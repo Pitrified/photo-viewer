@@ -291,32 +291,44 @@ class FramePathInfo(tk.Frame):
 
         # dicts for runtime elements
         self.photo_list_thumbbtn = {}
+        self.current_photo_prim = ""
 
     def update_photo_list(self, photo_list_info):
         """Receives a dict of PhotoInfo object and creates ThumbButton
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.info("Updating photo_list ThumbButton")
 
         for pic in self.photo_list_thumbbtn:
             self.photo_list_thumbbtn[pic].grid_forget()
 
         for ri, pic in enumerate(photo_list_info):
+            # create the new ThumbButton
             if not pic in self.photo_list_thumbbtn:
                 self.photo_list_thumbbtn[pic] = ThumbButton(
                     self.photo_list_scrollable.scroll_frame,
                     photo_list_info[pic],
                     back_col=self.photo_list_frame.cget("background"),
-                    active_back_col="SkyBlue2",
+                    hover_back_col="SkyBlue2",
+                    selected_back_col="DeepSkyBlue2",
                 )
 
+                # bind enter/leave event to highlight
                 self.photo_list_thumbbtn[pic].bind("<Enter>", self.on_thumbbtn_enter)
                 self.photo_list_thumbbtn[pic].bind("<Leave>", self.on_thumbbtn_leave)
-                # TODO current_photo relief, method in ThumbButton to set it
-                # TODO bind scroll
 
-            log.trace(f"Gridding {self.photo_list_thumbbtn[pic]} in row {ri}")
+                # bind scroll function to ThumbButton elements
+                self.photo_list_thumbbtn[pic].register_scroll_func(
+                    self.photo_list_scrollable.on_list_scroll
+                )
+
+            if pic == self.current_photo_prim:
+                log.trace(f"Raising {ri}")
+                self.photo_list_thumbbtn[pic].set_relief("RAISED")
+            else:
+                self.photo_list_thumbbtn[pic].set_relief("FLAT")
+
             self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
 
     def on_thumbbtn_enter(self, event):
@@ -332,3 +344,12 @@ class FramePathInfo(tk.Frame):
         log.trace("Leave ThumbButton")
         log.trace(f"Event {event} fired by {event.widget}")
         event.widget.on_leave()
+
+    def update_current_photo_prim(self, pic):
+        log = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
+        log.setLevel("TRACE")
+        log.trace("Update current_photo_prim")
+        if self.current_photo_prim != "":
+            self.photo_list_thumbbtn[self.current_photo_prim].set_relief("FLAT")
+        self.photo_list_thumbbtn[pic].set_relief("RAISED")
+        self.current_photo_prim = pic

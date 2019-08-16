@@ -23,6 +23,7 @@ class Controller:
         self.model.output_folder.addCallback(self.changedOutputFolder)
         self.model.input_folders.addCallback(self.addedInputFolder)
         self.model.photo_info_list_active.addCallback(self.updatedPhotoList)
+        self.model.current_photo_prim.addCallback(self.updatedCurrentPhotoPrim)
 
         self.view = View(self.root)
 
@@ -45,6 +46,7 @@ class Controller:
         # model.__init__ so the view does not update
         self.model.setOutputFolder("Not set")
         self.model.addInputFolder(input_folder)
+        self.model.setIndexPrim(0)
 
     def run(self):
         """Start the app and run the mainloop
@@ -63,6 +65,10 @@ class Controller:
             self.view.layout_cycle()
         elif keysym == "c":
             self.debug()
+        elif keysym == "e":
+            self.model.moveIndexPrim("forward")
+        elif keysym == "q":
+            self.model.moveIndexPrim("backward")
 
     def setOutputFolder(self):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -134,6 +140,11 @@ class Controller:
         log = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
         log.info(f"New values received for photo_info_list_active")  # {data}")
         self.view.frame_path_info.update_photo_list(data)
+
+    def updatedCurrentPhotoPrim(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
+        log.info(f"New value received for current_photo_prim {data}")
+        self.view.frame_path_info.update_current_photo_prim(data)
 
     def debug(self):
         log = logging.getLogger(f"c.{__class__.__name__}.debug")

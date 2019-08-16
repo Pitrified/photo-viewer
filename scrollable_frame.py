@@ -53,6 +53,11 @@ class ScrollableFrame(tk.Frame):
         # setup grid for internal frame
         self.scroll_frame.grid_columnconfigure(0, weight=1)
 
+        # bind scroll to empty canvas
+        self.scroll_canvas.bind("<4>", self.on_list_scroll)
+        self.scroll_canvas.bind("<5>", self.on_list_scroll)
+        self.scroll_canvas.bind("<MouseWheel>", self.on_list_scroll)
+
     def on_scroll_frame_configure(self, e):
         self.scroll_canvas.configure(
             scrollregion=self.scroll_canvas.bbox("all")
@@ -67,5 +72,5 @@ class ScrollableFrame(tk.Frame):
         else:
             log.error(f"Errors when scrolling {e}")
 
-        log.debug(f'Scrolling list {number} units, event {e} from {e.widget}')
+        log.trace(f'Scrolling list {number} units, event {e} from {e.widget}')
         self.scroll_canvas.yview_scroll(number, "units")

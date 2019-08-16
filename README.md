@@ -38,3 +38,4 @@ Captures User Input (with bindings/callbacks/events from tkinter widgets in the 
 ##### Controller
 ##### General
 * outfolder starts near the other one
+* colors saved as attributes of the class, easier customization at the end

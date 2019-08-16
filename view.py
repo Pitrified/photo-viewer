@@ -19,10 +19,16 @@ class View:
         self.frame_crop_prim = FrameCrop(self.root, bg="SeaGreen1")
         self.frame_crop_echo = FrameCrop(self.root, bg="SeaGreen3")
         self.frame_metadata = FrameMetadata(
-            self.root, width=self.right_sidebar_width, bg="SpringGreen2"
+            self.root,
+            sidebar_width=self.right_sidebar_width,
+            list_header_height=self.list_header_height,
+            bg="SpringGreen2",
         )
         self.frame_path_info = FramePathInfo(
-            self.root, width=self.right_sidebar_width, bg="DarkGoldenrod1"
+            parent=self.root,
+            sidebar_width=self.right_sidebar_width,
+            list_header_height=self.list_header_height,
+            bg="DarkGoldenrod1",
         )
 
         self.layout_setup()
@@ -38,6 +44,7 @@ class View:
 
         # setup elements dimensions
         self.right_sidebar_width = 250
+        self.list_header_height = 30
 
     def layout_setup(self):
         # setup layout info
@@ -132,23 +139,32 @@ class FrameCrop(tk.Frame):
 
 
 class FrameMetadata(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, sidebar_width, list_header_height, *args, **kwargs):
+        super().__init__(parent, width=sidebar_width, *args, **kwargs)
 
 
 class FramePathInfo(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, sidebar_width, list_header_height, *args, **kwargs):
+        super().__init__(parent, width=sidebar_width, *args, **kwargs)
 
         log = logging.getLogger(f"c.{__class__.__name__}.init")
+        log.setLevel("TRACE")
         log.info("Start init")
+        log.trace(f"args {args}")
+        log.trace(f"kwargs {kwargs}")
+
+        # save dimensions of elements
+        self.sidebar_width = sidebar_width
+        self.list_header_height = list_header_height
 
         # CREATE children frames
-        cur_width = self.winfo_width()
-        self.output_frame = tk.Frame(self, width=cur_width, bg="SkyBlue1")
-        self.input_frame = tk.Frame(self, width=cur_width, bg="SkyBlue2")
-        self.selection_list_frame = tk.Frame(self, width=cur_width, bg="SkyBlue3")
-        self.photo_list_frame = tk.Frame(self, width=cur_width, bg="SkyBlue4")
+        log.trace(f"self.sidebar_width {self.sidebar_width}")
+        self.output_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue1")
+        self.input_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue2")
+        self.selection_list_frame = tk.Frame(
+            self, width=self.sidebar_width, bg="SkyBlue3"
+        )
+        self.photo_list_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue4")
 
         # setup grid for FramePathInfo
         self.grid_rowconfigure(0, weight=0)
@@ -236,10 +252,22 @@ class FramePathInfo(tk.Frame):
 
     def build_photo_list_frame(self):
         log = logging.getLogger(f"c.{__class__.__name__}.build_photo_list_frame")
+        log.setLevel("TRACE")
         log.info("Building photo_list_frame")
-        cur_width = self.winfo_width()
-        # static elements
-        self.photo_list_frame_header = LabelPixel(
-            self, width=cur_width, text="Photo list:"
+        log.trace(f"self.sidebar_width {self.sidebar_width}")
+        # STATIC elements
+
+        # photo list header, no need for precise pixel dimensions
+        #  self.photo_list_frame_header = LabelPixel(
+        self.photo_list_frame_header = tk.Label(
+            self.photo_list_frame,
+            #  width=self.sidebar_width,
+            #  height=self.list_header_height,
+            text="Photo list:",
+            background=self.photo_list_frame.cget("background"),
         )
-        self.photo_list_frame_header.grid(row=0, column=0)
+
+        # setup grid in photo_list_frame
+        self.photo_list_frame.grid_columnconfigure(0, weight=1)
+        # grid static elements
+        self.photo_list_frame_header.grid(row=0, column=0, sticky="ew")

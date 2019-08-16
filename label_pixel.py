@@ -2,6 +2,7 @@ import logging
 
 import tkinter as tk
 
+
 class LabelPixel(tk.Frame):
     """label with width set in pixel
 
@@ -9,12 +10,12 @@ class LabelPixel(tk.Frame):
     https://stackoverflow.com/questions/14887610/specify-the-dimensions-of-a-tkinter-text-box-in-pixels
     """
 
-    def __init__(self, parent, width=0, height=0, **kwargs):
+    def __init__(self, parent, width, height, **kwargs):
         self.width = width
         self.height = height
 
         # create external frame of specified dimensions
-        tk.Frame.__init__(self, parent, width=self.width, height=self.height)
+        tk.Frame.__init__(self, parent, width=self.width, height=self.height, bg="red")
 
         # create internal label
         self.label_widget = tk.Label(self, **kwargs)
@@ -30,6 +31,8 @@ class LabelPixel(tk.Frame):
 
     def grid(self, *args, **kwargs):
         tk.Frame.grid(self, *args, **kwargs)
+        # By default the frame will shrink to whatever is inside of it and
+        # ignore width & height. We change that:
         self.grid_propagate(False)
 
     def config(self, *args, **kwargs):
@@ -37,6 +40,3 @@ class LabelPixel(tk.Frame):
 
     def bind(self, *args, **kwargs):
         self.label_widget.bind(*args, **kwargs)
-
-
-

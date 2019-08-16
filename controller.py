@@ -22,7 +22,7 @@ class Controller:
         # register callbacks on the model observables
         self.model.output_folder.addCallback(self.changedOutputFolder)
         self.model.input_folders.addCallback(self.addedInputFolder)
-        self.model.photo_info_list.addCallback(self.updatedPhotoList)
+        self.model.photo_info_list_active.addCallback(self.updatedPhotoList)
 
         self.view = View(self.root)
 
@@ -61,6 +61,8 @@ class Controller:
             self.view.exit()
         elif keysym == "F5":
             self.view.layout_cycle()
+        elif keysym == "c":
+            self.debug()
 
     def setOutputFolder(self):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -130,5 +132,9 @@ class Controller:
 
     def updatedPhotoList(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
-        log.info(f"New values received for photo_info_list")  # {data}")
+        log.info(f"New values received for photo_info_list_active")  # {data}")
+        self.view.frame_path_info.update_photo_list(data)
 
+    def debug(self):
+        log = logging.getLogger(f"c.{__class__.__name__}.debug")
+        log.info(f"Useful info\n\n")  # {data}")

@@ -4,6 +4,8 @@ import tkinter as tk
 from os.path import basename
 
 from label_pixel import LabelPixel
+from scrollable_frame import ScrollableFrame
+from thumb_button import ThumbButton
 
 
 class View:
@@ -51,7 +53,7 @@ class View:
         self.layout_tot = 5
         self.layout_is_double = (1,)
         # set starting layout
-        self.layout_current = 4
+        self.layout_current = 3
         self.layout_set(self.layout_current)
 
     def layout_set(self, lay_num):
@@ -148,7 +150,7 @@ class FramePathInfo(tk.Frame):
         super().__init__(parent, width=sidebar_width, *args, **kwargs)
 
         log = logging.getLogger(f"c.{__class__.__name__}.init")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info("Start init")
         log.trace(f"args {args}")
         log.trace(f"kwargs {kwargs}")
@@ -185,7 +187,7 @@ class FramePathInfo(tk.Frame):
 
     def build_output_frame(self):
         self.btn_set_output_folder = tk.Button(
-            self.output_frame, text="Set output folder"
+            self.output_frame, text="Set output folder", bd=0
         )
         self.output_folder_var = tk.StringVar(value="Not set not seen")
         self.text_output_folder = tk.Label(
@@ -207,7 +209,9 @@ class FramePathInfo(tk.Frame):
 
     def build_input_frame(self):
         # create static elements
-        self.btn_add_folder = tk.Button(self.input_frame, text="Add directory to list")
+        self.btn_add_folder = tk.Button(
+            self.input_frame, text="Add directory to list", bd=0
+        )
         # setup grid in input_frame
         self.input_frame.grid_columnconfigure(0, weight=1)
         # grid static elements
@@ -238,6 +242,8 @@ class FramePathInfo(tk.Frame):
                     background=self.input_frame.cget("background"),
                     variable=self.checkbtn_input_state[folder],
                     command=self.generate_virtual_toggling_input_folder,
+                    highlightthickness=0,
+                    activebackground="SkyBlue1",
                 )
 
             # grid the Checkbutton
@@ -252,9 +258,10 @@ class FramePathInfo(tk.Frame):
 
     def build_photo_list_frame(self):
         log = logging.getLogger(f"c.{__class__.__name__}.build_photo_list_frame")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info("Building photo_list_frame")
         log.trace(f"self.sidebar_width {self.sidebar_width}")
+
         # STATIC elements
 
         # photo list header, no need for precise pixel dimensions
@@ -267,7 +274,61 @@ class FramePathInfo(tk.Frame):
             background=self.photo_list_frame.cget("background"),
         )
 
+        # ScrollableFrame that holds the ThumbButtons
+        self.photo_list_scrollable = ScrollableFrame(
+            self.photo_list_frame,
+            scroll_width=self.sidebar_width,
+            back_col=self.photo_list_frame.cget("background"),
+        )
+
         # setup grid in photo_list_frame
+        self.photo_list_frame.grid_rowconfigure(1, weight=1)
         self.photo_list_frame.grid_columnconfigure(0, weight=1)
+
         # grid static elements
         self.photo_list_frame_header.grid(row=0, column=0, sticky="ew")
+        self.photo_list_scrollable.grid(row=1, column=0, sticky="nsew")
+
+        # dicts for runtime elements
+        self.photo_list_thumbbtn = {}
+
+    def update_photo_list(self, photo_list_info):
+        """Receives a dict of PhotoInfo object and creates ThumbButton
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
+        #  log.setLevel("TRACE")
+        log.info("Updating photo_list ThumbButton")
+
+        for pic in self.photo_list_thumbbtn:
+            self.photo_list_thumbbtn[pic].grid_forget()
+
+        for ri, pic in enumerate(photo_list_info):
+            if not pic in self.photo_list_thumbbtn:
+                self.photo_list_thumbbtn[pic] = ThumbButton(
+                    self.photo_list_scrollable.scroll_frame,
+                    photo_list_info[pic],
+                    back_col=self.photo_list_frame.cget("background"),
+                    active_back_col="SkyBlue2",
+                )
+
+                self.photo_list_thumbbtn[pic].bind("<Enter>", self.on_thumbbtn_enter)
+                self.photo_list_thumbbtn[pic].bind("<Leave>", self.on_thumbbtn_leave)
+                # TODO current_photo relief, method in ThumbButton to set it
+                # TODO bind scroll
+
+            log.trace(f"Gridding {self.photo_list_thumbbtn[pic]} in row {ri}")
+            self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
+
+    def on_thumbbtn_enter(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
+        #  log.setLevel("TRACE")
+        log.trace("Enter ThumbButton")
+        log.trace(f"Event {event} fired by {event.widget}")
+        event.widget.on_enter()
+
+    def on_thumbbtn_leave(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
+        #  log.setLevel("TRACE")
+        log.trace("Leave ThumbButton")
+        log.trace(f"Event {event} fired by {event.widget}")
+        event.widget.on_leave()

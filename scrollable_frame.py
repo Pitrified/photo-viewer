@@ -4,7 +4,7 @@ import tkinter as tk
 
 
 class ScrollableFrame(tk.Frame):
-    def __init__(self, parent, scroll_width, *args, **kwargs):
+    def __init__(self, parent, scroll_width, back_col, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         self.scroll_width = scroll_width
@@ -15,7 +15,7 @@ class ScrollableFrame(tk.Frame):
         # create the canvas and bind it to Scrollbar
         self.scroll_canvas = tk.Canvas(
             self,
-            bg="cornflower blue",
+            bg=back_col,
             yscrollcommand=self.scroll_bar.set,
             width=self.scroll_width - 13,
             highlightthickness=0,
@@ -27,7 +27,7 @@ class ScrollableFrame(tk.Frame):
         # create the Frame to put inside the Canvas
         # thanks to the wizard BO https://stackoverflow.com/a/3092341
         self.scroll_frame = tk.Frame(
-            self.scroll_canvas, bg="red", width=self.scroll_width - 13
+            self.scroll_canvas, bg=back_col, width=self.scroll_width - 13
         )
 
         # setup grid for Scrollbar and Canvas

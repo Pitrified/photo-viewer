@@ -64,7 +64,7 @@ class View:
     def layout_cycle(self):
         log = logging.getLogger(f"c.{__name__}.l_cycle")
         #  log.setLevel("TRACE")
-        log.log(5, "Cycling layout")
+        log.trace("Cycling layout")
 
         self.layout_current = (self.layout_current + 1) % self.layout_tot
         self.layout_set(self.layout_current)
@@ -72,7 +72,7 @@ class View:
     def layout_reset(self):
         log = logging.getLogger(f"c.{__name__}.l_reset")
         #  log.setLevel("TRACE")
-        log.log(5, "Reset layout")
+        log.trace("Reset layout")
 
         # forget all widgets
         self.frame_crop_prim.grid_forget()

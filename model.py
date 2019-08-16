@@ -21,16 +21,23 @@ class Model:
     def addInputFolder(self, input_folder_full):
         log = logging.getLogger(f"c.{__name__}.addInputFolder")
         log.info(f"Adding new input_folder '{input_folder_full}'")
+
         old_folders = self.input_folders.get()
+
+        if input_folder_full in old_folders:
+            log.info("Folder already in input list")
+            return
+
         old_folders[input_folder_full] = True
         self.input_folders.set(old_folders)
 
     def toggleInputFolder(self, state):
         log = logging.getLogger(f"c.{__name__}.toggleInputFolder")
+        #  log.setLevel("TRACE")
         log.info(f"Setting new input_folder state")
 
         state = {x: state[x].get() for x in state}
-        log.log(5, f"state {state}")
+        log.trace(f"state {state}")
 
         if sum((state[x] for x in state)) > 0:
             # at least one still toggled

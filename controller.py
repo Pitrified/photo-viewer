@@ -67,8 +67,8 @@ class Controller:
         log.info(f"Obtain new value")
 
         output_folder_full = tk.filedialog.askdirectory()
-        log.log(
-            5, f"Value received '{output_folder_full}' type {type(output_folder_full)}"
+        log.trace(
+            f"Value received '{output_folder_full}' type {type(output_folder_full)}"
         )
 
         # filedialog sometimes returns an empty tuple, sometimes an empty string
@@ -99,8 +99,8 @@ class Controller:
         log.info(f"Add an input folder")
 
         input_folder_full = tk.filedialog.askdirectory()
-        log.log(
-            5, f"Value received '{input_folder_full}' type {type(input_folder_full)}"
+        log.trace(
+            f"Value received '{input_folder_full}' type {type(input_folder_full)}"
         )
 
         # filedialog sometimes returns an empty tuple, sometimes an empty string

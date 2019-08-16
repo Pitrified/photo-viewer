@@ -214,9 +214,15 @@ class FramePathInfo(tk.Frame):
                     text=folder_name,
                     background=self.input_frame.cget("background"),
                     variable=self.checkbtn_input_state[folder],
+                    command=self.generate_virtual_toggling,
                 )
 
             # grid the Checkbutton
             self.checkbtn_input_fold[folder].grid(row=ri + 1, column=0, sticky="ew")
             # copy the state from what you receive from the model
-            self.checkbtn_input_state[folder].set( input_folders[folder])
+            self.checkbtn_input_state[folder].set(input_folders[folder])
+
+    def generate_virtual_toggling(self):
+        """Generate a virtual event to notify the controller of a toggled Checkbutton
+        """
+        self.input_frame.event_generate("<<toggle_input_folder>>")

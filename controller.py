@@ -34,6 +34,10 @@ class Controller:
         )
         # button to add another input_folder
         self.view.frame_path_info.btn_add_folder.config(command=self.addInputFolder)
+        # react to input folder toggling
+        self.view.frame_path_info.input_frame.bind(
+            "<<toggle_input_folder>>", self.toggledInputFolder
+        )
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -113,6 +117,12 @@ class Controller:
 
     def addedInputFolder(self, data):
         log = logging.getLogger(f"c.{__name__}.addedInputFolder")
-        log.info(f"New values received")# {data}")
+        log.info(f"New values received")  # {data}")
         self.view.frame_path_info.update_input_frame(data)
 
+    def toggledInputFolder(self, event):
+        log = logging.getLogger(f"c.{__name__}.toggledInputFolder")
+        log.info(f"Toggled input folder")
+
+        state = self.view.frame_path_info.checkbtn_input_state
+        self.model.toggleInputFolder(state)

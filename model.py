@@ -25,6 +25,21 @@ class Model:
         old_folders[input_folder_full] = True
         self.input_folders.set(old_folders)
 
+    def toggleInputFolder(self, state):
+        log = logging.getLogger(f"c.{__name__}.toggleInputFolder")
+        log.info(f"Setting new input_folder state")
+
+        state = {x: state[x].get() for x in state}
+        log.log(5, f"state {state}")
+
+        if sum((state[x] for x in state)) > 0:
+            # at least one still toggled
+            self.input_folders.set(state)
+        else:
+            # no folders toggled, revert to previous state
+            log.warn("At least one input folder has to be selected")
+            self.input_folders._docallbacks()
+
 
 class ModelCrop:
     def __init__(self):

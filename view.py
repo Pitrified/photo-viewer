@@ -139,10 +139,24 @@ class FrameCrop(tk.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.temp = tk.Label(
+            self, text="Mock up FrameCrop", background=self.cget("background")
+        )
+        self.temp.grid(row=0, column=0)
+
 
 class FrameMetadata(tk.Frame):
     def __init__(self, parent, sidebar_width, list_header_height, *args, **kwargs):
         super().__init__(parent, width=sidebar_width, *args, **kwargs)
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.temp = tk.Label(
+            self, text="Mock up Metadata", background=self.cget("background")
+        )
+        self.temp.grid(row=0, column=0)
 
 
 class FramePathInfo(tk.Frame):

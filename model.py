@@ -133,6 +133,10 @@ class Model:
         self._index_prim = new_index_prim % len(self.photo_info_list_active.get())
         self.current_photo_prim.set(self.active_photo_list[self._index_prim])
 
+    def seekIndexPhoto(self, pic):
+        self._index_prim = self.active_photo_list.index(pic)
+        self.current_photo_prim.set(pic)
+
 
 class ModelCrop:
     def __init__(self):

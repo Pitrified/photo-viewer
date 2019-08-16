@@ -59,9 +59,7 @@ class ScrollableFrame(tk.Frame):
         self.scroll_canvas.bind("<MouseWheel>", self.on_list_scroll)
 
     def on_scroll_frame_configure(self, e):
-        self.scroll_canvas.configure(
-            scrollregion=self.scroll_canvas.bbox("all")
-        )
+        self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all"))
 
     def on_list_scroll(self, e):
         log = logging.getLogger(f"c.{__class__.__name__}.on_list_scroll")
@@ -72,5 +70,5 @@ class ScrollableFrame(tk.Frame):
         else:
             log.error(f"Errors when scrolling {e}")
 
-        log.trace(f'Scrolling list {number} units, event {e} from {e.widget}')
+        log.trace(f"Scrolling list {number} units, event {e} from {e.widget}")
         self.scroll_canvas.yview_scroll(number, "units")

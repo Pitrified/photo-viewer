@@ -297,7 +297,7 @@ class FramePathInfo(tk.Frame):
         """Receives a dict of PhotoInfo object and creates ThumbButton
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info("Updating photo_list ThumbButton")
 
         for pic in self.photo_list_thumbbtn:
@@ -323,13 +323,28 @@ class FramePathInfo(tk.Frame):
                     self.photo_list_scrollable.on_list_scroll
                 )
 
+                # add event for doubleclick
+                self.photo_list_thumbbtn[pic].bind_doubleclick(
+                    self.on_photo_list_doubleclick
+                )
+
+            # highlight current photo primary
             if pic == self.current_photo_prim:
-                log.trace(f"Raising {ri}")
+                log.trace(f"Raising {pic}")
                 self.photo_list_thumbbtn[pic].set_relief("RAISED")
             else:
                 self.photo_list_thumbbtn[pic].set_relief("FLAT")
 
             self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
+
+    def on_photo_list_doubleclick(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
+        log.setLevel("TRACE")
+        log.trace("Doublecliked something")
+        log.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
+        self.photo_doubleclicked = event.widget.master.photo_info.photo_name_full
+        log.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
+        self.photo_list_frame.event_generate("<<thumbbtn_photo_doubleclick>>")
 
     def on_thumbbtn_enter(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
@@ -347,7 +362,7 @@ class FramePathInfo(tk.Frame):
 
     def update_current_photo_prim(self, pic):
         log = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.trace("Update current_photo_prim")
         if self.current_photo_prim != "":
             self.photo_list_thumbbtn[self.current_photo_prim].set_relief("FLAT")

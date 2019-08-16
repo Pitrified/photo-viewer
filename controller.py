@@ -40,6 +40,10 @@ class Controller:
         self.view.frame_path_info.input_frame.bind(
             "<<toggle_input_folder>>", self.toggledInputFolder
         )
+        # react to doubleclick on a ThumbButton
+        self.view.frame_path_info.photo_list_frame.bind(
+            "<<thumbbtn_photo_doubleclick>>", self.doubleclikedThumbbtnPhoto
+        )
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -130,8 +134,8 @@ class Controller:
         self.view.frame_path_info.update_input_frame(data)
 
     def toggledInputFolder(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.toggledInputFolder")
-        log.info(f"Toggled input folder")
+        log = logging.getLogger(f"c.{__class__.__name__}.toggledinputfolder")
+        log.info(f"toggled input folder")
 
         state = self.view.frame_path_info.checkbtn_input_state
         self.model.toggleInputFolder(state)
@@ -145,6 +149,14 @@ class Controller:
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
         log.info(f"New value received for current_photo_prim {data}")
         self.view.frame_path_info.update_current_photo_prim(data)
+
+    def doubleclikedThumbbtnPhoto(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
+        log.setLevel("TRACE")
+        log.info(f"doublecliked Thumbbtn photo")
+        pic = self.view.frame_path_info.photo_doubleclicked
+        log.trace(f"On pic {pic}")
+        self.model.seekIndexPhoto(pic)
 
     def debug(self):
         log = logging.getLogger(f"c.{__class__.__name__}.debug")

@@ -95,3 +95,7 @@ class ThumbButton(tk.Frame):
         self.photo_text.bind("<4>", func)
         self.photo_text.bind("<5>", func)
         self.photo_text.bind("<MouseWheel>", func)
+
+    def bind_doubleclick(self, func):
+        self.thumb_label.bind("<Double-Button-1>", func)
+        self.photo_text.bind("<Double-Button-1>", func)

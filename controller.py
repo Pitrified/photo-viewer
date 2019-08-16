@@ -12,7 +12,7 @@ from utils import format_color
 
 class Controller:
     def __init__(self, input_folder):
-        log = logging.getLogger(f"c.{__name__}.init")
+        log = logging.getLogger(f"c.{__class__.__name__}.init")
         log.info("Start init")
 
         self.root = tk.Tk()
@@ -22,6 +22,7 @@ class Controller:
         # register callbacks on the model observables
         self.model.output_folder.addCallback(self.changedOutputFolder)
         self.model.input_folders.addCallback(self.addedInputFolder)
+        self.model.photo_info_list.addCallback(self.updatedPhotoList)
 
         self.view = View(self.root)
 
@@ -48,7 +49,7 @@ class Controller:
     def run(self):
         """Start the app and run the mainloop
         """
-        log = logging.getLogger(f"c.{__name__}.run")
+        log = logging.getLogger(f"c.{__class__.__name__}.run")
         log.info("Running controller\n")
 
         self.root.mainloop()
@@ -62,7 +63,7 @@ class Controller:
             self.view.layout_cycle()
 
     def setOutputFolder(self):
-        log = logging.getLogger(f"c.{__name__}.setOutputFolder")
+        log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
         #  log.setLevel("TRACE")
         log.info(f"Obtain new value")
 
@@ -89,12 +90,12 @@ class Controller:
         self.model.setOutputFolder(output_folder_full)
 
     def changedOutputFolder(self, data):
-        log = logging.getLogger(f"c.{__name__}.changedOutputFolder")
+        log = logging.getLogger(f"c.{__class__.__name__}.changedOutputFolder")
         log.info(f"New value '{data}'")
         self.view.frame_path_info.update_output_frame(data)
 
     def addInputFolder(self):
-        log = logging.getLogger(f"c.{__name__}.addInputFolder")
+        log = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
         #  log.setLevel("TRACE")
         log.info(f"Add an input folder")
 
@@ -116,13 +117,18 @@ class Controller:
         self.model.addInputFolder(input_folder_full)
 
     def addedInputFolder(self, data):
-        log = logging.getLogger(f"c.{__name__}.addedInputFolder")
-        log.info(f"New values received")  # {data}")
+        log = logging.getLogger(f"c.{__class__.__name__}.addedInputFolder")
+        log.info(f"New values received for input_folders")  # {data}")
         self.view.frame_path_info.update_input_frame(data)
 
     def toggledInputFolder(self, event):
-        log = logging.getLogger(f"c.{__name__}.toggledInputFolder")
+        log = logging.getLogger(f"c.{__class__.__name__}.toggledInputFolder")
         log.info(f"Toggled input folder")
 
         state = self.view.frame_path_info.checkbtn_input_state
         self.model.toggleInputFolder(state)
+
+    def updatedPhotoList(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
+        log.info(f"New values received for photo_info_list")  # {data}")
+

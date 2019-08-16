@@ -3,10 +3,12 @@ import tkinter as tk
 
 from os.path import basename
 
+from label_pixel import LabelPixel
+
 
 class View:
     def __init__(self, root):
-        log = logging.getLogger(f"c.{__name__}.init")
+        log = logging.getLogger(f"c.{__class__.__name__}.init")
         log.info("Start init")
 
         self.root = root
@@ -46,7 +48,7 @@ class View:
         self.layout_set(self.layout_current)
 
     def layout_set(self, lay_num):
-        log = logging.getLogger(f"c.{__name__}.l_set")
+        log = logging.getLogger(f"c.{__class__.__name__}.l_set")
         log.debug(f"Setting layout {lay_num}")
 
         self.layout_reset()
@@ -62,7 +64,7 @@ class View:
             self.layout_imp()
 
     def layout_cycle(self):
-        log = logging.getLogger(f"c.{__name__}.l_cycle")
+        log = logging.getLogger(f"c.{__class__.__name__}.l_cycle")
         #  log.setLevel("TRACE")
         log.trace("Cycling layout")
 
@@ -70,7 +72,7 @@ class View:
         self.layout_set(self.layout_current)
 
     def layout_reset(self):
-        log = logging.getLogger(f"c.{__name__}.l_reset")
+        log = logging.getLogger(f"c.{__class__.__name__}.l_reset")
         #  log.setLevel("TRACE")
         log.trace("Reset layout")
 
@@ -138,7 +140,7 @@ class FramePathInfo(tk.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        log = logging.getLogger(f"c.{__name__}.init")
+        log = logging.getLogger(f"c.{__class__.__name__}.init")
         log.info("Start init")
 
         # CREATE children frames
@@ -163,6 +165,7 @@ class FramePathInfo(tk.Frame):
 
         self.build_output_frame()
         self.build_input_frame()
+        self.build_photo_list_frame()
 
     def build_output_frame(self):
         self.btn_set_output_folder = tk.Button(
@@ -181,15 +184,19 @@ class FramePathInfo(tk.Frame):
         self.text_output_folder.grid(row=1, column=0, sticky="ew")
 
     def update_output_frame(self, output_folder_full):
-        log = logging.getLogger(f"c.{__name__}.update_output_frame")
+        log = logging.getLogger(f"c.{__class__.__name__}.update_output_frame")
         log.info("Updating label output_folder")
         # MAYBE showing a right aligned full path might be more informative
         self.output_folder_var.set(basename(output_folder_full))
 
     def build_input_frame(self):
+        # create static elements
         self.btn_add_folder = tk.Button(self.input_frame, text="Add directory to list")
+        # setup grid in input_frame
         self.input_frame.grid_columnconfigure(0, weight=1)
+        # grid static elements
         self.btn_add_folder.grid(row=0, column=0)
+        # dicts for runtime elements
         self.checkbtn_input_fold = {}
         self.checkbtn_input_state = {}
 
@@ -200,7 +207,7 @@ class FramePathInfo(tk.Frame):
         When a new folder is added, create the corresponding Checkbutton,
         then repack them all
         """
-        log = logging.getLogger(f"c.{__name__}.update_input_frame")
+        log = logging.getLogger(f"c.{__class__.__name__}.update_input_frame")
         log.info("Updating input_folder checkbuttons")
 
         for ri, folder in enumerate(sorted(input_folders)):
@@ -214,7 +221,7 @@ class FramePathInfo(tk.Frame):
                     text=folder_name,
                     background=self.input_frame.cget("background"),
                     variable=self.checkbtn_input_state[folder],
-                    command=self.generate_virtual_toggling,
+                    command=self.generate_virtual_toggling_input_folder,
                 )
 
             # grid the Checkbutton
@@ -222,7 +229,17 @@ class FramePathInfo(tk.Frame):
             # copy the state from what you receive from the model
             self.checkbtn_input_state[folder].set(input_folders[folder])
 
-    def generate_virtual_toggling(self):
+    def generate_virtual_toggling_input_folder(self):
         """Generate a virtual event to notify the controller of a toggled Checkbutton
         """
         self.input_frame.event_generate("<<toggle_input_folder>>")
+
+    def build_photo_list_frame(self):
+        log = logging.getLogger(f"c.{__class__.__name__}.build_photo_list_frame")
+        log.info("Building photo_list_frame")
+        cur_width = self.winfo_width()
+        # static elements
+        self.photo_list_frame_header = LabelPixel(
+            self, width=cur_width, text="Photo list:"
+        )
+        self.photo_list_frame_header.grid(row=0, column=0)

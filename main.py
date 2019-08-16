@@ -1,6 +1,9 @@
 import argparse
 import logging
 
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 from timeit import default_timer as timer
 
 from controller import Controller
@@ -66,7 +69,9 @@ def main():
     logmain = logging.getLogger(f"c.{__name__}.main")
     logmain.info(recap)
 
-    test_run(path_input)
+    dir_file = abspath(dirname(__file__))
+    input_folder = join(dir_file, path_input)
+    test_run(input_folder)
 
 
 if __name__ == "__main__":

@@ -4,13 +4,28 @@ import tkinter as tk
 
 
 class ScrollableFrame(tk.Frame):
-    def __init__(self, parent, scroll_width, back_col, *args, **kwargs):
+    def __init__(
+        self,
+        parent,
+        scroll_width,
+        back_col,
+        hover_back_col,
+        slider_col,
+        *args,
+        **kwargs,
+    ):
         super().__init__(parent, *args, **kwargs)
 
         self.scroll_width = scroll_width
 
         # create scrollbar for canvas
-        self.scroll_bar = tk.Scrollbar(self)
+        self.scroll_bar = tk.Scrollbar(
+            self,
+            borderwidth=0,
+            background=slider_col,
+            activebackground=hover_back_col,
+            troughcolor=back_col,
+        )
 
         # create the canvas and bind it to Scrollbar
         self.scroll_canvas = tk.Canvas(

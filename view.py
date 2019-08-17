@@ -293,6 +293,8 @@ class FramePathInfo(tk.Frame):
             self.photo_list_frame,
             scroll_width=self.sidebar_width,
             back_col=self.photo_list_frame.cget("background"),
+            hover_back_col="SkyBlue2",
+            slider_col='DeepSkyBlue4'
         )
 
         # setup grid in photo_list_frame
@@ -390,6 +392,8 @@ class FramePathInfo(tk.Frame):
             self.selection_list_frame,
             scroll_width=self.sidebar_width,
             back_col=self.selection_list_frame.cget("background"),
+            hover_back_col="SkyBlue2",
+            slider_col='DeepSkyBlue3'
         )
 
         # setup grid in selection_list_frame

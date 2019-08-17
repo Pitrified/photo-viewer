@@ -35,6 +35,7 @@ Captures User Input (with bindings/callbacks/events from tkinter widgets in the 
 ### TODO
 ##### Model
 ##### View
+* button to save selection in selection\_frame, with askdialog that tells you a recap (number of photos and output folder)
 ##### Controller
 ##### General
 * outfolder starts near the other one

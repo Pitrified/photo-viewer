@@ -52,7 +52,7 @@ class Controller:
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
         # model.__init__ so the view does not update
-        self.model.setOutputFolder("Not snt")
+        self.model.setOutputFolder("Not set")
         self.model.addInputFolder(input_folder)
         self.model.setIndexPrim(0)
 

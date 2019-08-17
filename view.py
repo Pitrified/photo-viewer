@@ -201,7 +201,12 @@ class FramePathInfo(tk.Frame):
 
     def build_output_frame(self):
         self.btn_set_output_folder = tk.Button(
-            self.output_frame, text="Set output folder", bd=0
+            self.output_frame,
+            text="Set output folder",
+            borderwidth=0,
+            background="SkyBlue2",
+            activebackground="LightSkyBlue2",
+            highlightthickness=0,
         )
         self.output_folder_var = tk.StringVar(value="Not set not seen")
         self.text_output_folder = tk.Label(
@@ -224,7 +229,12 @@ class FramePathInfo(tk.Frame):
     def build_input_frame(self):
         # create static elements
         self.btn_add_folder = tk.Button(
-            self.input_frame, text="Add directory to list", bd=0
+            self.input_frame,
+            text="Add directory to list",
+            borderwidth=0,
+            background="SkyBlue3",
+            activebackground="LightSkyBlue3",
+            highlightthickness=0,
         )
         # setup grid in input_frame
         self.input_frame.grid_columnconfigure(0, weight=1)
@@ -258,6 +268,8 @@ class FramePathInfo(tk.Frame):
                     command=self.generate_virtual_toggling_input_folder,
                     highlightthickness=0,
                     activebackground="SkyBlue1",
+                    selectcolor="SkyBlue1",
+                    borderwidth=0,
                 )
 
             # grid the Checkbutton
@@ -294,7 +306,7 @@ class FramePathInfo(tk.Frame):
             scroll_width=self.sidebar_width,
             back_col=self.photo_list_frame.cget("background"),
             hover_back_col="SkyBlue2",
-            slider_col='DeepSkyBlue4'
+            slider_col="DeepSkyBlue4",
         )
 
         # setup grid in photo_list_frame
@@ -393,7 +405,7 @@ class FramePathInfo(tk.Frame):
             scroll_width=self.sidebar_width,
             back_col=self.selection_list_frame.cget("background"),
             hover_back_col="SkyBlue2",
-            slider_col='DeepSkyBlue3'
+            slider_col="DeepSkyBlue3",
         )
 
         # setup grid in selection_list_frame

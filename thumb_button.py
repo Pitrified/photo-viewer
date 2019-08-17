@@ -14,7 +14,8 @@ class ThumbButton(tk.Frame):
         photo_info,
         back_col,
         hover_back_col,
-        selected_back_col,
+        back_col_bis,
+        hover_back_col_bis="hover_back_col",
         *args,
         **kwargs,
     ):
@@ -23,7 +24,11 @@ class ThumbButton(tk.Frame):
         self.photo_info = photo_info
         self.back_col = back_col
         self.hover_back_col = hover_back_col
-        self.selected_back_col = selected_back_col
+        self.back_col_bis = back_col_bis
+        if hover_back_col_bis is "hover_back_col":
+            self.hover_back_col_bis = hover_back_col
+        else:
+            self.hover_back_col_bis = hover_back_col_bis
 
         # setup grid
         self.grid_rowconfigure(0, weight=1, minsize=30)
@@ -71,18 +76,22 @@ class ThumbButton(tk.Frame):
         self.thumb_label.config(state=tk.NORMAL)
         self.photo_text.config(state=tk.NORMAL)
 
-    def set_relief(self, relief_type):
-        log = logging.getLogger(f"c.{__class__.__name__}.set_relief")
+    def set_back_col_mode(self, color_mode):
+        log = logging.getLogger(f"c.{__class__.__name__}.set_back_col_mode")
         log.setLevel("TRACE")
 
-        if relief_type == "RAISED":
-            self.thumb_label.config(background=self.selected_back_col)
-            self.photo_text.config(background=self.selected_back_col)
-        elif relief_type == "FLAT":
+        if color_mode == "BIS":
+            self.thumb_label.config(background=self.back_col_bis)
+            self.photo_text.config(background=self.back_col_bis)
+            self.thumb_label.config(activebackground=self.hover_back_col_bis)
+            self.photo_text.config(activebackground=self.hover_back_col_bis)
+        elif color_mode == "FIRST":
             self.thumb_label.config(background=self.back_col)
             self.photo_text.config(background=self.back_col)
+            self.thumb_label.config(activebackground=self.hover_back_col)
+            self.photo_text.config(activebackground=self.hover_back_col)
         else:
-            log.error("Unrecognized relief type {relief_type}")
+            log.error("Unrecognized color mode {color_mode}")
 
     def register_scroll_func(self, func):
         log = logging.getLogger(f"c.{__class__.__name__}.register_scroll_func")

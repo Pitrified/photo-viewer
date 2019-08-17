@@ -24,6 +24,7 @@ class Controller:
         self.model.input_folders.addCallback(self.addedInputFolder)
         self.model.photo_info_list_active.addCallback(self.updatedPhotoList)
         self.model.current_photo_prim.addCallback(self.updatedCurrentPhotoPrim)
+        self.model.selection_list.addCallback(self.updatedSelectionList)
 
         self.view = View(self.root)
 
@@ -44,11 +45,14 @@ class Controller:
         self.view.frame_path_info.photo_list_frame.bind(
             "<<thumbbtn_photo_doubleclick>>", self.doubleclikedThumbbtnPhoto
         )
+        self.view.frame_path_info.photo_list_frame.bind(
+            "<<thumbbtn_selection_doubleclick>>", self.doubleclikedThumbbtnSelection
+        )
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
         # model.__init__ so the view does not update
-        self.model.setOutputFolder("Not set")
+        self.model.setOutputFolder("Not snt")
         self.model.addInputFolder(input_folder)
         self.model.setIndexPrim(0)
 
@@ -67,12 +71,25 @@ class Controller:
             self.view.exit()
         elif keysym == "F5":
             self.view.layout_cycle()
-        elif keysym == "c":
-            self.debug()
+
         elif keysym == "e":
             self.model.moveIndexPrim("forward")
         elif keysym == "q":
             self.model.moveIndexPrim("backward")
+        elif keysym == "3":
+            self.model.moveIndexEcho("forward")
+        elif keysym == "1":
+            self.model.moveIndexEcho("backward")
+
+        elif keysym == "l" or keysym == "k":
+            if self.view.layout_current in self.view.layout_is_double:
+                self.model.likePressed(keysym)
+            else:
+                # if the layout is not double send the event from prim
+                self.model.likePressed("k")
+
+        elif keysym == "c":
+            self.debug()
 
     def setOutputFolder(self):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -150,13 +167,26 @@ class Controller:
         log.info(f"New value received for current_photo_prim {data}")
         self.view.frame_path_info.update_current_photo_prim(data)
 
+    def updatedSelectionList(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedSelectionList")
+        log.info(f"New values received for selection_list")  # {data}")
+        self.view.frame_path_info.update_selection_list(data)
+
     def doubleclikedThumbbtnPhoto(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"doublecliked Thumbbtn photo")
         pic = self.view.frame_path_info.photo_doubleclicked
         log.trace(f"On pic {pic}")
-        self.model.seekIndexPhoto(pic)
+        self.model.seekIndexPrim(pic)
+
+    def doubleclikedThumbbtnSelection(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
+        log.setLevel("TRACE")
+        log.info(f"doublecliked Thumbbtn selection")
+        pic = self.view.frame_path_info.selection_doubleclicked
+        log.trace(f"On pic {pic}")
+        self.model.toggleSelectionPic(pic)
 
     def debug(self):
         log = logging.getLogger(f"c.{__class__.__name__}.debug")

@@ -198,6 +198,7 @@ class FramePathInfo(tk.Frame):
         self.build_output_frame()
         self.build_input_frame()
         self.build_photo_list_frame()
+        self.build_selection_list_frame()
 
     def build_output_frame(self):
         self.btn_set_output_folder = tk.Button(
@@ -309,6 +310,8 @@ class FramePathInfo(tk.Frame):
 
     def update_photo_list(self, photo_list_info):
         """Receives a dict of PhotoInfo object and creates ThumbButton
+
+        photo_list_info = { pic : PhotoInfo }
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
         #  log.setLevel("TRACE")
@@ -325,7 +328,7 @@ class FramePathInfo(tk.Frame):
                     photo_list_info[pic],
                     back_col=self.photo_list_frame.cget("background"),
                     hover_back_col="SkyBlue2",
-                    selected_back_col="DeepSkyBlue2",
+                    back_col_bis="DeepSkyBlue2",
                 )
 
                 # bind enter/leave event to highlight
@@ -344,21 +347,125 @@ class FramePathInfo(tk.Frame):
 
             # highlight current photo primary
             if pic == self.current_photo_prim:
-                log.trace(f"Raising {pic}")
-                self.photo_list_thumbbtn[pic].set_relief("RAISED")
+                log.trace(f"Setting color mode BIS for '{pic}' ThumbButton")
+                self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
             else:
-                self.photo_list_thumbbtn[pic].set_relief("FLAT")
+                self.photo_list_thumbbtn[pic].set_back_col_mode("FIRST")
 
+            # grid the ThumbButton
             self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
 
     def on_photo_list_doubleclick(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
-        log.setLevel("TRACE")
-        log.trace("Doublecliked something")
+        #  log.setLevel("TRACE")
+        log.debug("Doublecliked something")
         log.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
         self.photo_doubleclicked = event.widget.master.photo_info.photo_name_full
         log.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
         self.photo_list_frame.event_generate("<<thumbbtn_photo_doubleclick>>")
+
+    def update_current_photo_prim(self, pic):
+        log = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
+        #  log.setLevel("TRACE")
+        log.trace("Update current_photo_prim")
+        if self.current_photo_prim != "":
+            self.photo_list_thumbbtn[self.current_photo_prim].set_back_col_mode("FIRST")
+        self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
+        self.current_photo_prim = pic
+
+    def build_selection_list_frame(self):
+        log = logging.getLogger(f"c.{__class__.__name__}.build_selection_list_frame")
+        #  log.setLevel("TRACE")
+        log.info("Building selection_list_frame")
+        log.trace(f"self.sidebar_width {self.sidebar_width}")
+
+        # selection list header, no need for precise pixel dimensions
+        self.selection_list_frame_header = tk.Label(
+            self.selection_list_frame,
+            text="Selection list:",
+            background=self.selection_list_frame.cget("background"),
+        )
+
+        # ScrollableFrame that holds the ThumbButtons
+        self.selection_list_scrollable = ScrollableFrame(
+            self.selection_list_frame,
+            scroll_width=self.sidebar_width,
+            back_col=self.selection_list_frame.cget("background"),
+        )
+
+        # setup grid in selection_list_frame
+        self.selection_list_frame.grid_rowconfigure(1, weight=1)
+        self.selection_list_frame.grid_columnconfigure(0, weight=1)
+
+        # grid static elements
+        self.selection_list_frame_header.grid(row=0, column=0, sticky="ew")
+        self.selection_list_scrollable.grid(row=1, column=0, sticky="nsew")
+
+        # dicts for runtime elements
+        self.selection_list_thumbbtn = {}
+
+    def update_selection_list(self, selection_list_info):
+        """Receives a dict of PhotoInfo object and creates ThumbButton
+
+        There is also info on whether the pic is still selected
+        selection_list_info = { pic : (PhotoInfo, is_selected) }
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}.update_selection_list")
+        log.setLevel("TRACE")
+        log.info(f"Updating selection_list ThumbButtons")
+
+        for pic in self.selection_list_thumbbtn:
+            self.selection_list_thumbbtn[pic].grid_forget()
+
+        for ri, pic in enumerate(selection_list_info):
+            # extract values
+            photo_info = selection_list_info[pic][0]
+            is_selected = selection_list_info[pic][1]
+
+            # create the new ThumbButton
+            if not pic in self.selection_list_thumbbtn:
+                self.selection_list_thumbbtn[pic] = ThumbButton(
+                    self.selection_list_scrollable.scroll_frame,
+                    photo_info,
+                    back_col=self.selection_list_frame.cget("background"),
+                    hover_back_col="SkyBlue2",
+                    back_col_bis="sienna2",
+                )
+
+                # bind enter/leave event to highlight
+                self.selection_list_thumbbtn[pic].bind(
+                    "<Enter>", self.on_thumbbtn_enter
+                )
+                self.selection_list_thumbbtn[pic].bind(
+                    "<Leave>", self.on_thumbbtn_leave
+                )
+
+                # bind scroll function to ThumbButton elements
+                self.selection_list_thumbbtn[pic].register_scroll_func(
+                    self.selection_list_scrollable.on_list_scroll
+                )
+
+                # add event for doubleclick
+                self.selection_list_thumbbtn[pic].bind_doubleclick(
+                    self.on_selection_list_doubleclick
+                )
+
+            # set selected photo to FIRST, de-selected to BIS color_mode
+            if is_selected:
+                self.selection_list_thumbbtn[pic].set_back_col_mode("FIRST")
+            else:
+                self.selection_list_thumbbtn[pic].set_back_col_mode("BIS")
+
+            self.selection_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
+
+    def on_selection_list_doubleclick(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.on_selection_list_doubleclick")
+        #  log.setLevel("TRACE")
+        log.debug("Doublecliked something in selection list")
+        log.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
+        self.selection_doubleclicked = event.widget.master.photo_info.photo_name_full
+        log.trace(f"selection_doubleclicked {self.selection_doubleclicked}")
+        self.photo_list_frame.event_generate("<<thumbbtn_selection_doubleclick>>")
 
     def on_thumbbtn_enter(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
@@ -373,12 +480,3 @@ class FramePathInfo(tk.Frame):
         log.trace("Leave ThumbButton")
         log.trace(f"Event {event} fired by {event.widget}")
         event.widget.on_leave()
-
-    def update_current_photo_prim(self, pic):
-        log = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
-        #  log.setLevel("TRACE")
-        log.trace("Update current_photo_prim")
-        if self.current_photo_prim != "":
-            self.photo_list_thumbbtn[self.current_photo_prim].set_relief("FLAT")
-        self.photo_list_thumbbtn[pic].set_relief("RAISED")
-        self.current_photo_prim = pic

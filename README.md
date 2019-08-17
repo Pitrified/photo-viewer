@@ -39,3 +39,6 @@ Captures User Input (with bindings/callbacks/events from tkinter widgets in the 
 ##### General
 * outfolder starts near the other one
 * colors saved as attributes of the class, easier customization at the end
+### FIXME
+* when untoggling a folder, if the list is scrolled down, you have to manually scroll up
+* when changing pic with 'qe', the list does not scroll

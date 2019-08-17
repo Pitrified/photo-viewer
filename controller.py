@@ -16,6 +16,7 @@ class Controller:
         log.info("Start init")
 
         self.root = tk.Tk()
+        self._fullscreen_state = False
 
         self.model = Model()
 
@@ -71,6 +72,8 @@ class Controller:
             self.view.exit()
         elif keysym == "F5":
             self.view.layout_cycle()
+        elif keysym == "F11":
+            self._toggle_fullscreen()
 
         elif keysym == "e":
             self.model.moveIndexPrim("forward")
@@ -187,6 +190,13 @@ class Controller:
         pic = self.view.frame_path_info.selection_doubleclicked
         log.trace(f"On pic {pic}")
         self.model.toggleSelectionPic(pic)
+
+    def _toggle_fullscreen(self):
+        log = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")
+        log.setLevel("TRACE")
+        self._fullscreen_state = not self._fullscreen_state
+        log.trace(f"Toggling, is {self._fullscreen_state}")
+        self.root.attributes("-fullscreen", self._fullscreen_state)
 
     def debug(self):
         log = logging.getLogger(f"c.{__class__.__name__}.debug")

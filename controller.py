@@ -13,6 +13,7 @@ from utils import format_color
 class Controller:
     def __init__(self, input_folder):
         log = logging.getLogger(f"c.{__class__.__name__}.init")
+        log.setLevel("TRACE")
         log.info("Start init")
 
         self.root = tk.Tk()
@@ -26,6 +27,8 @@ class Controller:
         self.model.photo_info_list_active.addCallback(self.updatedPhotoList)
         self.model.current_photo_prim.addCallback(self.updatedCurrentPhotoPrim)
         self.model.selection_list.addCallback(self.updatedSelectionList)
+        self.model.layout_current.addCallback(self.updatedCurrentLayout)
+        self.model.cropped_prim.addCallback(self.updatedCroppedPrim)
 
         self.view = View(self.root)
 
@@ -49,12 +52,16 @@ class Controller:
         self.view.frame_path_info.photo_list_frame.bind(
             "<<thumbbtn_selection_doubleclick>>", self.doubleclikedThumbbtnSelection
         )
+        # react to window resize
+        self.view.frame_crop_prim.bind("<Configure>", self.frameResized)
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
         # model.__init__ so the view does not update
         self.model.setOutputFolder("Not set")
         self.model.addInputFolder(input_folder)
+        # set starting layout
+        self.model.setLayout(3)
         self.model.setIndexPrim(0)
 
     def run(self):
@@ -71,7 +78,7 @@ class Controller:
         if keysym == "Escape":
             self.view.exit()
         elif keysym == "F5":
-            self.view.layout_cycle()
+            self.model.cycleLayout()
         elif keysym == "F11":
             self._toggle_fullscreen()
 
@@ -85,11 +92,7 @@ class Controller:
             self.model.moveIndexEcho("backward")
 
         elif keysym == "l" or keysym == "k":
-            if self.view.layout_current in self.view.layout_is_double:
-                self.model.likePressed(keysym)
-            else:
-                # if the layout is not double send the event from prim
-                self.model.likePressed("k")
+            self.model.likePressed(keysym)
 
         elif keysym == "c":
             self.debug()
@@ -156,9 +159,13 @@ class Controller:
     def toggledInputFolder(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.toggledinputfolder")
         log.info(f"toggled input folder")
-
         state = self.view.frame_path_info.checkbtn_input_state
         self.model.toggleInputFolder(state)
+
+    def updatedCurrentLayout(self, lay_num):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentLayout")
+        log.info(f"Updated current layout")
+        self.view.layout_set(lay_num)
 
     def updatedPhotoList(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
@@ -190,6 +197,21 @@ class Controller:
         pic = self.view.frame_path_info.selection_doubleclicked
         log.trace(f"On pic {pic}")
         self.model.toggleSelectionPic(pic)
+
+    def frameResized(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.frameResized")
+        log.setLevel("TRACE")
+        log.info(f"Resized frame_crop_prim")
+        widget_wid = event.widget.winfo_width()
+        widget_hei = event.widget.winfo_height()
+        log.trace(f"width {widget_wid} height {widget_hei}")
+        self.model.doResize(widget_wid, widget_hei)
+
+    def updatedCroppedPrim(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
+        log.info(f"New value received for cropped_prim")
+        self.view.frame_crop_prim.update_image(data)
+
 
     def _toggle_fullscreen(self):
         log = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")

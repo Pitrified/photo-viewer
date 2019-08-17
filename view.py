@@ -18,22 +18,16 @@ class View:
         self.setup_main_window()
 
         # create frames for photo and info panels
-        self.frame_crop_prim = FrameCrop(self.root, bg="SeaGreen1")
-        self.frame_crop_echo = FrameCrop(self.root, bg="SeaGreen3")
+        self.frame_crop_prim = FrameCrop(self.root, back_col="SeaGreen1")
+        self.frame_crop_echo = FrameCrop(self.root, back_col="SeaGreen3")
         self.frame_metadata = FrameMetadata(
-            self.root,
-            sidebar_width=self.right_sidebar_width,
-            list_header_height=self.list_header_height,
-            bg="SpringGreen2",
+            self.root, sidebar_width=self.right_sidebar_width, bg="SpringGreen2"
         )
         self.frame_path_info = FramePathInfo(
             parent=self.root,
             sidebar_width=self.right_sidebar_width,
-            list_header_height=self.list_header_height,
             bg="DarkGoldenrod1",
         )
-
-        self.layout_setup()
 
     def setup_main_window(self):
         """Setup main window aesthetics
@@ -46,15 +40,6 @@ class View:
 
         # setup elements dimensions
         self.right_sidebar_width = 250
-        self.list_header_height = 30
-
-    def layout_setup(self):
-        # setup layout info
-        self.layout_tot = 5
-        self.layout_is_double = (1,)
-        # set starting layout
-        self.layout_current = 3
-        self.layout_set(self.layout_current)
 
     def layout_set(self, lay_num):
         log = logging.getLogger(f"c.{__class__.__name__}.l_set")
@@ -71,14 +56,6 @@ class View:
             self.layout_ip()
         elif lay_num == 4:
             self.layout_imp()
-
-    def layout_cycle(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.l_cycle")
-        #  log.setLevel("TRACE")
-        log.trace("Cycling layout")
-
-        self.layout_current = (self.layout_current + 1) % self.layout_tot
-        self.layout_set(self.layout_current)
 
     def layout_reset(self):
         log = logging.getLogger(f"c.{__class__.__name__}.l_reset")
@@ -135,19 +112,29 @@ class View:
 
 
 class FrameCrop(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, back_col, *args, **kwargs):
+        super().__init__(parent, background=back_col, *args, **kwargs)
 
+        # setup grid for the frame
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.temp = tk.Label(
+
+        # create the label that will hold the image
+        self.image_label = tk.Label(
             self, text="Mock up FrameCrop", background=self.cget("background")
         )
-        self.temp.grid(row=0, column=0)
+
+        # grid it, expand every direction (fill frame)
+        self.image_label.grid(row=0, column=0, sticky="nsew")
+
+    def update_image(self, data):
+        """Update the image in the label
+        """
+        self.image_label.configure(image=data)
 
 
 class FrameMetadata(tk.Frame):
-    def __init__(self, parent, sidebar_width, list_header_height, *args, **kwargs):
+    def __init__(self, parent, sidebar_width, *args, **kwargs):
         super().__init__(parent, width=sidebar_width, *args, **kwargs)
 
         self.grid_rowconfigure(0, weight=1)
@@ -159,7 +146,7 @@ class FrameMetadata(tk.Frame):
 
 
 class FramePathInfo(tk.Frame):
-    def __init__(self, parent, sidebar_width, list_header_height, *args, **kwargs):
+    def __init__(self, parent, sidebar_width, *args, **kwargs):
         super().__init__(parent, width=sidebar_width, *args, **kwargs)
 
         log = logging.getLogger(f"c.{__class__.__name__}.init")
@@ -170,7 +157,6 @@ class FramePathInfo(tk.Frame):
 
         # save dimensions of elements
         self.sidebar_width = sidebar_width
-        self.list_header_height = list_header_height
 
         # CREATE children frames
         log.trace(f"self.sidebar_width {self.sidebar_width}")
@@ -290,12 +276,8 @@ class FramePathInfo(tk.Frame):
 
         # STATIC elements
 
-        # photo list header, no need for precise pixel dimensions
-        #  self.photo_list_frame_header = LabelPixel(
         self.photo_list_frame_header = tk.Label(
             self.photo_list_frame,
-            #  width=self.sidebar_width,
-            #  height=self.list_header_height,
             text="Photo list:",
             background=self.photo_list_frame.cget("background"),
         )

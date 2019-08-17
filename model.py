@@ -44,6 +44,8 @@ class Model:
         #  self.cropper_photo_prim = ModelCrop()
         # MAYBE this could be a Queue to remember previous photo
         self._croppers_prim = {}
+        self._widget_wid = -1
+        self._widget_hei = -1
 
         # setup layout info
         self._layout_tot = 5
@@ -200,9 +202,17 @@ class Model:
         log = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
         self.current_photo_prim.set(pic)
 
+        # load the image if needed
         if not pic in self._croppers_prim:
             log.info("Loaded in _update_photo_prim")
             self._croppers_prim[pic] = ModelCrop(pic, self.cropped_prim)
+
+        # resets zoom level and pos for the new photo; can only be done AFTER
+        # mainloop starts, during initialization Model.doResize has not been
+        # called yet, and the widget dimensions are still undefined;
+        # the first time do_resize will be called by the Configure event later
+        if self._widget_wid != -1:
+            self._croppers_prim[pic].do_resize(self._widget_wid, self._widget_hei)
 
     def setIndexEcho(self, index_echo):
         log = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
@@ -276,17 +286,26 @@ class Model:
         self.selection_list.set(old_selection_list)
 
     def doResize(self, widget_wid, widget_hei):
+        """Triggered by a configure event in the Label
+
+        Also saves Label dimension, so that when the photo is changed, the new
+        crop can be computed
+        """
         log = logging.getLogger(f"c.{__class__.__name__}.doResize")
         log.info("Do resize")
 
-        cur_ph_prim = self.current_photo_prim.get()
+        self._widget_wid = widget_wid
+        self._widget_hei = widget_hei
+
+        # get the current_photo_prim full name
+        pic = self.current_photo_prim.get()
 
         # load the photo if needed
-        if not cur_ph_prim in self._croppers_prim:
+        if not pic in self._croppers_prim:
             log.info("Loaded in doResize")
-            self._croppers_prim[cur_ph_prim] = ModelCrop(cur_ph_prim, self.cropped_prim)
+            self._croppers_prim[pic] = ModelCrop(pic, self.cropped_prim)
 
-        self._croppers_prim[cur_ph_prim].do_resize(widget_wid, widget_hei)
+        self._croppers_prim[pic].do_resize(self._widget_wid, self._widget_hei)
 
         if self.layout_current.get() in self._layout_is_double:
             self.current_photo_echo.get()
@@ -357,8 +376,8 @@ class ModelCrop:
         zoom = self._zoom_base ** self._zoom_level
 
         # dimension of the virtual zoomed image
-        zoom_wid = floor(self._image_wid * zoom)
-        zoom_hei = floor(self._image_hei * zoom)
+        zoom_wid = ceil(self._image_wid * zoom)
+        zoom_hei = ceil(self._image_hei * zoom)
 
         # the zoomed photo fits inside the widget
         if zoom_wid < self.widget_wid and zoom_hei < self.widget_hei:

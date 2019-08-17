@@ -130,6 +130,8 @@ class FrameCrop(tk.Frame):
     def update_image(self, data):
         """Update the image in the label
         """
+        log = logging.getLogger(f"c.{__class__.__name__}.update_image")
+        log.info(f"Updating image_label")
         self.image_label.configure(image=data)
 
 

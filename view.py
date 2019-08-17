@@ -108,7 +108,7 @@ class View:
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
         self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
-        self.frame_metadata.grid(row=0, column=1, sticky="ns")
+        self.frame_metadata.grid(row=1, column=0, sticky="ew")
 
     def layout_ip(self):
         self.root.grid_rowconfigure(0, weight=1)
@@ -118,11 +118,10 @@ class View:
 
     def layout_imp(self):
         self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
-        self.frame_crop_prim.grid(row=0, column=0, rowspan=2, sticky="nsew")
-        self.frame_metadata.grid(row=0, column=1, sticky="nsew")
-        self.frame_path_info.grid(row=1, column=1, sticky="nsew")
+        self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
+        self.frame_metadata.grid(row=1, column=0, sticky="ew")
+        self.frame_path_info.grid(row=0, column=1, rowspan=2, sticky="ns")
 
     def layout_ii(self):
         self.root.grid_rowconfigure(0, weight=1)

@@ -124,8 +124,19 @@ class FrameCrop(tk.Frame):
             self, text="Mock up FrameCrop", background=self.cget("background")
         )
 
-        # grid it, expand every direction (fill frame)
-        self.image_label.grid(row=0, column=0, sticky="nsew")
+        #  longtext = str(list(range(50)))
+        #  self.second_image_label = tk.Label(self, text=longtext)
+        #  self.second_image_label.grid(row=0, column=0)
+
+        # grid it, do not expand
+        #  self.image_label.grid(row=0, column=0, sticky="nsew")
+        self.image_label.grid(row=0, column=0)
+        # stop propagation of grid dim: A boolean argument specifies whether
+        # the geometry information of the slaves will determine the size of
+        # this widget.
+        # does not work as I understand it, the label still expands and the
+        # frame follows...
+        #  self.grid_propagate(False)
 
     def update_image(self, data):
         """Update the image in the label
@@ -134,12 +145,19 @@ class FrameCrop(tk.Frame):
         log.info(f"Updating image_label")
         self.image_label.configure(image=data)
 
-    def bind_mouse_scroll(self, func):
+    def bind_mouse_scroll_label(self, func):
         """Bind mouse events to image_label
         """
         self.image_label.bind("<4>", func)
         self.image_label.bind("<5>", func)
         self.image_label.bind("<MouseWheel>", func)
+
+    def bind_mouse_scroll_frame(self, func):
+        """Bind mouse events to image_frame
+        """
+        self.bind("<4>", func)
+        self.bind("<5>", func)
+        self.bind("<MouseWheel>", func)
 
 
 class FrameMetadata(tk.Frame):

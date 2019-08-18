@@ -54,7 +54,10 @@ class Controller:
         )
         # react to window resize
         self.view.frame_crop_prim.bind("<Configure>", self.frameResized)
-        self.view.frame_crop_prim.bind_mouse_scroll(self.scrolledMouseImage)
+        # scrolled *on* the image -> use e.x as rel_x, Label does *not* fill Frame
+        self.view.frame_crop_prim.bind_mouse_scroll_label(self.scrolledMouseImageLabel)
+        # scrolled on the frame -> consider the center as fixed
+        self.view.frame_crop_prim.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -83,8 +86,6 @@ class Controller:
             self.model.cycleLayout()
         elif keysym == "F11":
             self._toggle_fullscreen()
-        elif keysym == "c":
-            self.debug()
 
         # change photo
         elif keysym == "e":
@@ -107,6 +108,14 @@ class Controller:
             self.model.zoomImage("out")
         if keysym == "v":
             self.model.zoomImage("reset")
+
+        # debug
+        elif keysym == "c":
+            self.debug()
+        elif keysym == "i":
+            self.createEventMouse("up")
+        elif keysym == "o":
+            self.createEventMouse("down")
 
     def setOutputFolder(self):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -211,7 +220,7 @@ class Controller:
 
     def frameResized(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.frameResized")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"Resized frame_crop_prim")
         widget_wid = event.widget.winfo_width()
         widget_hei = event.widget.winfo_height()
@@ -223,11 +232,31 @@ class Controller:
         log.info(f"New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
 
-    def scrolledMouseImage(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImage")
-        log.setLevel("TRACE")
-        log.info(f"Scrolled mouse")
+    def scrolledMouseImageLabel(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")
+        #  log.setLevel("TRACE")
+        log.info(f"Scrolled mouse on image")
         log.trace(f"widget {event.widget} x {event.x} y {event.y}")
+        log.trace(f"num {event.num} delta {event.delta}")
+        if event.num == 4 or event.delta == 120 or event.delta == 1:
+            direction = "in"
+        elif event.num == 5 or event.delta == -120 or event.delta == -1:
+            direction = "out"
+        else:
+            log.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
+        self.model.zoomImage(direction, event.x, event.y)
+
+    def scrolledMouseImageFrame(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageFrame")
+        #  log.setLevel("TRACE")
+        log.info(f"Scrolled mouse on image frame")
+        if event.num == 4 or event.delta == 120 or event.delta == 1:
+            direction = "in"
+        elif event.num == 5 or event.delta == -120 or event.delta == -1:
+            direction = "out"
+        else:
+            log.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
+        self.model.zoomImage(direction)
 
     def _toggle_fullscreen(self):
         log = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")
@@ -239,3 +268,22 @@ class Controller:
     def debug(self):
         log = logging.getLogger(f"c.{__class__.__name__}.debug")
         log.info(f"Useful info\n\n")  # {data}")
+
+    def createEventMouse(self, direction):
+        log = logging.getLogger(f"c.{__class__.__name__}.createEventMouse")
+        log.info(f"Creating FakeEvent mouse {direction}")
+        fe = FakeEvent()
+        if direction == "up":
+            fe.num = 4
+        else:
+            fe.num = 5
+        fe.x = 270
+        fe.y = 200
+        fe.widget = None
+        fe.delta = 0
+        self.scrolledMouseImageLabel(fe)
+
+
+class FakeEvent(tk.Event):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

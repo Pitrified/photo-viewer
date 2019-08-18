@@ -148,7 +148,7 @@ class Model:
             # collect the active PhotoInfo object in the new dict
             new_photo_info_active[photo_full] = self._photo_info_list_all[photo_full]
 
-        log.debug(f"photo_info_list_active has now {len(new_photo_info_active)} items")
+        log.info(f"photo_info_list_active has now {len(new_photo_info_active)} items")
         self.photo_info_list_active.set(new_photo_info_active)
 
         current_photo_prim = self.current_photo_prim.get()
@@ -382,7 +382,7 @@ class ModelCrop:
         there is no need for x_pos and place
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_crop")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"Updating crop zoom {self._zoom_level:.4f}")
 
         # zoom in linear scale
@@ -432,7 +432,7 @@ class ModelCrop:
             )
 
         # apply resize
-        log.debug(f"resized_dim {resized_dim} region {region}")
+        log.trace(f"resized_dim {resized_dim} region {region}")
         image_res = self._image.resize(resized_dim, self.resampling_mode, region)
         # convert the photo for tkinter
         image_res = ImageTk.PhotoImage(image_res)
@@ -443,8 +443,8 @@ class ModelCrop:
         """Change zoom level, keep (rel_x, rel_y) still
         """
         log = logging.getLogger(f"c.{__class__.__name__}.zoom_image")
-        log.setLevel("TRACE")
-        log.info("Zooming image {direction}")
+        #  log.setLevel("TRACE")
+        log.info(f"Zooming image {direction}")
 
         old_zoom = self._zoom_base ** self._zoom_level
         old_zoom_wid = self._image_wid * old_zoom
@@ -464,16 +464,12 @@ class ModelCrop:
         new_zoom_wid = self._image_wid * new_zoom
         new_zoom_hei = self._image_hei * new_zoom
         log.trace(f"old_zoom {old_zoom} new_zoom {new_zoom}")
-        recap = f" image ({self._image_wid}, {self._image_hei})"
+        recap = f"image ({self._image_wid}, {self._image_hei})"
         recap += f" old_zoom ({old_zoom_wid}, {old_zoom_hei})"
         recap += f" new_zoom ({new_zoom_wid}, {new_zoom_hei})"
         log.trace(recap)
 
         # find the center of the photo on the screen if not set
-        # EVERYTHING wrong:
-        # the ifs must be done on old_zoom
-        # old_zoom_wid>widget_wid -> mov_x must be considered
-        # prolly rel_x = widget_wid / 2 + mov_x/zoom
         if rel_x == -1 or rel_y == -1:
             if old_zoom_wid < self.widget_wid and old_zoom_hei < self.widget_hei:
                 rel_x = old_zoom_wid / 2
@@ -495,42 +491,47 @@ class ModelCrop:
         recap += f" rel_x/old_zoom {rel_x / old_zoom}"
         recap += f" rel_x/new_zoom {rel_x / new_zoom}"
         log.trace(recap)
-        recap = (
-            f"(mov_x+rel_x)*new_zoom/old_zoom {(self._mov_x+rel_x)*new_zoom/old_zoom}"
-        )
+        recap = f"(mov_x+rel_x)*new_z/old_z {(self._mov_x+rel_x)*new_zoom/old_zoom}"
+        recap += f" (mov_y+rel_y)*new_z/old_z {(self._mov_y+rel_y)*new_zoom/old_zoom}"
         log.trace(recap)
 
-        # MORE errors:
-        # mov_x is already in the *zoomed* image, mov_x/zoom is on the real one
-        # when you remove rel_x and the photo now goes outside, you are not
-        # removing enough
+        # source of hell was that the formula *is* right, but sometimes to keep
+        # a point fixed you need *negative* mov_x, implemented by moving the
+        # Label around; this will not happen, and mov can be set to 0.
+        # the same happens on the other side, the region should go out of the image
+        new_mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - rel_x
+        new_mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
+        if new_mov_x < 0:
+            new_mov_x = 0
+            log.trace(f'new_mov_x overflows {format_color("left", "orange")}')
+        if new_mov_x + self.widget_wid > new_zoom_wid:
+            new_mov_x = new_zoom_wid - self.widget_wid
+            log.trace(f'new_mov_x overflows {format_color("right", "orange")}')
+        if new_mov_y < 0:
+            new_mov_y = 0
+            log.trace(f'new_mov_y overflows {format_color("top", "orange")}')
+        if new_mov_y + self.widget_hei > new_zoom_hei:
+            new_mov_y = new_zoom_hei - self.widget_hei
+            log.trace(f'new_mov_y overflows {format_color("bottom", "orange")}')
+
         if new_zoom_wid < self.widget_wid and new_zoom_hei < self.widget_hei:
             log.trace(f'new_zoom photo {format_color("smaller", "green")} than frame')
             self._mov_x = 0
             self._mov_y = 0
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei < self.widget_hei:
             log.trace(f'new_zoom photo {format_color("wider", "green")} than frame')
-            #  self._mov_x = (
-            #  self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
-            #  ) * new_zoom
-            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - self.widget_wid/2
+            self._mov_x = new_mov_x
             self._mov_y = 0
         elif new_zoom_wid < self.widget_wid and new_zoom_hei >= self.widget_hei:
             log.trace(f'new_zoom photo {format_color("taller", "green")} than frame')
             self._mov_x = 0
-            #  self._mov_y = (
-            #  self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
-            #  ) * new_zoom
-            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - self.widget_hei/2
+            self._mov_y = new_mov_y
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei >= self.widget_hei:
             log.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
-            #  self._mov_x = (
-            #  self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
-            #  ) * new_zoom
-            #  self._mov_y = (
-            #  self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
-            #  ) * new_zoom
-            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - self.widget_wid/2
-            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - self.widget_hei/2
+            self._mov_x = new_mov_x
+            self._mov_y = new_mov_y
+
+        recap = f"mov_x {self._mov_x} mov_y {self._mov_y}"
+        log.trace(recap)
 
         self.update_crop()

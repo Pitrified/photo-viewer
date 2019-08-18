@@ -54,6 +54,7 @@ class Controller:
         )
         # react to window resize
         self.view.frame_crop_prim.bind("<Configure>", self.frameResized)
+        self.view.frame_crop_prim.bind_mouse_scroll(self.scrolledMouseImage)
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -75,13 +76,17 @@ class Controller:
     def KeyReleased(self, event):
         keysym = event.keysym
 
+        # misc
         if keysym == "Escape":
             self.view.exit()
         elif keysym == "F5":
             self.model.cycleLayout()
         elif keysym == "F11":
             self._toggle_fullscreen()
+        elif keysym == "c":
+            self.debug()
 
+        # change photo
         elif keysym == "e":
             self.model.moveIndexPrim("forward")
         elif keysym == "q":
@@ -91,11 +96,17 @@ class Controller:
         elif keysym == "1":
             self.model.moveIndexEcho("backward")
 
+        # like
         elif keysym == "l" or keysym == "k":
             self.model.likePressed(keysym)
 
-        elif keysym == "c":
-            self.debug()
+        # zoom
+        if keysym == "r":
+            self.model.zoomImage("in")
+        if keysym == "f":
+            self.model.zoomImage("out")
+        if keysym == "v":
+            self.model.zoomImage("reset")
 
     def setOutputFolder(self):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -212,6 +223,11 @@ class Controller:
         log.info(f"New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
 
+    def scrolledMouseImage(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImage")
+        log.setLevel("TRACE")
+        log.info(f"Scrolled mouse")
+        log.trace(f"widget {event.widget} x {event.x} y {event.y}")
 
     def _toggle_fullscreen(self):
         log = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")

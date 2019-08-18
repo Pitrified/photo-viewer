@@ -12,6 +12,7 @@ from math import ceil
 
 from observable import Observable
 from photo_info import PhotoInfo
+from utils import format_color
 
 
 class Model:
@@ -210,9 +211,9 @@ class Model:
         # resets zoom level and pos for the new photo; can only be done AFTER
         # mainloop starts, during initialization Model.doResize has not been
         # called yet, and the widget dimensions are still undefined;
-        # the first time do_resize will be called by the Configure event later
+        # the first time reset_image will be called by the Configure event later
         if self._widget_wid != -1:
-            self._croppers_prim[pic].do_resize(self._widget_wid, self._widget_hei)
+            self._croppers_prim[pic].reset_image(self._widget_wid, self._widget_hei)
 
     def setIndexEcho(self, index_echo):
         log = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
@@ -305,7 +306,15 @@ class Model:
             log.info("Loaded in doResize")
             self._croppers_prim[pic] = ModelCrop(pic, self.cropped_prim)
 
-        self._croppers_prim[pic].do_resize(self._widget_wid, self._widget_hei)
+        self._croppers_prim[pic].reset_image(self._widget_wid, self._widget_hei)
+
+        if self.layout_current.get() in self._layout_is_double:
+            self.current_photo_echo.get()
+
+    def zoomImage(self, direction, rel_x=-1, rel_y=-1):
+        pic = self.current_photo_prim.get()
+
+        self._croppers_prim[pic].zoom_image(direction, rel_x, rel_y)
 
         if self.layout_current.get() in self._layout_is_double:
             self.current_photo_echo.get()
@@ -335,31 +344,30 @@ class ModelCrop:
         # MAYBE the fixed point for zoom from keyboard should be the midpoint
         self._mov_delta = 50
 
-    def reset_zoom_level(self, widget_wid, widget_hei):
-        """Find zoom_level so that the image fits in the widget
+    def reset_image(self, widget_wid=-1, widget_hei=-1):
+        """Resets zoom level and position of the image
 
+        Save the current widget dimensions if changed.
+
+        Find zoom_level so that the image fits in the widget:
         _image_wid * ( zoom_base ** zoom_level ) = widget_wid
         and analogously for hei
         """
-        if self._image_wid < widget_wid and self._image_hei < widget_hei:
+        if widget_wid != -1:
+            self.widget_wid = widget_wid
+            self.widget_hei = widget_hei
+
+        if self._image_wid < self.widget_wid and self._image_hei < self.widget_hei:
             # the original photo is smaller than the widget
             self._zoom_level = 0
         else:
-            ratio = min(widget_wid / self._image_wid, widget_hei / self._image_hei)
+            ratio = min(
+                self.widget_wid / self._image_wid, self.widget_hei / self._image_hei
+            )
             self._zoom_level = log(ratio, self._zoom_base)
 
-    def do_resize(self, widget_wid, widget_hei):
-        """React to the widget changing dimension
-
-        Resets zoom level and position
-        Save the current widget dimensions
-        """
-        self.reset_zoom_level(widget_wid, widget_hei)
         self._mov_x = 0
         self._mov_y = 0
-        self.widget_wid = widget_wid
-        self.widget_hei = widget_hei
-
         self.update_crop()
 
     def update_crop(self):
@@ -372,6 +380,10 @@ class ModelCrop:
         The Label fills the frame, and the image is centered in the Label,
         there is no need for x_pos and place
         """
+        log = logging.getLogger(f"c.{__class__.__name__}.update_crop")
+        log.setLevel("TRACE")
+        log.info(f"Updating crop zoom {self._zoom_level:.4f}")
+
         # zoom in linear scale
         zoom = self._zoom_base ** self._zoom_level
 
@@ -412,15 +424,96 @@ class ModelCrop:
         elif zoom_wid >= self.widget_wid and zoom_hei >= self.widget_hei:
             resized_dim = (self.widget_wid, self.widget_hei)
             region = (
-                self.mov_x / zoom,
-                self.mov_y / zoom,
-                (self.mov_x + self.widget_wid) / zoom,
-                (self.mov_y + self.widget_hei) / zoom,
+                self._mov_x / zoom,
+                self._mov_y / zoom,
+                (self._mov_x + self.widget_wid) / zoom,
+                (self._mov_y + self.widget_hei) / zoom,
             )
 
         # apply resize
+        log.debug(f"resized_dim {resized_dim} region {region}")
         image_res = self._image.resize(resized_dim, self.resampling_mode, region)
         # convert the photo for tkinter
         image_res = ImageTk.PhotoImage(image_res)
         # save it in the observable, not garbage collected
         self._image_observable.set(image_res)
+
+    def zoom_image(self, direction, rel_x=-1, rel_y=-1):
+        """Change zoom level, keep (rel_x, rel_y) still
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}.zoom_image")
+        log.setLevel("TRACE")
+        log.info("Zooming image {direction}")
+
+        old_zoom = self._zoom_base ** self._zoom_level
+        old_zoom_wid = self._image_wid * old_zoom
+        old_zoom_hei = self._image_hei * old_zoom
+
+        if direction == "in":
+            self._zoom_level += 1
+        elif direction == "out":
+            self._zoom_level -= 1
+        elif direction == "reset":
+            self.reset_image()
+        else:
+            log.error(f"Unrecognized zooming direction {direction}")
+            return 1
+
+        new_zoom = self._zoom_base ** self._zoom_level
+        new_zoom_wid = self._image_wid * new_zoom
+        new_zoom_hei = self._image_hei * new_zoom
+        recap = f" image ({self._image_wid}, {self._image_hei})"
+        recap += f" old_zoom ({old_zoom_wid}, {old_zoom_hei})"
+        recap += f" new_zoom ({new_zoom_wid}, {new_zoom_hei})"
+        log.trace(recap)
+
+        # find the center of the photo on the screen if not set
+        # EVERYTHING wrong:
+        # the ifs must be done on old_zoom
+        # old_zoom_wid>widget_wid -> mov_x must be considered
+        # prolly rel_x = widget_wid / 2 + mov_x/zoom
+        if rel_x == -1 or rel_y == -1:
+            if old_zoom_wid < self.widget_wid and old_zoom_hei < self.widget_hei:
+                rel_x = old_zoom_wid / 2
+                rel_y = old_zoom_hei / 2
+            elif old_zoom_wid >= self.widget_wid and old_zoom_hei < self.widget_hei:
+                rel_x = self.widget_wid / 2
+                rel_y = old_zoom_hei / 2
+            elif old_zoom_wid < self.widget_wid and old_zoom_hei >= self.widget_hei:
+                rel_x = old_zoom_wid / 2
+                rel_y = self.widget_hei / 2
+            elif old_zoom_wid >= self.widget_wid and old_zoom_hei >= self.widget_hei:
+                rel_x = self.widget_wid / 2
+                rel_y = self.widget_hei / 2
+        recap = f"rel_x {rel_x} rel_y {rel_y}"
+        recap += f" widget ({self.widget_wid}, {self.widget_hei})"
+        log.trace(recap)
+
+        # MORE errors:
+        # mov_x is already in the *zoomed* image, mov_x/zoom is on the real one
+        if new_zoom_wid < self.widget_wid and new_zoom_hei < self.widget_hei:
+            log.trace(f'new_zoom photo {format_color("smaller", "green")} than frame')
+            self._mov_x = 0
+            self._mov_y = 0
+        elif new_zoom_wid >= self.widget_wid and new_zoom_hei < self.widget_hei:
+            log.trace(f'new_zoom photo {format_color("wider", "green")} than frame')
+            self._mov_x = (
+                self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
+            ) * new_zoom
+            self._mov_y = 0
+        elif new_zoom_wid < self.widget_wid and new_zoom_hei >= self.widget_hei:
+            log.trace(f'new_zoom photo {format_color("taller", "green")} than frame')
+            self._mov_x = 0
+            self._mov_y = (
+                self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
+            ) * new_zoom
+        elif new_zoom_wid >= self.widget_wid and new_zoom_hei >= self.widget_hei:
+            log.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
+            self._mov_x = (
+                self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
+            ) * new_zoom
+            self._mov_y = (
+                self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
+            ) * new_zoom
+
+        self.update_crop()

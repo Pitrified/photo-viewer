@@ -134,6 +134,13 @@ class FrameCrop(tk.Frame):
         log.info(f"Updating image_label")
         self.image_label.configure(image=data)
 
+    def bind_mouse_scroll(self, func):
+        """Bind mouse events to image_label
+        """
+        self.image_label.bind("<4>", func)
+        self.image_label.bind("<5>", func)
+        self.image_label.bind("<MouseWheel>", func)
+
 
 class FrameMetadata(tk.Frame):
     def __init__(self, parent, sidebar_width, *args, **kwargs):

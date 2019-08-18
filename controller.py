@@ -29,6 +29,7 @@ class Controller:
         self.model.selection_list.addCallback(self.updatedSelectionList)
         self.model.layout_current.addCallback(self.updatedCurrentLayout)
         self.model.cropped_prim.addCallback(self.updatedCroppedPrim)
+        self.model.cropped_echo.addCallback(self.updatedCroppedEcho)
 
         self.view = View(self.root)
 
@@ -65,7 +66,7 @@ class Controller:
         self.model.setOutputFolder("Not set")
         self.model.addInputFolder(input_folder)
         # set starting layout
-        self.model.setLayout(3)
+        self.model.setLayout(1)
         self.model.setIndexPrim(0)
 
     def run(self):
@@ -231,6 +232,11 @@ class Controller:
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
         log.info(f"New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
+
+    def updatedCroppedEcho(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedEcho")
+        log.info(f"New value received for cropped_echo")
+        self.view.frame_crop_echo.update_image(data)
 
     def scrolledMouseImageLabel(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")

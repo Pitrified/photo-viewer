@@ -42,9 +42,9 @@ class Model:
         self._thumb_size = 50
 
         self.cropped_prim = Observable(None)
-        #  self.cropper_photo_prim = ModelCrop()
+        self.cropped_echo = Observable(None)
         # MAYBE this could be a Queue to remember previous photo
-        self._croppers_prim = {}
+        self._loaded_croppers = {}
         self._widget_wid = -1
         self._widget_hei = -1
 
@@ -203,17 +203,15 @@ class Model:
         log = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
         self.current_photo_prim.set(pic)
 
-        # load the image if needed
-        if not pic in self._croppers_prim:
-            log.info("Loaded in _update_photo_prim")
-            self._croppers_prim[pic] = ModelCrop(pic, self.cropped_prim)
+        self._load_pic(pic)
 
         # resets zoom level and pos for the new photo; can only be done AFTER
         # mainloop starts, during initialization Model.doResize has not been
         # called yet, and the widget dimensions are still undefined;
         # the first time reset_image will be called by the Configure event later
         if self._widget_wid != -1:
-            self._croppers_prim[pic].reset_image(self._widget_wid, self._widget_hei)
+            self._loaded_croppers[pic].reset_image(self._widget_wid, self._widget_hei)
+            self.cropped_prim.set(self._loaded_croppers[pic].image_res)
 
     def setIndexEcho(self, index_echo):
         log = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
@@ -244,8 +242,17 @@ class Model:
         If _index_echo == _index_prim do not recompute image crop
         """
         log = logging.getLogger(f"c.{__class__.__name__}._update_photo_echo")
-        log.trace(f"Updating photo echo, index {self._index_echo}")
+        log.info(f"Updating photo echo, index {self._index_echo}")
         self.current_photo_echo.set(pic)
+
+        self._load_pic(pic)
+
+        pic_prim = self.current_photo_prim.get()
+
+        if self._widget_wid != -1:
+            params = self._loaded_croppers[pic_prim].get_params()
+            self._loaded_croppers[pic].load_params(params)
+            self.cropped_echo.set(self._loaded_croppers[pic].image_res)
 
     def likePressed(self, which_frame):
         """Update selection_list accordingly
@@ -293,40 +300,67 @@ class Model:
         crop can be computed
         """
         log = logging.getLogger(f"c.{__class__.__name__}.doResize")
+        log.setLevel("TRACE")
         log.info("Do resize")
 
         self._widget_wid = widget_wid
         self._widget_hei = widget_hei
 
         # get the current_photo_prim full name
-        pic = self.current_photo_prim.get()
+        pic_prim = self.current_photo_prim.get()
 
-        # load the photo if needed
-        if not pic in self._croppers_prim:
-            log.info("Loaded in doResize")
-            self._croppers_prim[pic] = ModelCrop(pic, self.cropped_prim)
+        self._load_pic(pic_prim)
 
-        self._croppers_prim[pic].reset_image(self._widget_wid, self._widget_hei)
+        # reset the image with the new widget dimension
+        self._loaded_croppers[pic_prim].reset_image(self._widget_wid, self._widget_hei)
+        # update the Observable
+        self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
 
+        log.trace(f"Loading ECHO ----------")
         if self.layout_current.get() in self._layout_is_double:
-            self.current_photo_echo.get()
+            # get current echo pic
+            pic_echo = self.current_photo_echo.get()
+            # load if needed
+            self._load_pic(pic_echo)
+            # get params from prim
+            params = self._loaded_croppers[pic_prim].get_params()
+            # copy them in echo
+            self._loaded_croppers[pic_echo].load_params(params)
+            # update echo observable
+            self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
 
     def zoomImage(self, direction, rel_x=-1, rel_y=-1):
-        pic = self.current_photo_prim.get()
+        # get current prim pic
+        pic_prim = self.current_photo_prim.get()
+        # zoom the image
+        self._loaded_croppers[pic_prim].zoom_image(direction, rel_x, rel_y)
+        # update prim observable
+        self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
 
-        self._croppers_prim[pic].zoom_image(direction, rel_x, rel_y)
-
+        # TODO add echo zoom_image if _layout_is_double
         if self.layout_current.get() in self._layout_is_double:
-            self.current_photo_echo.get()
+            # get current echo pic
+            pic_echo = self.current_photo_echo.get()
+            # get params from prim
+            params = self._loaded_croppers[pic_prim].get_params()
+            # copy them in echo
+            self._loaded_croppers[pic_echo].load_params(params)
+            # update echo observable
+            self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
+
+    def _load_pic(self, pic):
+        """Load the pic in _loaded_croppers if needed
+        """
+        if not pic in self._loaded_croppers:
+            self._loaded_croppers[pic] = ModelCrop(pic)
 
 
 class ModelCrop:
-    def __init__(self, photo_name_full, image_observable):
+    def __init__(self, photo_name_full):
         log = logging.getLogger(f"c.{__class__.__name__}.init")
         log.info("Start init")
 
         self._photo_name_full = photo_name_full
-        self._image_observable = image_observable
         self._image = Image.open(self._photo_name_full)
         self._image_wid, self._image_hei = self._image.size
 
@@ -436,8 +470,8 @@ class ModelCrop:
         image_res = self._image.resize(resized_dim, self.resampling_mode, region)
         # convert the photo for tkinter
         image_res = ImageTk.PhotoImage(image_res)
-        # save it in the observable, not garbage collected
-        self._image_observable.set(image_res)
+        # save it as attribute of the object, not garbage collected
+        self.image_res = image_res
 
     def zoom_image(self, direction, rel_x=-1, rel_y=-1):
         """Change zoom level, keep (rel_x, rel_y) still
@@ -534,4 +568,27 @@ class ModelCrop:
         recap = f"mov_x {self._mov_x} mov_y {self._mov_y}"
         log.trace(recap)
 
+        self.update_crop()
+
+    def get_params(self):
+        """Returns all the relevant params for the pic
+
+        Basically everything that is not set in __init__ has to be copied
+        """
+        params = {}
+        params["mov_x"] = self._mov_x
+        params["mov_y"] = self._mov_y
+        params["zoom_level"] = self._zoom_level
+        params["widget_wid"] = self.widget_wid
+        params["widget_hei"] = self.widget_hei
+        return params
+
+    def load_params(self, params):
+        """Crop the photo according to params
+        """
+        self._mov_x = params["mov_x"]
+        self._mov_y = params["mov_y"]
+        self._zoom_level = params["zoom_level"]
+        self.widget_wid = params["widget_wid"]
+        self.widget_hei = params["widget_hei"]
         self.update_crop()

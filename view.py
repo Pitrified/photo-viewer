@@ -124,19 +124,12 @@ class FrameCrop(tk.Frame):
             self, text="Mock up FrameCrop", background=self.cget("background")
         )
 
-        #  longtext = str(list(range(50)))
-        #  self.second_image_label = tk.Label(self, text=longtext)
-        #  self.second_image_label.grid(row=0, column=0)
-
         # grid it, do not expand
-        #  self.image_label.grid(row=0, column=0, sticky="nsew")
         self.image_label.grid(row=0, column=0)
         # stop propagation of grid dim: A boolean argument specifies whether
         # the geometry information of the slaves will determine the size of
         # this widget.
-        # does not work as I understand it, the label still expands and the
-        # frame follows...
-        #  self.grid_propagate(False)
+        self.grid_propagate(False)
 
     def update_image(self, data):
         """Update the image in the label

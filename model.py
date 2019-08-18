@@ -185,8 +185,8 @@ class Model:
             new_index_prim = self._index_prim + 1
         elif direction == "backward":
             new_index_prim = self._index_prim - 1
-        self._index_prim = new_index_prim % len(self.photo_info_list_active.get())
-        self._update_photo_prim(self._active_photo_list[self._index_prim])
+        new_index_prim = new_index_prim % len(self.photo_info_list_active.get())
+        self.setIndexPrim(new_index_prim)
 
     def seekIndexPrim(self, pic):
         log = logging.getLogger(f"c.{__class__.__name__}.seekIndexPrim")
@@ -233,8 +233,8 @@ class Model:
             new_index_echo = self._index_echo + 1
         elif direction == "backward":
             new_index_echo = self._index_echo - 1
-        self._index_echo = new_index_echo % len(self.photo_info_list_active.get())
-        self._update_photo_echo(self._active_photo_list[self._index_echo])
+        new_index_echo = new_index_echo % len(self.photo_info_list_active.get())
+        self.setIndexEcho(new_index_echo)
 
     def _update_photo_echo(self, pic):
         """Change what is needed for a new pic in echo frame

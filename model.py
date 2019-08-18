@@ -502,6 +502,8 @@ class ModelCrop:
 
         # MORE errors:
         # mov_x is already in the *zoomed* image, mov_x/zoom is on the real one
+        # when you remove rel_x and the photo now goes outside, you are not
+        # removing enough
         if new_zoom_wid < self.widget_wid and new_zoom_hei < self.widget_hei:
             log.trace(f'new_zoom photo {format_color("smaller", "green")} than frame')
             self._mov_x = 0
@@ -511,7 +513,7 @@ class ModelCrop:
             #  self._mov_x = (
             #  self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
             #  ) * new_zoom
-            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - rel_x
+            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - self.widget_wid/2
             self._mov_y = 0
         elif new_zoom_wid < self.widget_wid and new_zoom_hei >= self.widget_hei:
             log.trace(f'new_zoom photo {format_color("taller", "green")} than frame')
@@ -519,7 +521,7 @@ class ModelCrop:
             #  self._mov_y = (
             #  self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
             #  ) * new_zoom
-            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
+            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - self.widget_hei/2
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei >= self.widget_hei:
             log.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
             #  self._mov_x = (
@@ -528,7 +530,7 @@ class ModelCrop:
             #  self._mov_y = (
             #  self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
             #  ) * new_zoom
-            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - rel_x
-            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
+            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - self.widget_wid/2
+            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - self.widget_hei/2
 
         self.update_crop()

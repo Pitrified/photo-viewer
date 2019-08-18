@@ -335,6 +335,7 @@ class ModelCrop:
 
         # zoom saved in log scale, actual zoom: zoom_base**zoom_level
         self._zoom_base = sqrt(2)
+        #  self._zoom_base = 2
         self._zoom_level = None
 
         self._mov_x = 0
@@ -462,6 +463,7 @@ class ModelCrop:
         new_zoom = self._zoom_base ** self._zoom_level
         new_zoom_wid = self._image_wid * new_zoom
         new_zoom_hei = self._image_hei * new_zoom
+        log.trace(f"old_zoom {old_zoom} new_zoom {new_zoom}")
         recap = f" image ({self._image_wid}, {self._image_hei})"
         recap += f" old_zoom ({old_zoom_wid}, {old_zoom_hei})"
         recap += f" new_zoom ({new_zoom_wid}, {new_zoom_hei})"
@@ -488,6 +490,15 @@ class ModelCrop:
         recap = f"rel_x {rel_x} rel_y {rel_y}"
         recap += f" widget ({self.widget_wid}, {self.widget_hei})"
         log.trace(recap)
+        recap = f"mov_x/old_zoom {self._mov_x / old_zoom}"
+        recap += f" mov_x/new_zoom {self._mov_x / new_zoom}"
+        recap += f" rel_x/old_zoom {rel_x / old_zoom}"
+        recap += f" rel_x/new_zoom {rel_x / new_zoom}"
+        log.trace(recap)
+        recap = (
+            f"(mov_x+rel_x)*new_zoom/old_zoom {(self._mov_x+rel_x)*new_zoom/old_zoom}"
+        )
+        log.trace(recap)
 
         # MORE errors:
         # mov_x is already in the *zoomed* image, mov_x/zoom is on the real one
@@ -497,23 +508,27 @@ class ModelCrop:
             self._mov_y = 0
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei < self.widget_hei:
             log.trace(f'new_zoom photo {format_color("wider", "green")} than frame')
-            self._mov_x = (
-                self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
-            ) * new_zoom
+            #  self._mov_x = (
+            #  self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
+            #  ) * new_zoom
+            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - rel_x
             self._mov_y = 0
         elif new_zoom_wid < self.widget_wid and new_zoom_hei >= self.widget_hei:
             log.trace(f'new_zoom photo {format_color("taller", "green")} than frame')
             self._mov_x = 0
-            self._mov_y = (
-                self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
-            ) * new_zoom
+            #  self._mov_y = (
+            #  self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
+            #  ) * new_zoom
+            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei >= self.widget_hei:
             log.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
-            self._mov_x = (
-                self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
-            ) * new_zoom
-            self._mov_y = (
-                self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
-            ) * new_zoom
+            #  self._mov_x = (
+            #  self._mov_x / old_zoom + rel_x / old_zoom - rel_x / new_zoom
+            #  ) * new_zoom
+            #  self._mov_y = (
+            #  self._mov_y / old_zoom + rel_y / old_zoom - rel_y / new_zoom
+            #  ) * new_zoom
+            self._mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - rel_x
+            self._mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
 
         self.update_crop()

@@ -194,24 +194,33 @@ class Model:
         self._index_prim = self._active_photo_list.index(pic)
         self._update_photo_prim(pic)
 
-    def _update_photo_prim(self, pic):
-        """Change what is needed for a new pic
+    def _update_photo_prim(self, pic_prim):
+        """Change what is needed for a new pic_prim
 
         - current_photo_prim
         - cropped_prim
         """
         log = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
-        self.current_photo_prim.set(pic)
+        self.current_photo_prim.set(pic_prim)
 
-        self._load_pic(pic)
+        self._load_pic(pic_prim)
 
         # resets zoom level and pos for the new photo; can only be done AFTER
         # mainloop starts, during initialization Model.doResize has not been
         # called yet, and the widget dimensions are still undefined;
         # the first time reset_image will be called by the Configure event later
         if self._widget_wid != -1:
-            self._loaded_croppers[pic].reset_image(self._widget_wid, self._widget_hei)
-            self.cropped_prim.set(self._loaded_croppers[pic].image_res)
+            self._loaded_croppers[pic_prim].reset_image(
+                self._widget_wid, self._widget_hei
+            )
+            self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
+
+            # if the layout is double, copy the new zoom level to echo pic
+            if self.layout_current.get() in self._layout_is_double:
+                pic_echo = self.current_photo_echo.get()
+                params = self._loaded_croppers[pic_prim].get_params()
+                self._loaded_croppers[pic_echo].load_params(params)
+                self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
 
     def setIndexEcho(self, index_echo):
         log = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
@@ -231,11 +240,14 @@ class Model:
             new_index_echo = self._index_echo + 1
         elif direction == "backward":
             new_index_echo = self._index_echo - 1
+        elif direction == "sync":
+            new_index_echo = self._index_prim
+
         new_index_echo = new_index_echo % len(self.photo_info_list_active.get())
         self.setIndexEcho(new_index_echo)
 
-    def _update_photo_echo(self, pic):
-        """Change what is needed for a new pic in echo frame
+    def _update_photo_echo(self, pic_echo):
+        """Change what is needed for a new pic_echo in echo frame
 
         - current_photo_echo
         - cropped_echo
@@ -243,16 +255,16 @@ class Model:
         """
         log = logging.getLogger(f"c.{__class__.__name__}._update_photo_echo")
         log.info(f"Updating photo echo, index {self._index_echo}")
-        self.current_photo_echo.set(pic)
+        self.current_photo_echo.set(pic_echo)
 
-        self._load_pic(pic)
+        self._load_pic(pic_echo)
 
         pic_prim = self.current_photo_prim.get()
 
         if self._widget_wid != -1:
             params = self._loaded_croppers[pic_prim].get_params()
-            self._loaded_croppers[pic].load_params(params)
-            self.cropped_echo.set(self._loaded_croppers[pic].image_res)
+            self._loaded_croppers[pic_echo].load_params(params)
+            self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
 
     def likePressed(self, which_frame):
         """Update selection_list accordingly
@@ -591,4 +603,5 @@ class ModelCrop:
         self._zoom_level = params["zoom_level"]
         self.widget_wid = params["widget_wid"]
         self.widget_hei = params["widget_hei"]
+        # MAYBE do validation on params, pic might be of different size
         self.update_crop()

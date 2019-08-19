@@ -22,8 +22,8 @@ class Controller:
         self.model = Model()
 
         # register callbacks on the model observables
-        self.model.output_folder.addCallback(self.changedOutputFolder)
-        self.model.input_folders.addCallback(self.addedInputFolder)
+        self.model.output_folder.addCallback(self.updatedOutputFolder)
+        self.model.input_folders.addCallback(self.updatedInputFolder)
         self.model.photo_info_list_active.addCallback(self.updatedPhotoList)
         self.model.current_photo_prim.addCallback(self.updatedCurrentPhotoPrim)
         self.model.selection_list.addCallback(self.updatedSelectionList)
@@ -57,8 +57,10 @@ class Controller:
         self.view.frame_crop_prim.bind("<Configure>", self.frameResized)
         # scrolled *on* the image -> use e.x as rel_x, Label does *not* fill Frame
         self.view.frame_crop_prim.bind_mouse_scroll_label(self.scrolledMouseImageLabel)
+        self.view.frame_crop_echo.bind_mouse_scroll_label(self.scrolledMouseImageLabel)
         # scrolled on the frame -> consider the center as fixed
         self.view.frame_crop_prim.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
+        self.view.frame_crop_echo.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -97,6 +99,8 @@ class Controller:
             self.model.moveIndexEcho("forward")
         elif keysym == "1":
             self.model.moveIndexEcho("backward")
+        elif keysym == "2":
+            self.model.moveIndexEcho("sync")
 
         # like
         elif keysym == "l" or keysym == "k":
@@ -145,8 +149,8 @@ class Controller:
 
         self.model.setOutputFolder(output_folder_full)
 
-    def changedOutputFolder(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.changedOutputFolder")
+    def updatedOutputFolder(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedOutputFolder")
         log.info(f"New value '{data}'")
         self.view.frame_path_info.update_output_frame(data)
 
@@ -172,8 +176,8 @@ class Controller:
 
         self.model.addInputFolder(input_folder_full)
 
-    def addedInputFolder(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.addedInputFolder")
+    def updatedInputFolder(self, data):
+        log = logging.getLogger(f"c.{__class__.__name__}.updatedInputFolder")
         log.info(f"New values received for input_folders")  # {data}")
         self.view.frame_path_info.update_input_frame(data)
 

@@ -102,8 +102,8 @@ class View:
 
     def layout_ii(self):
         self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1, uniform="half")
+        self.root.grid_columnconfigure(1, weight=1, uniform="half")
         self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
         self.frame_crop_echo.grid(row=0, column=1, sticky="nsew")
 

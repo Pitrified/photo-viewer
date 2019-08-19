@@ -377,7 +377,8 @@ class ModelCrop:
         self._image_wid, self._image_hei = self._image.size
 
         # setup parameters for resizing
-        self.resampling_mode = Image.NEAREST
+        #  self.resampling_mode = Image.NEAREST
+        self.resampling_mode = Image.LANCZOS
 
         # zoom saved in log scale, actual zoom: zoom_base**zoom_level
         self._zoom_base = sqrt(2)

@@ -199,7 +199,7 @@ class Controller:
 
     def updatedCurrentPhotoPrim(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
-        log.info(f"New value received for current_photo_prim {data}")
+        log.info(f"New value received for current_photo_prim")
         self.view.frame_path_info.update_current_photo_prim(data)
 
     def updatedSelectionList(self, data):

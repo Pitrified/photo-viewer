@@ -72,9 +72,9 @@ class View:
         max_row = 1
         max_col = 1
         for i in range(max_row + 1):
-            self.root.grid_rowconfigure(i, weight=0)
+            self.root.grid_rowconfigure(i, weight=0, uniform="")
         for i in range(max_col + 1):
-            self.root.grid_columnconfigure(i, weight=0)
+            self.root.grid_columnconfigure(i, weight=0, uniform="")
 
     def layout_i(self):
         self.root.grid_rowconfigure(0, weight=1)

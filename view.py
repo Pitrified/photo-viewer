@@ -135,7 +135,7 @@ class FrameCrop(tk.Frame):
         """Update the image in the label
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_image")
-        log.info(f"Updating image_label")
+        log.trace(f"Updating image_label")
         self.image_label.configure(image=data)
 
     def bind_mouse_scroll_label(self, func):
@@ -151,6 +151,11 @@ class FrameCrop(tk.Frame):
         self.bind("<4>", func)
         self.bind("<5>", func)
         self.bind("<MouseWheel>", func)
+
+    def bind_image(self, kind, func):
+        """Bind event 'kind' to func on image_label
+        """
+        self.image_label.bind(kind, func)
 
 
 class FrameMetadata(tk.Frame):
@@ -428,7 +433,7 @@ class FramePathInfo(tk.Frame):
         selection_list_info = { pic : (PhotoInfo, is_selected) }
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_selection_list")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"Updating selection_list ThumbButtons")
 
         for pic in self.selection_list_thumbbtn:

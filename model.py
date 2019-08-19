@@ -38,12 +38,18 @@ class Model:
         self.current_photo_echo = Observable("")
         self._index_echo = 0
 
+        # set of valid photo extensions to load in _active_photo_list
         self._is_photo_ext = set((".jpg", ".jpeg", ".JPG", ".png"))
+        # thumbnail size for ThumbButtons
         self._thumb_size = 50
+        # how much to move the image from keyboard
+        self._mov_delta = 200
 
+        # Image that holds the cropped picture
         self.cropped_prim = Observable(None)
         self.cropped_echo = Observable(None)
         # MAYBE this could be a Queue to remember previous photo
+        # more precisely, Limited Size Queue where last used is put back to top
         self._loaded_croppers = {}
         self._widget_wid = -1
         self._widget_hei = -1
@@ -52,7 +58,6 @@ class Model:
         self._layout_tot = 5
         self._layout_is_double = (1,)
         self.layout_current = Observable(0)
-        #  self.layout_set(self.layout_current)
 
     def setOutputFolder(self, output_folder_full):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -118,7 +123,7 @@ class Model:
         Has to load the thumbnail and metadata
         """
         log = logging.getLogger(f"c.{__class__.__name__}.updatePhotoInfoList")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"Update photo_info_list_active")
 
         # list of filenames of active photos: ideally parallel to
@@ -217,10 +222,7 @@ class Model:
 
             # if the layout is double, copy the new zoom level to echo pic
             if self.layout_current.get() in self._layout_is_double:
-                pic_echo = self.current_photo_echo.get()
-                params = self._loaded_croppers[pic_prim].get_params()
-                self._loaded_croppers[pic_echo].load_params(params)
-                self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
+                self._cloneParams()
 
     def setIndexEcho(self, index_echo):
         log = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
@@ -259,18 +261,14 @@ class Model:
 
         self._load_pic(pic_echo)
 
-        pic_prim = self.current_photo_prim.get()
-
         if self._widget_wid != -1:
-            params = self._loaded_croppers[pic_prim].get_params()
-            self._loaded_croppers[pic_echo].load_params(params)
-            self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
+            self._cloneParams()
 
     def likePressed(self, which_frame):
         """Update selection_list accordingly
         """
         log = logging.getLogger(f"c.{__class__.__name__}.likePressed")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"Like pressed on {which_frame}")
 
         # if the layout is not double consider the event from prim
@@ -312,7 +310,7 @@ class Model:
         crop can be computed
         """
         log = logging.getLogger(f"c.{__class__.__name__}.doResize")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info("Do resize")
 
         self._widget_wid = widget_wid
@@ -321,6 +319,7 @@ class Model:
         # get the current_photo_prim full name
         pic_prim = self.current_photo_prim.get()
 
+        # MAYBE this loading is never useful
         self._load_pic(pic_prim)
 
         # reset the image with the new widget dimension
@@ -328,18 +327,13 @@ class Model:
         # update the Observable
         self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
 
-        log.trace(f"Loading ECHO ----------")
         if self.layout_current.get() in self._layout_is_double:
             # get current echo pic
             pic_echo = self.current_photo_echo.get()
             # load if needed
             self._load_pic(pic_echo)
-            # get params from prim
-            params = self._loaded_croppers[pic_prim].get_params()
-            # copy them in echo
-            self._loaded_croppers[pic_echo].load_params(params)
-            # update echo observable
-            self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
+            # clone params to echo
+            self._cloneParams()
 
     def zoomImage(self, direction, rel_x=-1, rel_y=-1):
         # get current prim pic
@@ -349,16 +343,77 @@ class Model:
         # update prim observable
         self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
 
-        # TODO add echo zoom_image if _layout_is_double
         if self.layout_current.get() in self._layout_is_double:
-            # get current echo pic
-            pic_echo = self.current_photo_echo.get()
-            # get params from prim
-            params = self._loaded_croppers[pic_prim].get_params()
-            # copy them in echo
-            self._loaded_croppers[pic_echo].load_params(params)
-            # update echo observable
-            self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
+            self._cloneParams()
+
+    def moveImageDirection(self, direction):
+        """Move image in the specified direction of self._mov_delta
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}.moveImageDirection")
+        #  log.setLevel("TRACE")
+        log.trace(f"Moving in direction {direction}")
+        if direction == "right":
+            self._moveImage(self._mov_delta, 0)
+        elif direction == "left":
+            self._moveImage(-self._mov_delta, 0)
+        elif direction == "up":
+            self._moveImage(0, -self._mov_delta)
+        elif direction == "down":
+            self._moveImage(0, self._mov_delta)
+
+    def moveImageMouse(self, mouse_x, mouse_y):
+        """Move the image to follow the mouse
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}.moveImageMouse")
+        #  log.setLevel("TRACE")
+        log.trace(f"Moving mouse")
+        delta_x = self._old_mouse_x - mouse_x
+        delta_y = self._old_mouse_y - mouse_y
+        self._old_mouse_x = mouse_x
+        self._old_mouse_y = mouse_y
+        self._moveImage(delta_x, delta_y)
+
+    def saveMousePos(self, mouse_x, mouse_y):
+        """Save the current mouse position
+        """
+        self._old_mouse_x = mouse_x
+        self._old_mouse_y = mouse_y
+
+    def _moveImage(self, delta_x, delta_y):
+        """Actually move image of specified delta
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}._moveImage")
+        #  log.setLevel("TRACE")
+        log.trace(f"Moving delta {delta_x} {delta_y}")
+        # get current prim pic
+        pic_prim = self.current_photo_prim.get()
+        # move the image
+        self._loaded_croppers[pic_prim].move_image(delta_x, delta_y)
+        # update prim observable
+        log.trace("Updating prim observable")
+        self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
+        # if double, move echo as well
+        if self.layout_current.get() in self._layout_is_double:
+            self._cloneParams()
+
+    def _cloneParams(self):
+        """Clone current prim params to echo image
+        """
+        # MAYBE the check for doubleness of the layout can be done here
+        # cloning only makes sense if it's double after all
+        log = logging.getLogger(f"c.{__class__.__name__}._cloneParams")
+        #  log.setLevel("TRACE")
+        log.trace(f"Cloning params")
+        # get current prim pic
+        pic_prim = self.current_photo_prim.get()
+        # get current echo pic
+        pic_echo = self.current_photo_echo.get()
+        # get params from prim
+        params = self._loaded_croppers[pic_prim].get_params()
+        # copy them in echo
+        self._loaded_croppers[pic_echo].load_params(params)
+        # update echo observable
+        self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
 
     def _load_pic(self, pic):
         """Load the pic in _loaded_croppers if needed
@@ -377,20 +432,16 @@ class ModelCrop:
         self._image_wid, self._image_hei = self._image.size
 
         # setup parameters for resizing
-        #  self.resampling_mode = Image.NEAREST
-        self.resampling_mode = Image.LANCZOS
+        # TODO upsampling_mode and downsamplin, zoom_image will pick one
+        self.resampling_mode = Image.NEAREST
+        #  self.resampling_mode = Image.LANCZOS
 
         # zoom saved in log scale, actual zoom: zoom_base**zoom_level
         self._zoom_base = sqrt(2)
-        #  self._zoom_base = 2
         self._zoom_level = None
 
         self._mov_x = 0
         self._mov_y = 0
-        # you move delta pixel regardless of zoom_level
-        # when zooming the function will take care of leaving a fixed point
-        # MAYBE the fixed point for zoom from keyboard should be the midpoint
-        self._mov_delta = 50
 
     def reset_image(self, widget_wid=-1, widget_hei=-1):
         """Resets zoom level and position of the image
@@ -430,7 +481,7 @@ class ModelCrop:
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_crop")
         #  log.setLevel("TRACE")
-        log.info(f"Updating crop zoom {self._zoom_level:.4f}")
+        log.trace(f"Updating crop zoom {self._zoom_level:.4f}")
 
         # zoom in linear scale
         zoom = self._zoom_base ** self._zoom_level
@@ -503,6 +554,7 @@ class ModelCrop:
             self._zoom_level -= 1
         elif direction == "reset":
             self.reset_image()
+            return 0
         else:
             log.error(f"Unrecognized zooming direction {direction}")
             return 1
@@ -548,18 +600,6 @@ class ModelCrop:
         # the same happens on the other side, the region should go out of the image
         new_mov_x = (self._mov_x + rel_x) * new_zoom / old_zoom - rel_x
         new_mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
-        if new_mov_x < 0:
-            new_mov_x = 0
-            log.trace(f'new_mov_x overflows {format_color("left", "orange")}')
-        if new_mov_x + self.widget_wid > new_zoom_wid:
-            new_mov_x = new_zoom_wid - self.widget_wid
-            log.trace(f'new_mov_x overflows {format_color("right", "orange")}')
-        if new_mov_y < 0:
-            new_mov_y = 0
-            log.trace(f'new_mov_y overflows {format_color("top", "orange")}')
-        if new_mov_y + self.widget_hei > new_zoom_hei:
-            new_mov_y = new_zoom_hei - self.widget_hei
-            log.trace(f'new_mov_y overflows {format_color("bottom", "orange")}')
 
         if new_zoom_wid < self.widget_wid and new_zoom_hei < self.widget_hei:
             log.trace(f'new_zoom photo {format_color("smaller", "green")} than frame')
@@ -577,6 +617,8 @@ class ModelCrop:
             log.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
             self._mov_x = new_mov_x
             self._mov_y = new_mov_y
+
+        self._validate_mov()
 
         recap = f"mov_x {self._mov_x} mov_y {self._mov_y}"
         log.trace(recap)
@@ -606,3 +648,45 @@ class ModelCrop:
         self.widget_hei = params["widget_hei"]
         # MAYBE do validation on params, pic might be of different size
         self.update_crop()
+
+    def move_image(self, delta_x, delta_y):
+        """Move image of specified delta
+        """
+        self._mov_x += delta_x
+        self._mov_y += delta_y
+        self._validate_mov()
+        self.update_crop()
+
+    def _validate_mov(self):
+        """Check that mov is reasonable for the current widget/image/zoom
+        """
+        zoom = self._zoom_base ** self._zoom_level
+        zoom_wid = self._image_wid * zoom
+        zoom_hei = self._image_hei * zoom
+
+        # in any case they can't be negative
+        if self._mov_x < 0:
+            self._mov_x = 0
+        if self._mov_y < 0:
+            self._mov_y = 0
+
+        # the zoomed photo fits inside the widget
+        if zoom_wid < self.widget_wid and zoom_hei < self.widget_hei:
+            self._mov_x = 0
+            self._mov_y = 0
+        # the zoomed photo is wider than the widget
+        elif zoom_wid >= self.widget_wid and zoom_hei < self.widget_hei:
+            if self._mov_x + self.widget_wid > zoom_wid:
+                self._mov_x = zoom_wid - self.widget_wid
+            self._mov_y = 0
+        # the zoomed photo is taller than the widget
+        elif zoom_wid < self.widget_wid and zoom_hei >= self.widget_hei:
+            self._mov_x = 0
+            if self._mov_y + self.widget_hei > zoom_hei:
+                self._mov_y = zoom_hei - self.widget_hei
+        # the zoomed photo is bigger than the widget
+        elif zoom_wid >= self.widget_wid and zoom_hei >= self.widget_hei:
+            if self._mov_x + self.widget_wid > zoom_wid:
+                self._mov_x = zoom_wid - self.widget_wid
+            if self._mov_y + self.widget_hei > zoom_hei:
+                self._mov_y = zoom_hei - self.widget_hei

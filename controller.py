@@ -61,6 +61,12 @@ class Controller:
         # scrolled on the frame -> consider the center as fixed
         self.view.frame_crop_prim.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
         self.view.frame_crop_echo.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
+        # clicked on image
+        self.view.frame_crop_prim.bind_image("<Button-1>", self.clickedImage)
+        self.view.frame_crop_echo.bind_image("<Button-1>", self.clickedImage)
+        # moved mouse
+        self.view.frame_crop_prim.bind_image("<B1-Motion>", self.movedImageMouse)
+        self.view.frame_crop_echo.bind_image("<B1-Motion>", self.movedImageMouse)
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -91,11 +97,12 @@ class Controller:
             self._toggle_fullscreen()
 
         # change photo
-        elif keysym == "e":
+        elif keysym == "e" or keysym == "KP_Down":  # numpad 2
             self.model.moveIndexPrim("forward")
-        elif keysym == "q":
+        elif keysym == "q" or keysym == "KP_End":  # numpad 1
             self.model.moveIndexPrim("backward")
         elif keysym == "3":
+            # TODO numpad 4,5 to move echo; 0 to sync;
             self.model.moveIndexEcho("forward")
         elif keysym == "1":
             self.model.moveIndexEcho("backward")
@@ -104,14 +111,28 @@ class Controller:
 
         # like
         elif keysym == "l" or keysym == "k":
+            # TODO move logic here, call likePressed('prim|echo')
+            # if the layout is not double the model will correct it
             self.model.likePressed(keysym)
+            # todo add 3,6; now you can call likePressed('prim|echo')
+            # the model must NOT know the view, what are keysym for it?
+
+        # move photo
+        if keysym == "d":
+            self.model.moveImageDirection("right")
+        if keysym == "a":
+            self.model.moveImageDirection("left")
+        if keysym == "w":
+            self.model.moveImageDirection("up")
+        if keysym == "s":
+            self.model.moveImageDirection("down")
 
         # zoom
         if keysym == "r":
             self.model.zoomImage("in")
         if keysym == "f":
             self.model.zoomImage("out")
-        if keysym == "v":
+        if keysym == "x":
             self.model.zoomImage("reset")
 
         # debug
@@ -217,7 +238,7 @@ class Controller:
 
     def doubleclikedThumbbtnSelection(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
-        log.setLevel("TRACE")
+        #  log.setLevel("TRACE")
         log.info(f"doublecliked Thumbbtn selection")
         pic = self.view.frame_path_info.selection_doubleclicked
         log.trace(f"On pic {pic}")
@@ -234,12 +255,14 @@ class Controller:
 
     def updatedCroppedPrim(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
-        log.info(f"New value received for cropped_prim")
+        #  log.setLevel("TRACE")
+        log.trace(f"New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
 
     def updatedCroppedEcho(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedEcho")
-        log.info(f"New value received for cropped_echo")
+        #  log.setLevel("TRACE")
+        log.trace(f"New value received for cropped_echo")
         self.view.frame_crop_echo.update_image(data)
 
     def scrolledMouseImageLabel(self, event):
@@ -267,6 +290,18 @@ class Controller:
         else:
             log.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
         self.model.zoomImage(direction)
+
+    def clickedImage(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.clickedImage")
+        #  log.setLevel("TRACE")
+        log.info(f"Clicked mouse on image")
+        self.model.saveMousePos(event.x, event.y)
+
+    def movedImageMouse(self, event):
+        log = logging.getLogger(f"c.{__class__.__name__}.movedImageMouse")
+        #  log.setLevel("TRACE")
+        log.trace(f"Moved mouse on image")
+        self.model.moveImageMouse(event.x, event.y)
 
     def _toggle_fullscreen(self):
         log = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")

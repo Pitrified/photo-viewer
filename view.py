@@ -38,6 +38,8 @@ class View:
         icon_img = tk.PhotoImage(file="./LogoPV64_2-2.gif")
         self.root.iconphoto(True, icon_img)
 
+        # TODO add some info in titlebar
+
         # setup elements dimensions
         self.right_sidebar_width = 250
 

@@ -432,9 +432,8 @@ class ModelCrop:
         self._image_wid, self._image_hei = self._image.size
 
         # setup parameters for resizing
-        # TODO upsampling_mode and downsamplin, zoom_image will pick one
-        self.resampling_mode = Image.NEAREST
-        #  self.resampling_mode = Image.LANCZOS
+        self.upscaling_mode = Image.NEAREST
+        self.downscaling_mode = Image.LANCZOS
 
         # zoom saved in log scale, actual zoom: zoom_base**zoom_level
         self._zoom_base = sqrt(2)
@@ -529,9 +528,16 @@ class ModelCrop:
                 (self._mov_y + self.widget_hei) / zoom,
             )
 
-        # apply resize
         log.trace(f"resized_dim {resized_dim} region {region}")
-        image_res = self._image.resize(resized_dim, self.resampling_mode, region)
+
+        # decide what method to use when resizing
+        if zoom > 1:
+            resampling_mode = self.upscaling_mode
+        else:
+            resampling_mode = self.downscaling_mode
+
+        # apply resize
+        image_res = self._image.resize(resized_dim, resampling_mode, region)
         # convert the photo for tkinter
         image_res = ImageTk.PhotoImage(image_res)
         # save it as attribute of the object, not garbage collected

@@ -307,6 +307,14 @@ class FramePathInfo(tk.Frame):
             background=self.photo_list_frame.cget("background"),
         )
 
+        # TODO reimplement the whole thing: manually change the TB you show
+        # ask for new PhotoInfo when needed, so that they do not have to be all
+        # loaded; bind configure of photo_list_frame to compute how many TB
+        # have to be available; bind scroll (from the Scrollbar as well?) to a
+        # call in the model to update the list of TB, and show just them
+        # this is mainly needed because this frame can only hold a puny 1000ish
+        # photo list; that's like one week of vacation.
+
         # ScrollableFrame that holds the ThumbButtons
         self.photo_list_scrollable = ScrollableFrame(
             self.photo_list_frame,

@@ -86,6 +86,10 @@ class Controller:
         self.root.mainloop()
 
     def KeyReleased(self, event):
+        """Bind Key to functions
+
+        Using the numpad is hard: https://stackoverflow.com/q/45869902/2237151 
+        """
         keysym = event.keysym
 
         # misc
@@ -97,25 +101,22 @@ class Controller:
             self._toggle_fullscreen()
 
         # change photo
-        elif keysym == "e" or keysym == "KP_Down":  # numpad 2
+        elif keysym == "e" or keysym == "KP_2":
             self.model.moveIndexPrim("forward")
-        elif keysym == "q" or keysym == "KP_End":  # numpad 1
+        elif keysym == "q" or keysym == "KP_1":
             self.model.moveIndexPrim("backward")
-        elif keysym == "3":
-            # TODO numpad 4,5 to move echo; 0 to sync;
+        elif keysym == "3" or keysym == "KP_5":
             self.model.moveIndexEcho("forward")
-        elif keysym == "1":
+        elif keysym == "1" or keysym == "KP_4":
             self.model.moveIndexEcho("backward")
-        elif keysym == "2":
+        elif keysym == "2" or keysym == "KP_0":
             self.model.moveIndexEcho("sync")
 
         # like
-        elif keysym == "l" or keysym == "k":
-            # TODO move logic here, call likePressed('prim|echo')
-            # if the layout is not double the model will correct it
-            self.model.likePressed(keysym)
-            # todo add 3,6; now you can call likePressed('prim|echo')
-            # the model must NOT know the view, what are keysym for it?
+        elif keysym == "k" or keysym == "KP_3":
+            self.model.likePressed('prim')
+        elif keysym == "l" or keysym == "KP_6":
+            self.model.likePressed('echo')
 
         # move photo
         if keysym == "d":

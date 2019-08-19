@@ -273,12 +273,12 @@ class Model:
 
         # if the layout is not double consider the event from prim
         cur_lay_is_double = self.layout_current.get() in self._layout_is_double
-        if (not cur_lay_is_double) and which_frame == "l":
-            which_frame = "k"
+        if (not cur_lay_is_double) and which_frame == "echo":
+            which_frame = "prim"
 
-        if which_frame == "k":
+        if which_frame == "prim":
             new_pic = self.current_photo_prim.get()
-        elif which_frame == "l":
+        elif which_frame == "echo":
             new_pic = self.current_photo_echo.get()
         else:
             log.error(f"Unrecognized frame {which_frame}")

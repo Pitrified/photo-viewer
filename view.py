@@ -133,7 +133,10 @@ class FrameCrop(tk.Frame):
         # stop propagation of grid dim: A boolean argument specifies whether
         # the geometry information of the slaves will determine the size of
         # this widget.
-        self.grid_propagate(False)
+        #  self.grid_propagate(False)
+        # let the dimension propagate up: this triggers the configure event,
+        # but the size of the columns is determined by
+        # grid_columnconfigure(uniform='half')
 
     def update_image(self, data):
         """Update the image in the label

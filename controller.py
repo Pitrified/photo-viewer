@@ -188,13 +188,17 @@ class Controller:
             f"Value received '{input_folder_full}' type {type(input_folder_full)}"
         )
 
+        logui = logging.getLogger(f"UI")
         # filedialog sometimes returns an empty tuple, sometimes an empty string
         if len(input_folder_full) == 0:
             logg.info(f"Selection of input_folder cancelled")
+            #  logui.info(f"Selection of new input folder cancelled.")
             return
 
         if not isdir(input_folder_full):
-            logg.error(f"Not a valid folder: {input_folder_full}")
+            #  logg.error(f"Not a valid folder: {input_folder_full}")
+            logui.error(f"Not a valid folder: {input_folder_full}")
+            return 1
 
         logg.info(f'{format_color("Input", "spring green")} folder: {input_folder_full}')
 

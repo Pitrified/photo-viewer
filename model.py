@@ -73,7 +73,8 @@ class Model:
         old_folders = self.input_folders.get()
 
         if input_folder_full in old_folders:
-            logg.info("Folder already in input list")
+            logui = logging.getLogger(f"UI")
+            logui.warn("Selected folder already in input list.")
             return
 
         old_folders[input_folder_full] = True
@@ -179,7 +180,7 @@ class Model:
         logg.info(f"photo_info_list_active has now {len(new_photo_info_active)} items")
 
         logui = logging.getLogger('UI')
-        logui.info(f'There are now {len(new_photo_info_active)} image in the active list.')
+        logui.info(f'There are now {len(new_photo_info_active)} images in the active list.')
 
         self.photo_info_list_active.set(new_photo_info_active)
 

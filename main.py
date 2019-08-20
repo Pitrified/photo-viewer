@@ -19,7 +19,16 @@ def parse_arguments():
         "--path_input",
         type=str,
         default="img_fold1",
-        help="path to input image to use",
+        help="Path to starting folder",
+    )
+
+    parser.add_argument(
+        "-lld",
+        "--log_level_debug",
+        type=str,
+        default="INFO",
+        help="Level for the debugging logger",
+        choices=["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"],
     )
 
     # last line to parse the args
@@ -33,7 +42,7 @@ def setup_logger(logLevel="DEBUG"):
     # setup a logger for debugging purposes
     logdebug = logging.getLogger("c")
     logdebug.propagate = False
-    logLevel = "WARN"
+    #  logLevel = "WARN"
     logdebug.setLevel(logLevel)
 
     debug_console_handler = logging.StreamHandler()
@@ -121,16 +130,18 @@ def test_run(input_folder):
 
 
 def main():
-    setup_logger()
-
     args = parse_arguments()
 
     path_input = args.path_input
+    log_level_debug = args.log_level_debug
 
-    recap = f"python3 photo_main.py"
+    setup_logger(log_level_debug)
+
+    recap = f"Startup settings: python3 photo_main.py"
     recap += f" --path_input {path_input}"
+    recap += f" --log_level_debug {log_level_debug}"
 
-    logmain = logging.getLogger(f"c.{__name__}.main")
+    logmain = logging.getLogger(f"UI")
     logmain.info(recap)
 
     dir_file = abspath(dirname(__file__))

@@ -48,12 +48,12 @@ class Model:
         # how much to move the image from keyboard
         self._mov_delta = 200
 
-        # Image that holds the cropped picture
+        # ImageTk that holds the cropped picture
         self.cropped_prim = Observable(None)
         self.cropped_echo = Observable(None)
-        # MAYBE this could be a Queue to remember previous photo
-        # more precisely, Limited Size Queue where last used is put back to top
-        self._loaded_croppers = {}
+        # cache dimension for the Holder
+        self._cropper_cache_dim = 10
+        self._loaded_croppers = Holder(self._cropper_cache_dim)
         self._widget_wid = -1
         self._widget_hei = -1
 
@@ -62,6 +62,7 @@ class Model:
         self._layout_is_double = (1,)
         self.layout_current = Observable(0)
         self._old_single_layout = 0
+        # double layout to jump to when swapDoubleLayout is called
         self._basic_double_layout = 1
 
     def setOutputFolder(self, output_folder_full):
@@ -138,8 +139,7 @@ class Model:
         if new_layout in self._layout_is_double and (
             not old_layout in self._layout_is_double
         ):
-            self.setIndexEcho(self._index_prim)
-            #  self.moveIndexEcho("sync")
+            self.moveIndexEcho("sync")
 
     def swapDoubleLayout(self):
         """Go from a single to a double layout and back
@@ -157,7 +157,6 @@ class Model:
             self._old_single_layout = self.layout_current.get()
             self.setLayout(self._basic_double_layout)
             # also sync echo to prim
-            #  self.setIndexEcho(self._index_prim)
             self.moveIndexEcho("sync")
 
     def updatePhotoInfoList(self):
@@ -174,6 +173,8 @@ class Model:
         # photo_info_list_active.keys() but dict order can't be trusted so we
         # keep track here of the index
         # MAYBE the list passed to view to sort in special way
+        # TODO sort list according to metadata
+        # hopefully loading them will be fast, all will be needed to sort
         self._active_photo_list = []
 
         input_folders = self.input_folders.get()
@@ -222,10 +223,7 @@ class Model:
 
     def _is_photo(self, photo_full):
         _, photo_ext = splitext(photo_full)
-        if photo_ext in self._is_photo_ext:
-            return True
-        else:
-            return False
+        return photo_ext in self._is_photo_ext
 
     def setIndexPrim(self, index_prim):
         logg = logging.getLogger(f"c.{__class__.__name__}.setIndexPrim")
@@ -246,6 +244,7 @@ class Model:
     def seekIndexPrim(self, pic):
         logg = logging.getLogger(f"c.{__class__.__name__}.seekIndexPrim")
         logg.info(f"Seeking index prim")
+        # MAYBE the pic is not in _active_photo_list... very weird, add guards?
         self._index_prim = self._active_photo_list.index(pic)
         self._update_photo_prim(pic)
 
@@ -260,17 +259,16 @@ class Model:
         logg.info(f"Updating photo prim, index {self._index_prim}")
         self.current_photo_prim.set(pic_prim)
 
-        self._load_pic(pic_prim)
+        #  self._load_pic(pic_prim)
 
         # resets zoom level and pos for the new photo; can only be done AFTER
         # mainloop starts, during initialization Model.doResize has not been
         # called yet, and the widget dimensions are still undefined;
         # the first time reset_image will be called by the Configure event later
         if self._widget_wid != -1:
-            self._loaded_croppers[pic_prim].reset_image(
-                self._widget_wid, self._widget_hei
-            )
-            self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
+            crop_prim = self._loaded_croppers.get_cropper(pic_prim)
+            crop_prim.reset_image(self._widget_wid, self._widget_hei)
+            self.cropped_prim.set(crop_prim.image_res)
 
             # if the layout is double, copy the new zoom level to echo pic
             if self.layout_current.get() in self._layout_is_double:
@@ -310,8 +308,6 @@ class Model:
         logg = logging.getLogger(f"c.{__class__.__name__}._update_photo_echo")
         logg.info(f"Updating photo echo, index {self._index_echo}")
         self.current_photo_echo.set(pic_echo)
-
-        self._load_pic(pic_echo)
 
         if self._widget_wid != -1:
             self._cloneParams()
@@ -371,19 +367,15 @@ class Model:
         # get the current_photo_prim full name
         pic_prim = self.current_photo_prim.get()
 
-        # MAYBE this loading is never useful
-        self._load_pic(pic_prim)
-
-        # reset the image with the new widget dimension
-        self._loaded_croppers[pic_prim].reset_image(self._widget_wid, self._widget_hei)
+        # reset the image with the new widget dimension:
+        # get the cropper for the image
+        crop_prim = self._loaded_croppers.get_cropper(pic_prim)
+        # reset the image zoom/pos
+        crop_prim.reset_image(self._widget_wid, self._widget_hei)
         # update the Observable
-        self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
+        self.cropped_prim.set(crop_prim.image_res)
 
         if self.layout_current.get() in self._layout_is_double:
-            # get current echo pic
-            pic_echo = self.current_photo_echo.get()
-            # load if needed
-            self._load_pic(pic_echo)
             # clone params to echo
             self._cloneParams()
 
@@ -393,10 +385,12 @@ class Model:
         logg.trace(f"Zooming in direction {direction}")
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
+        # get the cropper for the image
+        crop_prim = self._loaded_croppers.get_cropper(pic_prim)
         # zoom the image
-        self._loaded_croppers[pic_prim].zoom_image(direction, rel_x, rel_y)
-        # update prim observable
-        self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
+        crop_prim.zoom_image(direction, rel_x, rel_y)
+        # update the Observable
+        self.cropped_prim.set(crop_prim.image_res)
 
         if self.layout_current.get() in self._layout_is_double:
             self._cloneParams()
@@ -442,11 +436,13 @@ class Model:
         logg.trace(f"Moving delta {delta_x} {delta_y}")
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
+        # get the cropper for the image
+        crop_prim = self._loaded_croppers.get_cropper(pic_prim)
         # move the image
-        self._loaded_croppers[pic_prim].move_image(delta_x, delta_y)
-        # update prim observable
-        logg.trace("Updating prim observable")
-        self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
+        crop_prim.move_image(delta_x, delta_y)
+        # update the Observable
+        self.cropped_prim.set(crop_prim.image_res)
+
         # if double, move echo as well
         if self.layout_current.get() in self._layout_is_double:
             self._cloneParams()
@@ -459,22 +455,23 @@ class Model:
         logg = logging.getLogger(f"c.{__class__.__name__}._cloneParams")
         #  logg.setLevel("TRACE")
         logg.trace(f"Cloning params")
+
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
+        # get the cropper for the image
+        crop_prim = self._loaded_croppers.get_cropper(pic_prim)
+
         # get current echo pic
         pic_echo = self.current_photo_echo.get()
-        # get params from prim
-        params = self._loaded_croppers[pic_prim].get_params()
-        # copy them in echo
-        self._loaded_croppers[pic_echo].load_params(params)
-        # update echo observable
-        self.cropped_echo.set(self._loaded_croppers[pic_echo].image_res)
+        # get the cropper for the image
+        crop_echo = self._loaded_croppers.get_cropper(pic_echo)
 
-    def _load_pic(self, pic):
-        """Load the pic in _loaded_croppers if needed
-        """
-        if not pic in self._loaded_croppers:
-            self._loaded_croppers[pic] = ModelCrop(pic)
+        # get params from prim
+        params = crop_prim.get_params()
+        # copy them in echo
+        crop_echo.load_params(params)
+        # update echo observable
+        self.cropped_echo.set(crop_echo.image_res)
 
 
 class ModelCrop:
@@ -754,3 +751,35 @@ class ModelCrop:
                 self._mov_x = zoom_wid - self.widget_wid
             if self._mov_y + self.widget_hei > zoom_hei:
                 self._mov_y = zoom_hei - self.widget_hei
+
+
+class Holder:
+    """Basic interface for a Holder, that might work in the future as a LRU cache
+
+    The implementation will be a dict for now
+    """
+
+    def __init__(self, cache_dim):
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info("Start init")
+
+        self._loaded_croppers = {}
+
+    def get_cropper(self, image_name):
+        """Return the requested cropper, if not loaded, create it on the fly
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}.get_cropper")
+        logg.trace("Getting cropper")
+
+        if not image_name in self._loaded_croppers:
+            self._load_cropper(image_name)
+
+        return self._loaded_croppers[image_name]
+
+    def _load_cropper(self, image_name):
+        """Load the cropper
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}._load_cropper")
+        logg.info("Loading cropper")
+
+        self._loaded_croppers[image_name] = ModelCrop(image_name)

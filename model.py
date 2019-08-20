@@ -58,6 +58,8 @@ class Model:
         self._layout_tot = 5
         self._layout_is_double = (1,)
         self.layout_current = Observable(0)
+        self._old_single_layout = 0
+        self._basic_double_layout = 1
 
     def setOutputFolder(self, output_folder_full):
         log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
@@ -115,6 +117,26 @@ class Model:
             not old_layout in self._layout_is_double
         ):
             self.setIndexEcho(self._index_prim)
+            #  self.moveIndexEcho("sync")
+
+    def swapDoubleLayout(self):
+        """Go from a single to a double layout and back
+
+        Save the current one if it's single, and go back to that
+        """
+        log = logging.getLogger(f"c.{__class__.__name__}.swapDoubleLayout")
+        #  log.setLevel("TRACE")
+        log.info("Swapping layout")
+        # the layout is double: go back to saved single layout
+        if self.layout_current.get() in self._layout_is_double:
+            self.setLayout(self._old_single_layout)
+        # the layout is single: save it and go to double
+        else:
+            self._old_single_layout = self.layout_current.get()
+            self.setLayout(self._basic_double_layout)
+            # also sync echo to prim
+            #  self.setIndexEcho(self._index_prim)
+            self.moveIndexEcho("sync")
 
     def updatePhotoInfoList(self):
         """Update photo_info_list_active, load new photos and relative info
@@ -206,6 +228,8 @@ class Model:
         - cropped_prim
         """
         log = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
+        #  log.setLevel("TRACE")
+        log.info(f"Updating photo prim, index {self._index_prim}")
         self.current_photo_prim.set(pic_prim)
 
         self._load_pic(pic_prim)
@@ -336,6 +360,9 @@ class Model:
             self._cloneParams()
 
     def zoomImage(self, direction, rel_x=-1, rel_y=-1):
+        log = logging.getLogger(f"c.{__class__.__name__}.zoomImage")
+        #  log.setLevel("TRACE")
+        log.trace(f"Zooming in direction {direction}")
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
         # zoom the image
@@ -350,7 +377,7 @@ class Model:
         """Move image in the specified direction of self._mov_delta
         """
         log = logging.getLogger(f"c.{__class__.__name__}.moveImageDirection")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.trace(f"Moving in direction {direction}")
         if direction == "right":
             self._moveImage(self._mov_delta, 0)
@@ -451,6 +478,9 @@ class ModelCrop:
         _image_wid * ( zoom_base ** zoom_level ) = widget_wid
         and analogously for hei
         """
+        #  log = logging.getLogger(f"c.{__class__.__name__}.reset_image")
+        #  log.setLevel("TRACE")
+        #  log.trace(f"Resetting image")
         if widget_wid != -1:
             self.widget_wid = widget_wid
             self.widget_hei = widget_hei
@@ -479,7 +509,7 @@ class ModelCrop:
         there is no need for x_pos and place
         """
         log = logging.getLogger(f"c.{__class__.__name__}.update_crop")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.trace(f"Updating crop zoom {self._zoom_level:.4f}")
 
         # zoom in linear scale

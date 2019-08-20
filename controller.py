@@ -74,7 +74,7 @@ class Controller:
         self.model.setOutputFolder("Not set")
         self.model.addInputFolder(input_folder)
         # set starting layout
-        self.model.setLayout(1)
+        self.model.setLayout(0)
         self.model.setIndexPrim(0)
 
     def run(self):
@@ -95,6 +95,8 @@ class Controller:
         # misc
         if keysym == "Escape":
             self.view.exit()
+        elif keysym == "F4":
+            self.model.swapDoubleLayout()
         elif keysym == "F5":
             self.model.cycleLayout()
         elif keysym == "F11":
@@ -114,9 +116,9 @@ class Controller:
 
         # like
         elif keysym == "k" or keysym == "KP_3":
-            self.model.likePressed('prim')
+            self.model.likePressed("prim")
         elif keysym == "l" or keysym == "KP_6":
-            self.model.likePressed('echo')
+            self.model.likePressed("echo")
 
         # move photo
         if keysym == "d":
@@ -238,7 +240,7 @@ class Controller:
         self.model.seekIndexPrim(pic)
 
     def doubleclikedThumbbtnSelection(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
+        log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnSelection")
         #  log.setLevel("TRACE")
         log.info(f"doublecliked Thumbbtn selection")
         pic = self.view.frame_path_info.selection_doubleclicked
@@ -247,7 +249,7 @@ class Controller:
 
     def frameResized(self, event):
         log = logging.getLogger(f"c.{__class__.__name__}.frameResized")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.info(f"Resized frame_crop_prim")
         widget_wid = event.widget.winfo_width()
         widget_hei = event.widget.winfo_height()
@@ -256,13 +258,13 @@ class Controller:
 
     def updatedCroppedPrim(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.trace(f"New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
 
     def updatedCroppedEcho(self, data):
         log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedEcho")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.trace(f"New value received for cropped_echo")
         self.view.frame_crop_echo.update_image(data)
 

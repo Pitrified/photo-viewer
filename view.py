@@ -44,8 +44,8 @@ class View:
         self.right_sidebar_width = 250
 
     def layout_set(self, lay_num):
-        log = logging.getLogger(f"c.{__class__.__name__}.l_set")
-        log.debug(f"Setting layout {lay_num}")
+        log = logging.getLogger(f"c.{__class__.__name__}.layout_set")
+        log.info(f"Setting layout {lay_num}")
 
         self.layout_reset()
         if lay_num == 0:
@@ -60,7 +60,7 @@ class View:
             self.layout_imp()
 
     def layout_reset(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.l_reset")
+        log = logging.getLogger(f"c.{__class__.__name__}.layout_reset")
         #  log.setLevel("TRACE")
         log.trace("Reset layout")
 
@@ -116,6 +116,8 @@ class View:
 class FrameCrop(tk.Frame):
     def __init__(self, parent, back_col, *args, **kwargs):
         super().__init__(parent, background=back_col, *args, **kwargs)
+        log = logging.getLogger(f"c.{__class__.__name__}.init")
+        log.info(f"Start init")
 
         # setup grid for the frame
         self.grid_rowconfigure(0, weight=1)
@@ -396,7 +398,7 @@ class FramePathInfo(tk.Frame):
 
     def update_current_photo_prim(self, pic):
         log = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
-        #  log.setLevel("TRACE")
+        log.setLevel("TRACE")
         log.trace("Update current_photo_prim")
         if self.current_photo_prim != "":
             self.photo_list_thumbbtn[self.current_photo_prim].set_back_col_mode("FIRST")

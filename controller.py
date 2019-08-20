@@ -12,9 +12,9 @@ from utils import format_color
 
 class Controller:
     def __init__(self, input_folder):
-        log = logging.getLogger(f"c.{__class__.__name__}.init")
-        log.setLevel("TRACE")
-        log.info("Start init")
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        #  logg.setLevel("TRACE")
+        logg.info("Start init")
 
         self.root = tk.Tk()
         self._fullscreen_state = False
@@ -80,8 +80,8 @@ class Controller:
     def run(self):
         """Start the app and run the mainloop
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.run")
-        log.info("Running controller\n")
+        logg = logging.getLogger(f"c.{__class__.__name__}.run")
+        logg.info("Running controller\n")
 
         self.root.mainloop()
 
@@ -147,179 +147,179 @@ class Controller:
             self.createEventMouse("down")
 
     def setOutputFolder(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
-        #  log.setLevel("TRACE")
-        log.info(f"Obtain new value")
+        logg = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Obtain new value")
 
         output_folder_full = tk.filedialog.askdirectory()
-        log.trace(
+        logg.trace(
             f"Value received '{output_folder_full}' type {type(output_folder_full)}"
         )
 
         # filedialog sometimes returns an empty tuple, sometimes an empty string
         # if isinstance(output_folder_full, tuple) or output_folder_full == '':
         if len(output_folder_full) == 0:
-            log.info(f"Selection of output_folder cancelled")
+            logg.info(f"Selection of output_folder cancelled")
             return
 
-        log.info(
+        logg.info(
             f'{format_color("Output", "spring green")} folder: {output_folder_full}'
         )
 
         # create the folder if it doesn't exist
         if not isdir(output_folder_full):
-            log.warn(f"Not a folder '{output_folder_full}', creating it")
+            logg.warn(f"Not a folder '{output_folder_full}', creating it")
             makedirs(output_folder_full)
 
         self.model.setOutputFolder(output_folder_full)
 
     def updatedOutputFolder(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedOutputFolder")
-        log.info(f"New value '{data}'")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedOutputFolder")
+        logg.info(f"New value '{data}'")
         self.view.frame_path_info.update_output_frame(data)
 
     def addInputFolder(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
-        #  log.setLevel("TRACE")
-        log.info(f"Add an input folder")
+        logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Add an input folder")
 
         input_folder_full = tk.filedialog.askdirectory()
-        log.trace(
+        logg.trace(
             f"Value received '{input_folder_full}' type {type(input_folder_full)}"
         )
 
         # filedialog sometimes returns an empty tuple, sometimes an empty string
         if len(input_folder_full) == 0:
-            log.info(f"Selection of input_folder cancelled")
+            logg.info(f"Selection of input_folder cancelled")
             return
 
         if not isdir(input_folder_full):
-            log.error(f"Not a valid folder: {input_folder_full}")
+            logg.error(f"Not a valid folder: {input_folder_full}")
 
-        log.info(f'{format_color("Input", "spring green")} folder: {input_folder_full}')
+        logg.info(f'{format_color("Input", "spring green")} folder: {input_folder_full}')
 
         self.model.addInputFolder(input_folder_full)
 
     def updatedInputFolder(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedInputFolder")
-        log.info(f"New values received for input_folders")  # {data}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedInputFolder")
+        logg.info(f"New values received for input_folders")  # {data}")
         self.view.frame_path_info.update_input_frame(data)
 
     def toggledInputFolder(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.toggledinputfolder")
-        log.info(f"toggled input folder")
+        logg = logging.getLogger(f"c.{__class__.__name__}.toggledinputfolder")
+        logg.info(f"toggled input folder")
         state = self.view.frame_path_info.checkbtn_input_state
         self.model.toggleInputFolder(state)
 
     def updatedCurrentLayout(self, lay_num):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentLayout")
-        log.info(f"Updated current layout")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentLayout")
+        logg.info(f"Updated current layout")
         self.view.layout_set(lay_num)
 
     def updatedPhotoList(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
-        log.info(f"New values received for photo_info_list_active")  # {data}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
+        logg.info(f"New values received for photo_info_list_active")  # {data}")
         self.view.frame_path_info.update_photo_list(data)
 
     def updatedCurrentPhotoPrim(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
-        log.info(f"New value received for current_photo_prim")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
+        logg.info(f"New value received for current_photo_prim")
         self.view.frame_path_info.update_current_photo_prim(data)
 
     def updatedSelectionList(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedSelectionList")
-        log.info(f"New values received for selection_list")  # {data}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedSelectionList")
+        logg.info(f"New values received for selection_list")  # {data}")
         self.view.frame_path_info.update_selection_list(data)
 
     def doubleclikedThumbbtnPhoto(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
-        #  log.setLevel("TRACE")
-        log.info(f"doublecliked Thumbbtn photo")
+        logg = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
+        #  logg.setLevel("TRACE")
+        logg.info(f"doublecliked Thumbbtn photo")
         pic = self.view.frame_path_info.photo_doubleclicked
-        log.trace(f"On pic {pic}")
+        logg.trace(f"On pic {pic}")
         self.model.seekIndexPrim(pic)
 
     def doubleclikedThumbbtnSelection(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnSelection")
-        #  log.setLevel("TRACE")
-        log.info(f"doublecliked Thumbbtn selection")
+        logg = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnSelection")
+        #  logg.setLevel("TRACE")
+        logg.info(f"doublecliked Thumbbtn selection")
         pic = self.view.frame_path_info.selection_doubleclicked
-        log.trace(f"On pic {pic}")
+        logg.trace(f"On pic {pic}")
         self.model.toggleSelectionPic(pic)
 
     def frameResized(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.frameResized")
-        log.setLevel("TRACE")
-        log.info(f"Resized frame_crop_prim")
+        logg = logging.getLogger(f"c.{__class__.__name__}.frameResized")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Resized frame_crop_prim")
         widget_wid = event.widget.winfo_width()
         widget_hei = event.widget.winfo_height()
-        log.trace(f"width {widget_wid} height {widget_hei}")
+        logg.trace(f"width {widget_wid} height {widget_hei}")
         self.model.doResize(widget_wid, widget_hei)
 
     def updatedCroppedPrim(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
-        log.setLevel("TRACE")
-        log.trace(f"New value received for cropped_prim")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
 
     def updatedCroppedEcho(self, data):
-        log = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedEcho")
-        log.setLevel("TRACE")
-        log.trace(f"New value received for cropped_echo")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedEcho")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"New value received for cropped_echo")
         self.view.frame_crop_echo.update_image(data)
 
     def scrolledMouseImageLabel(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")
-        #  log.setLevel("TRACE")
-        log.info(f"Scrolled mouse on image")
-        log.trace(f"widget {event.widget} x {event.x} y {event.y}")
-        log.trace(f"num {event.num} delta {event.delta}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Scrolled mouse on image")
+        logg.trace(f"widget {event.widget} x {event.x} y {event.y}")
+        logg.trace(f"num {event.num} delta {event.delta}")
         if event.num == 4 or event.delta == 120 or event.delta == 1:
             direction = "in"
         elif event.num == 5 or event.delta == -120 or event.delta == -1:
             direction = "out"
         else:
-            log.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
+            logg.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
         self.model.zoomImage(direction, event.x, event.y)
 
     def scrolledMouseImageFrame(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageFrame")
-        #  log.setLevel("TRACE")
-        log.info(f"Scrolled mouse on image frame")
+        logg = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageFrame")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Scrolled mouse on image frame")
         if event.num == 4 or event.delta == 120 or event.delta == 1:
             direction = "in"
         elif event.num == 5 or event.delta == -120 or event.delta == -1:
             direction = "out"
         else:
-            log.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
+            logg.error(f"Unrecognized mouse event num {event.num} delta {event.delta}")
         self.model.zoomImage(direction)
 
     def clickedImage(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.clickedImage")
-        #  log.setLevel("TRACE")
-        log.info(f"Clicked mouse on image")
+        logg = logging.getLogger(f"c.{__class__.__name__}.clickedImage")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Clicked mouse on image")
         self.model.saveMousePos(event.x, event.y)
 
     def movedImageMouse(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.movedImageMouse")
-        #  log.setLevel("TRACE")
-        log.trace(f"Moved mouse on image")
+        logg = logging.getLogger(f"c.{__class__.__name__}.movedImageMouse")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Moved mouse on image")
         self.model.moveImageMouse(event.x, event.y)
 
     def _toggle_fullscreen(self):
-        log = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")
-        log.setLevel("TRACE")
+        logg = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")
+        #  logg.setLevel("TRACE")
         self._fullscreen_state = not self._fullscreen_state
-        log.trace(f"Toggling, is {self._fullscreen_state}")
+        logg.trace(f"Toggling, is {self._fullscreen_state}")
         self.root.attributes("-fullscreen", self._fullscreen_state)
 
     def debug(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.debug")
-        log.info(f"Useful info\n\n")  # {data}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.debug")
+        logg.info(f"Useful info\n\n")  # {data}")
 
     def createEventMouse(self, direction):
-        log = logging.getLogger(f"c.{__class__.__name__}.createEventMouse")
-        log.info(f"Creating FakeEvent mouse {direction}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.createEventMouse")
+        logg.info(f"Creating FakeEvent mouse {direction}")
         fe = FakeEvent()
         if direction == "up":
             fe.num = 4

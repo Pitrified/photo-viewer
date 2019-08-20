@@ -17,8 +17,8 @@ from utils import format_color
 
 class Model:
     def __init__(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.init")
-        log.info("Start init")
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info("Start init")
 
         self.output_folder = Observable("Not set not known")
         self.input_folders = Observable({})
@@ -62,18 +62,18 @@ class Model:
         self._basic_double_layout = 1
 
     def setOutputFolder(self, output_folder_full):
-        log = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
-        log.info(f"Setting output_folder to '{output_folder_full}'")
+        logg = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
+        logg.info(f"Setting output_folder to '{output_folder_full}'")
         self.output_folder.set(output_folder_full)
 
     def addInputFolder(self, input_folder_full):
-        log = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
-        log.info(f"Adding new input_folder '{input_folder_full}'")
+        logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
+        logg.info(f"Adding new input_folder '{input_folder_full}'")
 
         old_folders = self.input_folders.get()
 
         if input_folder_full in old_folders:
-            log.info("Folder already in input list")
+            logg.info("Folder already in input list")
             return
 
         old_folders[input_folder_full] = True
@@ -82,32 +82,33 @@ class Model:
         self.updatePhotoInfoList()
 
     def toggleInputFolder(self, state):
-        log = logging.getLogger(f"c.{__class__.__name__}.toggleInputFolder")
-        #  log.setLevel("TRACE")
-        log.info(f"Setting new input_folder state")
+        logg = logging.getLogger(f"c.{__class__.__name__}.toggleInputFolder")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Setting new input_folder state")
 
         state = {x: state[x].get() for x in state}
-        log.trace(f"state {state}")
+        logg.trace(f"state {state}")
 
         if sum((state[x] for x in state)) > 0:
             # at least one still toggled
             self.input_folders.set(state)
         else:
             # no folders toggled, revert to previous state
-            log.warn("At least one input folder has to be selected")
+            logui = logging.getLogger('UI')
+            logui.warn("At least one input folder has to be selected.")
             self.input_folders._docallbacks()
 
         self.updatePhotoInfoList()
 
     def setLayout(self, lay_num):
-        log = logging.getLogger(f"c.{__class__.__name__}.setLayout")
-        log.info(f"Setting layout_current to '{lay_num}'")
+        logg = logging.getLogger(f"c.{__class__.__name__}.setLayout")
+        logg.info(f"Setting layout_current to '{lay_num}'")
         self.layout_current.set(lay_num)
 
     def cycleLayout(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.cycleLayout")
-        #  log.setLevel("TRACE")
-        log.info("Cycling layout")
+        logg = logging.getLogger(f"c.{__class__.__name__}.cycleLayout")
+        #  logg.setLevel("TRACE")
+        logg.info("Cycling layout")
         old_layout = self.layout_current.get()
         new_layout = (old_layout + 1) % self._layout_tot
         self.layout_current.set(new_layout)
@@ -124,9 +125,9 @@ class Model:
 
         Save the current one if it's single, and go back to that
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.swapDoubleLayout")
-        #  log.setLevel("TRACE")
-        log.info("Swapping layout")
+        logg = logging.getLogger(f"c.{__class__.__name__}.swapDoubleLayout")
+        #  logg.setLevel("TRACE")
+        logg.info("Swapping layout")
         # the layout is double: go back to saved single layout
         if self.layout_current.get() in self._layout_is_double:
             self.setLayout(self._old_single_layout)
@@ -144,9 +145,9 @@ class Model:
         photo_info_list_active is actually a dict of PhotoInfo objects
         Has to load the thumbnail and metadata
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.updatePhotoInfoList")
-        #  log.setLevel("TRACE")
-        log.info(f"Update photo_info_list_active")
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatePhotoInfoList")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Update photo_info_list_active")
 
         # list of filenames of active photos: ideally parallel to
         # photo_info_list_active.keys() but dict order can't be trusted so we
@@ -175,7 +176,11 @@ class Model:
             # collect the active PhotoInfo object in the new dict
             new_photo_info_active[photo_full] = self._photo_info_list_all[photo_full]
 
-        log.info(f"photo_info_list_active has now {len(new_photo_info_active)} items")
+        logg.info(f"photo_info_list_active has now {len(new_photo_info_active)} items")
+
+        logui = logging.getLogger('UI')
+        logui.info(f'There are now {len(new_photo_info_active)} image in the active list.')
+
         self.photo_info_list_active.set(new_photo_info_active)
 
         current_photo_prim = self.current_photo_prim.get()
@@ -200,14 +205,14 @@ class Model:
             return False
 
     def setIndexPrim(self, index_prim):
-        log = logging.getLogger(f"c.{__class__.__name__}.setIndexPrim")
-        log.info(f"Setting index_prim to {index_prim}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.setIndexPrim")
+        logg.info(f"Setting index_prim to {index_prim}")
         self._index_prim = index_prim
         self._update_photo_prim(self._active_photo_list[index_prim])
 
     def moveIndexPrim(self, direction):
-        log = logging.getLogger(f"c.{__class__.__name__}.moveIndexPrim")
-        log.info(f"Moving index prim {direction}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.moveIndexPrim")
+        logg.info(f"Moving index prim {direction}")
         if direction == "forward":
             new_index_prim = self._index_prim + 1
         elif direction == "backward":
@@ -216,8 +221,8 @@ class Model:
         self.setIndexPrim(new_index_prim)
 
     def seekIndexPrim(self, pic):
-        log = logging.getLogger(f"c.{__class__.__name__}.seekIndexPrim")
-        log.info(f"Seeking index prim")
+        logg = logging.getLogger(f"c.{__class__.__name__}.seekIndexPrim")
+        logg.info(f"Seeking index prim")
         self._index_prim = self._active_photo_list.index(pic)
         self._update_photo_prim(pic)
 
@@ -227,9 +232,9 @@ class Model:
         - current_photo_prim
         - cropped_prim
         """
-        log = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
-        #  log.setLevel("TRACE")
-        log.info(f"Updating photo prim, index {self._index_prim}")
+        logg = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Updating photo prim, index {self._index_prim}")
         self.current_photo_prim.set(pic_prim)
 
         self._load_pic(pic_prim)
@@ -249,17 +254,17 @@ class Model:
                 self._cloneParams()
 
     def setIndexEcho(self, index_echo):
-        log = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
-        log.info(f"Setting index_echo to {index_echo}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
+        logg.info(f"Setting index_echo to {index_echo}")
         self._index_echo = index_echo
         self._update_photo_echo(self._active_photo_list[index_echo])
 
     def moveIndexEcho(self, direction):
-        log = logging.getLogger(f"c.{__class__.__name__}.moveIndexEcho")
-        log.info(f"Moving index echo {direction}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.moveIndexEcho")
+        logg.info(f"Moving index echo {direction}")
 
         if not self.layout_current.get() in self._layout_is_double:
-            log.warn("Current layout is not double, can't move index echo")
+            logg.warn("Current layout is not double, can't move index echo")
             return
 
         if direction == "forward":
@@ -279,8 +284,8 @@ class Model:
         - cropped_echo
         If _index_echo == _index_prim do not recompute image crop
         """
-        log = logging.getLogger(f"c.{__class__.__name__}._update_photo_echo")
-        log.info(f"Updating photo echo, index {self._index_echo}")
+        logg = logging.getLogger(f"c.{__class__.__name__}._update_photo_echo")
+        logg.info(f"Updating photo echo, index {self._index_echo}")
         self.current_photo_echo.set(pic_echo)
 
         self._load_pic(pic_echo)
@@ -291,9 +296,9 @@ class Model:
     def likePressed(self, which_frame):
         """Update selection_list accordingly
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.likePressed")
-        #  log.setLevel("TRACE")
-        log.info(f"Like pressed on {which_frame}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.likePressed")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Like pressed on {which_frame}")
 
         # if the layout is not double consider the event from prim
         cur_lay_is_double = self.layout_current.get() in self._layout_is_double
@@ -305,7 +310,7 @@ class Model:
         elif which_frame == "echo":
             new_pic = self.current_photo_echo.get()
         else:
-            log.error(f"Unrecognized frame {which_frame}")
+            logg.error(f"Unrecognized frame {which_frame}")
 
         old_selection_list = self.selection_list.get()
 
@@ -319,9 +324,9 @@ class Model:
         self.selection_list.set(old_selection_list)
 
     def toggleSelectionPic(self, pic):
-        log = logging.getLogger(f"c.{__class__.__name__}.toggleSelectionPic")
-        #  log.setLevel("TRACE")
-        log.info(f"Toggling selection_list {pic}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.toggleSelectionPic")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Toggling selection_list {pic}")
 
         old_selection_list = self.selection_list.get()
         old_selection_list[pic][1] = not old_selection_list[pic][1]
@@ -333,9 +338,9 @@ class Model:
         Also saves Label dimension, so that when the photo is changed, the new
         crop can be computed
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.doResize")
-        #  log.setLevel("TRACE")
-        log.info("Do resize")
+        logg = logging.getLogger(f"c.{__class__.__name__}.doResize")
+        #  logg.setLevel("TRACE")
+        logg.info("Do resize")
 
         self._widget_wid = widget_wid
         self._widget_hei = widget_hei
@@ -360,9 +365,9 @@ class Model:
             self._cloneParams()
 
     def zoomImage(self, direction, rel_x=-1, rel_y=-1):
-        log = logging.getLogger(f"c.{__class__.__name__}.zoomImage")
-        #  log.setLevel("TRACE")
-        log.trace(f"Zooming in direction {direction}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.zoomImage")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Zooming in direction {direction}")
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
         # zoom the image
@@ -376,9 +381,9 @@ class Model:
     def moveImageDirection(self, direction):
         """Move image in the specified direction of self._mov_delta
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.moveImageDirection")
-        log.setLevel("TRACE")
-        log.trace(f"Moving in direction {direction}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.moveImageDirection")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Moving in direction {direction}")
         if direction == "right":
             self._moveImage(self._mov_delta, 0)
         elif direction == "left":
@@ -391,9 +396,9 @@ class Model:
     def moveImageMouse(self, mouse_x, mouse_y):
         """Move the image to follow the mouse
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.moveImageMouse")
-        #  log.setLevel("TRACE")
-        log.trace(f"Moving mouse")
+        logg = logging.getLogger(f"c.{__class__.__name__}.moveImageMouse")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Moving mouse")
         delta_x = self._old_mouse_x - mouse_x
         delta_y = self._old_mouse_y - mouse_y
         self._old_mouse_x = mouse_x
@@ -409,15 +414,15 @@ class Model:
     def _moveImage(self, delta_x, delta_y):
         """Actually move image of specified delta
         """
-        log = logging.getLogger(f"c.{__class__.__name__}._moveImage")
-        #  log.setLevel("TRACE")
-        log.trace(f"Moving delta {delta_x} {delta_y}")
+        logg = logging.getLogger(f"c.{__class__.__name__}._moveImage")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Moving delta {delta_x} {delta_y}")
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
         # move the image
         self._loaded_croppers[pic_prim].move_image(delta_x, delta_y)
         # update prim observable
-        log.trace("Updating prim observable")
+        logg.trace("Updating prim observable")
         self.cropped_prim.set(self._loaded_croppers[pic_prim].image_res)
         # if double, move echo as well
         if self.layout_current.get() in self._layout_is_double:
@@ -428,9 +433,9 @@ class Model:
         """
         # MAYBE the check for doubleness of the layout can be done here
         # cloning only makes sense if it's double after all
-        log = logging.getLogger(f"c.{__class__.__name__}._cloneParams")
-        #  log.setLevel("TRACE")
-        log.trace(f"Cloning params")
+        logg = logging.getLogger(f"c.{__class__.__name__}._cloneParams")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Cloning params")
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
         # get current echo pic
@@ -451,8 +456,8 @@ class Model:
 
 class ModelCrop:
     def __init__(self, photo_name_full):
-        log = logging.getLogger(f"c.{__class__.__name__}.init")
-        log.info("Start init")
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info("Start init")
 
         self._photo_name_full = photo_name_full
         self._image = Image.open(self._photo_name_full)
@@ -462,7 +467,7 @@ class ModelCrop:
         self.upscaling_mode = Image.NEAREST
         self.downscaling_mode = Image.LANCZOS
 
-        # zoom saved in log scale, actual zoom: zoom_base**zoom_level
+        # zoom saved in logg scale, actual zoom: zoom_base**zoom_level
         self._zoom_base = sqrt(2)
         self._zoom_level = None
 
@@ -478,9 +483,9 @@ class ModelCrop:
         _image_wid * ( zoom_base ** zoom_level ) = widget_wid
         and analogously for hei
         """
-        #  log = logging.getLogger(f"c.{__class__.__name__}.reset_image")
-        #  log.setLevel("TRACE")
-        #  log.trace(f"Resetting image")
+        logg = logging.getLogger(f"c.{__class__.__name__}.reset_image")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Resetting image")
         if widget_wid != -1:
             self.widget_wid = widget_wid
             self.widget_hei = widget_hei
@@ -508,9 +513,9 @@ class ModelCrop:
         The Label fills the frame, and the image is centered in the Label,
         there is no need for x_pos and place
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.update_crop")
-        log.setLevel("TRACE")
-        log.trace(f"Updating crop zoom {self._zoom_level:.4f}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_crop")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Updating crop zoom {self._zoom_level:.4f}")
 
         # zoom in linear scale
         zoom = self._zoom_base ** self._zoom_level
@@ -558,7 +563,7 @@ class ModelCrop:
                 (self._mov_y + self.widget_hei) / zoom,
             )
 
-        log.trace(f"resized_dim {resized_dim} region {region}")
+        logg.trace(f"resized_dim {resized_dim} region {region}")
 
         # decide what method to use when resizing
         if zoom > 1:
@@ -576,9 +581,9 @@ class ModelCrop:
     def zoom_image(self, direction, rel_x=-1, rel_y=-1):
         """Change zoom level, keep (rel_x, rel_y) still
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.zoom_image")
-        #  log.setLevel("TRACE")
-        log.info(f"Zooming image {direction}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.zoom_image")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Zooming image {direction}")
 
         old_zoom = self._zoom_base ** self._zoom_level
         old_zoom_wid = self._image_wid * old_zoom
@@ -592,17 +597,17 @@ class ModelCrop:
             self.reset_image()
             return 0
         else:
-            log.error(f"Unrecognized zooming direction {direction}")
+            logg.error(f"Unrecognized zooming direction {direction}")
             return 1
 
         new_zoom = self._zoom_base ** self._zoom_level
         new_zoom_wid = self._image_wid * new_zoom
         new_zoom_hei = self._image_hei * new_zoom
-        log.trace(f"old_zoom {old_zoom} new_zoom {new_zoom}")
+        logg.trace(f"old_zoom {old_zoom} new_zoom {new_zoom}")
         recap = f"image ({self._image_wid}, {self._image_hei})"
         recap += f" old_zoom ({old_zoom_wid}, {old_zoom_hei})"
         recap += f" new_zoom ({new_zoom_wid}, {new_zoom_hei})"
-        log.trace(recap)
+        logg.trace(recap)
 
         # find the center of the photo on the screen if not set
         if rel_x == -1 or rel_y == -1:
@@ -620,15 +625,15 @@ class ModelCrop:
                 rel_y = self.widget_hei / 2
         recap = f"rel_x {rel_x} rel_y {rel_y}"
         recap += f" widget ({self.widget_wid}, {self.widget_hei})"
-        log.trace(recap)
+        logg.trace(recap)
         recap = f"mov_x/old_zoom {self._mov_x / old_zoom}"
         recap += f" mov_x/new_zoom {self._mov_x / new_zoom}"
         recap += f" rel_x/old_zoom {rel_x / old_zoom}"
         recap += f" rel_x/new_zoom {rel_x / new_zoom}"
-        log.trace(recap)
+        logg.trace(recap)
         recap = f"(mov_x+rel_x)*new_z/old_z {(self._mov_x+rel_x)*new_zoom/old_zoom}"
         recap += f" (mov_y+rel_y)*new_z/old_z {(self._mov_y+rel_y)*new_zoom/old_zoom}"
-        log.trace(recap)
+        logg.trace(recap)
 
         # source of hell was that the formula *is* right, but sometimes to keep
         # a point fixed you need *negative* mov_x, implemented by moving the
@@ -638,26 +643,26 @@ class ModelCrop:
         new_mov_y = (self._mov_y + rel_y) * new_zoom / old_zoom - rel_y
 
         if new_zoom_wid < self.widget_wid and new_zoom_hei < self.widget_hei:
-            log.trace(f'new_zoom photo {format_color("smaller", "green")} than frame')
+            logg.trace(f'new_zoom photo {format_color("smaller", "green")} than frame')
             self._mov_x = 0
             self._mov_y = 0
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei < self.widget_hei:
-            log.trace(f'new_zoom photo {format_color("wider", "green")} than frame')
+            logg.trace(f'new_zoom photo {format_color("wider", "green")} than frame')
             self._mov_x = new_mov_x
             self._mov_y = 0
         elif new_zoom_wid < self.widget_wid and new_zoom_hei >= self.widget_hei:
-            log.trace(f'new_zoom photo {format_color("taller", "green")} than frame')
+            logg.trace(f'new_zoom photo {format_color("taller", "green")} than frame')
             self._mov_x = 0
             self._mov_y = new_mov_y
         elif new_zoom_wid >= self.widget_wid and new_zoom_hei >= self.widget_hei:
-            log.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
+            logg.trace(f'new_zoom photo {format_color("larger", "green")} than frame')
             self._mov_x = new_mov_x
             self._mov_y = new_mov_y
 
         self._validate_mov()
 
         recap = f"mov_x {self._mov_x} mov_y {self._mov_y}"
-        log.trace(recap)
+        logg.trace(recap)
 
         self.update_crop()
 

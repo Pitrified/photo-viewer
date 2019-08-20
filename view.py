@@ -10,8 +10,8 @@ from thumb_button import ThumbButton
 
 class View:
     def __init__(self, root):
-        log = logging.getLogger(f"c.{__class__.__name__}.init")
-        log.info("Start init")
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info("Start init")
 
         self.root = root
 
@@ -44,8 +44,8 @@ class View:
         self.right_sidebar_width = 250
 
     def layout_set(self, lay_num):
-        log = logging.getLogger(f"c.{__class__.__name__}.layout_set")
-        log.info(f"Setting layout {lay_num}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.layout_set")
+        logg.info(f"Setting layout {lay_num}")
 
         self.layout_reset()
         if lay_num == 0:
@@ -60,9 +60,9 @@ class View:
             self.layout_imp()
 
     def layout_reset(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.layout_reset")
-        #  log.setLevel("TRACE")
-        log.trace("Reset layout")
+        logg = logging.getLogger(f"c.{__class__.__name__}.layout_reset")
+        #  logg.setLevel("TRACE")
+        logg.trace("Reset layout")
 
         # forget all widgets
         self.frame_crop_prim.grid_forget()
@@ -116,8 +116,8 @@ class View:
 class FrameCrop(tk.Frame):
     def __init__(self, parent, back_col, *args, **kwargs):
         super().__init__(parent, background=back_col, *args, **kwargs)
-        log = logging.getLogger(f"c.{__class__.__name__}.init")
-        log.info(f"Start init")
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info(f"Start init")
 
         # setup grid for the frame
         self.grid_rowconfigure(0, weight=1)
@@ -141,8 +141,8 @@ class FrameCrop(tk.Frame):
     def update_image(self, data):
         """Update the image in the label
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.update_image")
-        log.trace(f"Updating image_label")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_image")
+        logg.trace(f"Updating image_label")
         self.image_label.configure(image=data)
 
     def bind_mouse_scroll_label(self, func):
@@ -181,17 +181,17 @@ class FramePathInfo(tk.Frame):
     def __init__(self, parent, sidebar_width, *args, **kwargs):
         super().__init__(parent, width=sidebar_width, *args, **kwargs)
 
-        log = logging.getLogger(f"c.{__class__.__name__}.init")
-        #  log.setLevel("TRACE")
-        log.info("Start init")
-        log.trace(f"args {args}")
-        log.trace(f"kwargs {kwargs}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        #  logg.setLevel("TRACE")
+        logg.info("Start init")
+        logg.trace(f"args {args}")
+        logg.trace(f"kwargs {kwargs}")
 
         # save dimensions of elements
         self.sidebar_width = sidebar_width
 
         # CREATE children frames
-        log.trace(f"self.sidebar_width {self.sidebar_width}")
+        logg.trace(f"self.sidebar_width {self.sidebar_width}")
         self.output_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue1")
         self.input_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue2")
         self.selection_list_frame = tk.Frame(
@@ -239,8 +239,8 @@ class FramePathInfo(tk.Frame):
         self.text_output_folder.grid(row=1, column=0, sticky="ew")
 
     def update_output_frame(self, output_folder_full):
-        log = logging.getLogger(f"c.{__class__.__name__}.update_output_frame")
-        log.info("Updating label output_folder")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_output_frame")
+        logg.info("Updating label output_folder")
         # MAYBE showing a right aligned full path might be more informative
         self.output_folder_var.set(basename(output_folder_full))
 
@@ -269,8 +269,8 @@ class FramePathInfo(tk.Frame):
         When a new folder is added, create the corresponding Checkbutton,
         then repack them all
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.update_input_frame")
-        log.info("Updating input_folder checkbuttons")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_input_frame")
+        logg.info("Updating input_folder checkbuttons")
 
         for ri, folder in enumerate(sorted(input_folders)):
             folder_name = basename(folder)
@@ -301,10 +301,10 @@ class FramePathInfo(tk.Frame):
         self.input_frame.event_generate("<<toggle_input_folder>>")
 
     def build_photo_list_frame(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.build_photo_list_frame")
-        #  log.setLevel("TRACE")
-        log.info("Building photo_list_frame")
-        log.trace(f"self.sidebar_width {self.sidebar_width}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.build_photo_list_frame")
+        #  logg.setLevel("TRACE")
+        logg.info("Building photo_list_frame")
+        logg.trace(f"self.sidebar_width {self.sidebar_width}")
 
         # STATIC elements
 
@@ -348,9 +348,9 @@ class FramePathInfo(tk.Frame):
 
         photo_list_info = { pic : PhotoInfo }
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
-        #  log.setLevel("TRACE")
-        log.info("Updating photo_list ThumbButton")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
+        #  logg.setLevel("TRACE")
+        logg.info("Updating photo_list ThumbButton")
 
         for pic in self.photo_list_thumbbtn:
             self.photo_list_thumbbtn[pic].grid_forget()
@@ -382,7 +382,7 @@ class FramePathInfo(tk.Frame):
 
             # highlight current photo primary
             if pic == self.current_photo_prim:
-                log.trace(f"Setting color mode BIS for '{pic}' ThumbButton")
+                logg.trace(f"Setting color mode BIS for '{pic}' ThumbButton")
                 self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
             else:
                 self.photo_list_thumbbtn[pic].set_back_col_mode("FIRST")
@@ -391,28 +391,28 @@ class FramePathInfo(tk.Frame):
             self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
 
     def on_photo_list_doubleclick(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
-        #  log.setLevel("TRACE")
-        log.debug("Doublecliked something")
-        log.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
+        #  logg.setLevel("TRACE")
+        logg.debug("Doublecliked something")
+        logg.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
         self.photo_doubleclicked = event.widget.master.photo_info.photo_name_full
-        log.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
+        logg.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
         self.photo_list_frame.event_generate("<<thumbbtn_photo_doubleclick>>")
 
     def update_current_photo_prim(self, pic):
-        log = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
-        log.setLevel("TRACE")
-        log.trace("Update current_photo_prim")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
+        #  logg.setLevel("TRACE")
+        logg.trace("Update current_photo_prim")
         if self.current_photo_prim != "":
             self.photo_list_thumbbtn[self.current_photo_prim].set_back_col_mode("FIRST")
         self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
         self.current_photo_prim = pic
 
     def build_selection_list_frame(self):
-        log = logging.getLogger(f"c.{__class__.__name__}.build_selection_list_frame")
-        #  log.setLevel("TRACE")
-        log.info("Building selection_list_frame")
-        log.trace(f"self.sidebar_width {self.sidebar_width}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.build_selection_list_frame")
+        #  logg.setLevel("TRACE")
+        logg.info("Building selection_list_frame")
+        logg.trace(f"self.sidebar_width {self.sidebar_width}")
 
         # selection list header, no need for precise pixel dimensions
         self.selection_list_frame_header = tk.Label(
@@ -447,9 +447,9 @@ class FramePathInfo(tk.Frame):
         There is also info on whether the pic is still selected
         selection_list_info = { pic : (PhotoInfo, is_selected) }
         """
-        log = logging.getLogger(f"c.{__class__.__name__}.update_selection_list")
-        #  log.setLevel("TRACE")
-        log.info(f"Updating selection_list ThumbButtons")
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_selection_list")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Updating selection_list ThumbButtons")
 
         for pic in self.selection_list_thumbbtn:
             self.selection_list_thumbbtn[pic].grid_forget()
@@ -496,24 +496,24 @@ class FramePathInfo(tk.Frame):
             self.selection_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
 
     def on_selection_list_doubleclick(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.on_selection_list_doubleclick")
-        #  log.setLevel("TRACE")
-        log.debug("Doublecliked something in selection list")
-        log.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_selection_list_doubleclick")
+        #  logg.setLevel("TRACE")
+        logg.debug("Doublecliked something in selection list")
+        logg.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
         self.selection_doubleclicked = event.widget.master.photo_info.photo_name_full
-        log.trace(f"selection_doubleclicked {self.selection_doubleclicked}")
+        logg.trace(f"selection_doubleclicked {self.selection_doubleclicked}")
         self.photo_list_frame.event_generate("<<thumbbtn_selection_doubleclick>>")
 
     def on_thumbbtn_enter(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
-        #  log.setLevel("TRACE")
-        log.trace("Enter ThumbButton")
-        log.trace(f"Event {event} fired by {event.widget}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
+        #  logg.setLevel("TRACE")
+        logg.trace("Enter ThumbButton")
+        logg.trace(f"Event {event} fired by {event.widget}")
         event.widget.on_enter()
 
     def on_thumbbtn_leave(self, event):
-        log = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
-        #  log.setLevel("TRACE")
-        log.trace("Leave ThumbButton")
-        log.trace(f"Event {event} fired by {event.widget}")
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
+        #  logg.setLevel("TRACE")
+        logg.trace("Leave ThumbButton")
+        logg.trace(f"Event {event} fired by {event.widget}")
         event.widget.on_leave()

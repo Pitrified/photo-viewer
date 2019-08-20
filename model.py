@@ -3,8 +3,10 @@ import logging
 from PIL import Image
 from PIL import ImageTk
 from os import listdir
+from os import makedirs
 from os.path import join
 from os.path import splitext
+from os.path import isdir
 from math import sqrt
 from math import log
 from math import floor
@@ -20,7 +22,8 @@ class Model:
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
         logg.info("Start init")
 
-        self.output_folder = Observable("Not set not known")
+        self._out_fold_not_set = "Not set not known"
+        self.output_folder = Observable(self._out_fold_not_set)
         self.input_folders = Observable({})
 
         # dict to send photo_info -> only active photos
@@ -64,18 +67,35 @@ class Model:
     def setOutputFolder(self, output_folder_full):
         logg = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
         logg.info(f"Setting output_folder to '{output_folder_full}'")
+
+        logui = logging.getLogger(f"UI")
+        logui.info(f"Setting output folder to '{output_folder_full}'")
+
+        # create the folder if it doesn't exist
+        if not isdir(output_folder_full):
+            logui.info(f"Not a folder '{output_folder_full}', creating it")
+            makedirs(output_folder_full)
+
         self.output_folder.set(output_folder_full)
 
     def addInputFolder(self, input_folder_full):
         logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
         logg.info(f"Adding new input_folder '{input_folder_full}'")
 
+        logui = logging.getLogger(f"UI")
+
+        # check for folder existence
+        if not isdir(input_folder_full):
+            logui.error(f"Not a valid folder: {input_folder_full}")
+            return 1
+
+        logui.info(f"Selected new input folder: '{input_folder_full}'")
+
         old_folders = self.input_folders.get()
 
         if input_folder_full in old_folders:
-            logui = logging.getLogger(f"UI")
             logui.warn("Selected folder already in input list.")
-            return
+            return 0
 
         old_folders[input_folder_full] = True
         self.input_folders.set(old_folders)
@@ -95,7 +115,7 @@ class Model:
             self.input_folders.set(state)
         else:
             # no folders toggled, revert to previous state
-            logui = logging.getLogger('UI')
+            logui = logging.getLogger("UI")
             logui.warn("At least one input folder has to be selected.")
             self.input_folders._docallbacks()
 
@@ -179,8 +199,10 @@ class Model:
 
         logg.info(f"photo_info_list_active has now {len(new_photo_info_active)} items")
 
-        logui = logging.getLogger('UI')
-        logui.info(f'There are now {len(new_photo_info_active)} images in the active list.')
+        logui = logging.getLogger("UI")
+        logui.info(
+            f"There are now {len(new_photo_info_active)} images in the active list."
+        )
 
         self.photo_info_list_active.set(new_photo_info_active)
 

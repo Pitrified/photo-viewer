@@ -2,9 +2,6 @@ from tkinter import filedialog
 import tkinter as tk
 import logging
 
-from os import makedirs
-from os.path import isdir
-
 from view import View
 from model import Model
 from utils import format_color
@@ -71,7 +68,6 @@ class Controller:
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
         # model.__init__ so the view does not update
-        self.model.setOutputFolder("Not set")
         self.model.addInputFolder(input_folder)
         # set starting layout
         self.model.setLayout(0)
@@ -166,11 +162,6 @@ class Controller:
             f'{format_color("Output", "spring green")} folder: {output_folder_full}'
         )
 
-        # create the folder if it doesn't exist
-        if not isdir(output_folder_full):
-            logg.warn(f"Not a folder '{output_folder_full}', creating it")
-            makedirs(output_folder_full)
-
         self.model.setOutputFolder(output_folder_full)
 
     def updatedOutputFolder(self, data):
@@ -188,19 +179,14 @@ class Controller:
             f"Value received '{input_folder_full}' type {type(input_folder_full)}"
         )
 
-        logui = logging.getLogger(f"UI")
         # filedialog sometimes returns an empty tuple, sometimes an empty string
         if len(input_folder_full) == 0:
             logg.info(f"Selection of input_folder cancelled")
-            #  logui.info(f"Selection of new input folder cancelled.")
             return
 
-        if not isdir(input_folder_full):
-            #  logg.error(f"Not a valid folder: {input_folder_full}")
-            logui.error(f"Not a valid folder: {input_folder_full}")
-            return 1
-
-        logg.info(f'{format_color("Input", "spring green")} folder: {input_folder_full}')
+        logg.info(
+            f'{format_color("Input", "spring green")} folder: {input_folder_full}'
+        )
 
         self.model.addInputFolder(input_folder_full)
 
@@ -244,7 +230,9 @@ class Controller:
         self.model.seekIndexPrim(pic)
 
     def doubleclikedThumbbtnSelection(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnSelection")
+        logg = logging.getLogger(
+            f"c.{__class__.__name__}.doubleclikedThumbbtnSelection"
+        )
         #  logg.setLevel("TRACE")
         logg.info(f"doublecliked Thumbbtn selection")
         pic = self.view.frame_path_info.selection_doubleclicked

@@ -226,7 +226,7 @@ class FramePathInfo(tk.Frame):
             activebackground="LightSkyBlue2",
             highlightthickness=0,
         )
-        self.output_folder_var = tk.StringVar(value="Not set not seen")
+        self.output_folder_var = tk.StringVar(value="Not set")
         self.text_output_folder = tk.Label(
             self.output_frame,
             textvariable=self.output_folder_var,

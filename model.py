@@ -2,15 +2,16 @@ import logging
 
 from PIL import Image
 from PIL import ImageTk
+from math import ceil
+from math import floor
+from math import log
+from math import sqrt
 from os import listdir
 from os import makedirs
+from os.path import isdir
 from os.path import join
 from os.path import splitext
-from os.path import isdir
-from math import sqrt
-from math import log
-from math import floor
-from math import ceil
+from sys import getsizeof
 
 from observable import Observable
 from photo_info import PhotoInfo
@@ -477,11 +478,15 @@ class Model:
 class ModelCrop:
     def __init__(self, photo_name_full):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        #  logg.setLevel("TRACE")
         logg.info("Start init")
 
         self._photo_name_full = photo_name_full
         self._image = Image.open(self._photo_name_full)
         self._image_wid, self._image_hei = self._image.size
+
+        # https://stackoverflow.com/a/51245891/2237151
+        logg.trace(f"{photo_name_full} size: {getsizeof(self._image.tobytes())}")
 
         # setup parameters for resizing
         self.upscaling_mode = Image.NEAREST

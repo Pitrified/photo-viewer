@@ -164,6 +164,13 @@ class FrameCrop(tk.Frame):
         """
         self.image_label.bind(kind, func)
 
+    def bind_to_all(self, kind, func):
+        """Bind event 'kind' to func on image_label and on frame
+        """
+        self.bind(kind, func)
+        self.image_label.bind(kind, func)
+
+
 
 class FrameMetadata(tk.Frame):
     def __init__(self, parent, sidebar_width, *args, **kwargs):

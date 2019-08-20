@@ -33,16 +33,20 @@ class Controller:
         # bind callbacks from user input
         # general keypress
         self.root.bind("<KeyRelease>", self.KeyReleased)
+
         # button to set new output_folder
         self.view.frame_path_info.btn_set_output_folder.config(
             command=self.setOutputFolder
         )
+        # TODO button to save_selection
+
         # button to add another input_folder
         self.view.frame_path_info.btn_add_folder.config(command=self.addInputFolder)
         # react to input folder toggling
         self.view.frame_path_info.input_frame.bind(
             "<<toggle_input_folder>>", self.toggledInputFolder
         )
+
         # react to doubleclick on a ThumbButton
         self.view.frame_path_info.photo_list_frame.bind(
             "<<thumbbtn_photo_doubleclick>>", self.doubleclikedThumbbtnPhoto
@@ -50,20 +54,36 @@ class Controller:
         self.view.frame_path_info.photo_list_frame.bind(
             "<<thumbbtn_selection_doubleclick>>", self.doubleclikedThumbbtnSelection
         )
+
         # react to window resize
         self.view.frame_crop_prim.bind("<Configure>", self.frameResized)
+
         # scrolled *on* the image -> use e.x as rel_x, Label does *not* fill Frame
         self.view.frame_crop_prim.bind_mouse_scroll_label(self.scrolledMouseImageLabel)
         self.view.frame_crop_echo.bind_mouse_scroll_label(self.scrolledMouseImageLabel)
         # scrolled on the frame -> consider the center as fixed
         self.view.frame_crop_prim.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
         self.view.frame_crop_echo.bind_mouse_scroll_frame(self.scrolledMouseImageFrame)
+
         # clicked on image
         self.view.frame_crop_prim.bind_image("<Button-1>", self.clickedImage)
         self.view.frame_crop_echo.bind_image("<Button-1>", self.clickedImage)
         # moved mouse
         self.view.frame_crop_prim.bind_image("<B1-Motion>", self.movedImageMouse)
         self.view.frame_crop_echo.bind_image("<B1-Motion>", self.movedImageMouse)
+
+        # some trickery is needed to distinguish single and doubleClick
+        # https://stackoverflow.com/a/50622349/2237151
+        # right click -> index prim forward
+        self.view.frame_crop_prim.bind_to_all(
+            "<Button-3>", self.rightClickedFrameCropPrim
+        )
+        # right double click -> index prim backward
+        #  self.view.frame_crop_prim.bind_to_all(
+        #  "<Double-Button-3>", self.rightDoubleClickedFrameCropPrim
+        #  )
+        self._right_double_click_frame_crop_prim = False
+        # left double click -> save current image
 
         # initialize the values in the model
         # this can't be done before, as the callback are not registered during
@@ -297,6 +317,43 @@ class Controller:
         #  logg.setLevel("TRACE")
         logg.trace(f"Moved mouse on image")
         self.model.moveImageMouse(event.x, event.y)
+
+    def rightClickedFrameCropPrim(self, event):
+        """Setup delayed callback for eventual doubleclick
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}.rightClickedFrameCropPrim")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Callback for right click")
+        # this works but I hate it, it is too slow to react
+        #  event.widget.after(200, self.rightClickActionFrameCropPrim, event)
+        self.rightClickActionFrameCropPrim(event)
+
+    def rightDoubleClickedFrameCropPrim(self, event):
+        """Set flag that a doubleclick happened
+        """
+        logg = logging.getLogger(
+            f"c.{__class__.__name__}.rightDoubleClickedFrameCropPrim"
+        )
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Callback for right doubleclick")
+        self._right_double_click_frame_crop_prim = True
+
+    def rightClickActionFrameCropPrim(self, event):
+        """Actual action for Click or DoubleClick
+        """
+        logg = logging.getLogger(
+            f"c.{__class__.__name__}.rightClickActionFrameCropPrim"
+        )
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Action for right doubleclick or click")
+
+        if self._right_double_click_frame_crop_prim:
+            self._right_double_click_frame_crop_prim = False
+            logg.trace("Double click!")
+            self.model.moveIndexPrim("backward")
+        else:
+            logg.trace("Single click!")
+            self.model.moveIndexPrim("forward")
 
     def _toggle_fullscreen(self):
         logg = logging.getLogger(f"c.{__class__.__name__}._toggle_fullscreen")

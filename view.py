@@ -146,26 +146,26 @@ class FrameCrop(tk.Frame):
         self.image_label.configure(image=data)
 
     def bind_mouse_scroll_label(self, func):
-        """Bind mouse events to image_label
+        """Bind mouse scroll events *only* to image_label
         """
         self.image_label.bind("<4>", func)
         self.image_label.bind("<5>", func)
         self.image_label.bind("<MouseWheel>", func)
 
     def bind_mouse_scroll_frame(self, func):
-        """Bind mouse events to image_frame
+        """Bind mouse scroll events *only* to image_frame
         """
         self.bind("<4>", func)
         self.bind("<5>", func)
         self.bind("<MouseWheel>", func)
 
     def bind_image(self, kind, func):
-        """Bind event 'kind' to func on image_label
+        """Bind event 'kind' to func *only* on image_label
         """
         self.image_label.bind(kind, func)
 
     def bind_to_all(self, kind, func):
-        """Bind event 'kind' to func on image_label and on frame
+        """Bind event 'kind' to func on *both* image_label and frame
         """
         self.bind(kind, func)
         self.image_label.bind(kind, func)

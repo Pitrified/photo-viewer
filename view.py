@@ -171,7 +171,6 @@ class FrameCrop(tk.Frame):
         self.image_label.bind(kind, func)
 
 
-
 class FrameMetadata(tk.Frame):
     def __init__(self, parent, sidebar_width, *args, **kwargs):
         super().__init__(parent, width=sidebar_width, *args, **kwargs)
@@ -401,7 +400,9 @@ class FramePathInfo(tk.Frame):
         logg = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
         #  logg.setLevel("TRACE")
         logg.debug("Doublecliked something")
-        logg.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
+        logg.trace(
+            f"Event {event} fired by {event.widget} master {event.widget.master}"
+        )
         self.photo_doubleclicked = event.widget.master.photo_info.photo_name_full
         logg.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
         self.photo_list_frame.event_generate("<<thumbbtn_photo_doubleclick>>")
@@ -503,10 +504,14 @@ class FramePathInfo(tk.Frame):
             self.selection_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
 
     def on_selection_list_doubleclick(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.on_selection_list_doubleclick")
+        logg = logging.getLogger(
+            f"c.{__class__.__name__}.on_selection_list_doubleclick"
+        )
         #  logg.setLevel("TRACE")
         logg.debug("Doublecliked something in selection list")
-        logg.trace(f"Event {event} fired by {event.widget} master {event.widget.master}")
+        logg.trace(
+            f"Event {event} fired by {event.widget} master {event.widget.master}"
+        )
         self.selection_doubleclicked = event.widget.master.photo_info.photo_name_full
         logg.trace(f"selection_doubleclicked {self.selection_doubleclicked}")
         self.photo_list_frame.event_generate("<<thumbbtn_selection_doubleclick>>")
@@ -524,3 +529,57 @@ class FramePathInfo(tk.Frame):
         logg.trace("Leave ThumbButton")
         logg.trace(f"Event {event} fired by {event.widget}")
         event.widget.on_leave()
+
+
+class ThumbButtonList(tk.Frame):
+    def __init__(self, parent, back_col, *args, **kwargs):
+        super().__init__(parent, background=back_col, *args, **kwargs)
+
+    def on_thumbbtn_enter():
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
+        #  logg.setLevel("TRACE")
+        logg.trace("Enter ThumbButton")
+        logg.trace(f"Event {event} fired by {event.widget}")
+        event.widget.on_enter()
+
+
+class SelectionListFrame(ThumbButtonList):
+    """Class to build and update selection list
+    """
+
+    def __init__(self, parent, back_col, *args, **kwargs):
+        """Do things in build_selection_list_frame
+        """
+        super().__init__(parent, background=back_col, *args, **kwargs)
+
+    def update_selection_list(self):
+        """Receives a dict of PhotoInfo object and creates ThumbButton
+
+        There is also info on whether the pic is still selected
+        selection_list_info = { pic : (PhotoInfo, is_selected) }
+        """
+
+
+class PhotoListFrame(ThumbButtonList):
+    """Class to build and update active photo list
+    """
+
+    def __init__(self, parent, back_col, *args, **kwargs):
+        """Do things in build_photo_list_frame
+        """
+        super().__init__(parent, background=back_col, *args, **kwargs)
+
+    def update_photo_list(self, photo_list_info):
+        """Receives a dict of PhotoInfo object and creates ThumbButton
+
+        photo_list_info = { pic : PhotoInfo }
+        """
+
+    def on_photo_list_doubleclick(self, event):
+        """Handle double clicks on photo list, go to that pic
+
+        MAYBE better binding of this event in ThumbButton, bind the double
+        click to some virtual events raised, then bind the virtual event on the
+        ThumbButton top widget, so that the callback can access event.widget
+        directly on the ThumbButton, instead of event.widget.master
+        """

@@ -6,6 +6,7 @@ from os.path import basename
 from label_pixel import LabelPixel
 from scrollable_frame import ScrollableFrame
 from thumb_button import ThumbButton
+from color_palette import Palette
 
 
 class View:
@@ -14,19 +15,28 @@ class View:
         logg.info("Start init")
 
         self.root = root
+        self.palette = Palette("blue")
 
         self.setup_main_window()
 
         # create frames for photo and info panels
-        self.frame_crop_prim = FrameCrop(self.root, back_col="SeaGreen1")
-        self.frame_crop_echo = FrameCrop(self.root, back_col="SeaGreen3")
+        self.frame_crop_prim = FrameCrop(
+            self.root, name="frame_crop_prim", palette=self.palette
+        )
+        self.frame_crop_echo = FrameCrop(
+            self.root, name="frame_crop_echo", palette=self.palette
+        )
         self.frame_metadata = FrameMetadata(
-            self.root, sidebar_width=self.right_sidebar_width, bg="SpringGreen2"
+            self.root,
+            sidebar_width=self.right_sidebar_width,
+            name="frame_metadata",
+            palette=self.palette,
         )
         self.frame_path_info = FramePathInfo(
             parent=self.root,
             sidebar_width=self.right_sidebar_width,
-            bg="DarkGoldenrod1",
+            name="frame_path_info",
+            palette=self.palette,
         )
 
     def setup_main_window(self):
@@ -41,6 +51,7 @@ class View:
         # TODO add some info in titlebar
 
         # setup elements dimensions
+        # TODO sidebar width set using grid_rowconfigure(minwidth)
         self.right_sidebar_width = 250
 
     def layout_set(self, lay_num):
@@ -114,10 +125,15 @@ class View:
 
 
 class FrameCrop(tk.Frame):
-    def __init__(self, parent, back_col, *args, **kwargs):
-        super().__init__(parent, background=back_col, *args, **kwargs)
+    def __init__(self, parent, name, palette, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
         logg.info(f"Start init")
+
+        self.name = name
+        self.palette = palette
+        back_col = self.palette.get_colors(f"background.{self.name}")
+
+        super().__init__(parent, background=back_col, *args, **kwargs)
 
         # setup grid for the frame
         self.grid_rowconfigure(0, weight=1)
@@ -172,8 +188,17 @@ class FrameCrop(tk.Frame):
 
 
 class FrameMetadata(tk.Frame):
-    def __init__(self, parent, sidebar_width, *args, **kwargs):
-        super().__init__(parent, width=sidebar_width, *args, **kwargs)
+    def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info(f"Start init")
+
+        self.name = name
+        self.palette = palette
+        back_col = self.palette.get_colors(f"background.{self.name}")
+
+        super().__init__(
+            parent, width=sidebar_width, background=back_col, *args, **kwargs
+        )
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -184,14 +209,20 @@ class FrameMetadata(tk.Frame):
 
 
 class FramePathInfo(tk.Frame):
-    def __init__(self, parent, sidebar_width, *args, **kwargs):
-        super().__init__(parent, width=sidebar_width, *args, **kwargs)
-
+    def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
         #  logg.setLevel("TRACE")
         logg.info("Start init")
         logg.trace(f"args {args}")
         logg.trace(f"kwargs {kwargs}")
+
+        self.name = name
+        self.palette = palette
+        back_col = self.palette.get_colors(f"background.{self.name}")
+
+        super().__init__(
+            parent, width=sidebar_width, background=back_col, *args, **kwargs
+        )
 
         # save dimensions of elements
         self.sidebar_width = sidebar_width
@@ -544,9 +575,6 @@ class ThumbButtonList(tk.Frame):
 
 
 class SelectionListFrame(ThumbButtonList):
-    """Class to build and update selection list
-    """
-
     def __init__(self, parent, back_col, *args, **kwargs):
         """Do things in build_selection_list_frame
         """
@@ -561,9 +589,6 @@ class SelectionListFrame(ThumbButtonList):
 
 
 class PhotoListFrame(ThumbButtonList):
-    """Class to build and update active photo list
-    """
-
     def __init__(self, parent, back_col, *args, **kwargs):
         """Do things in build_photo_list_frame
         """

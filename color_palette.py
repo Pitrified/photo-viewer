@@ -30,6 +30,9 @@ class Palette:
         self.colors["slider"] = {}
 
         self.colors["background"]["frame_crop_prim"] = "SeaGreen1"
+        self.colors["background"]["frame_crop_echo"] = "SeaGreen2"
+        self.colors["background"]["frame_metadata"] = "SeaGreen3"
+        self.colors["background"]["frame_path_info"] = "SeaGreen4"
 
     def get_colors(self, req_element):
         """Return the color of the requested element, in the current theme

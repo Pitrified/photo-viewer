@@ -234,7 +234,13 @@ class FramePathInfo(tk.Frame):
         self.selection_list_frame = tk.Frame(
             self, width=self.sidebar_width, bg="SkyBlue3"
         )
-        self.photo_list_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue4")
+        self.photo_list_frame = PhotoListFrame(
+            self,
+            width=self.sidebar_width,
+            name="photo_list_frame",
+            palette=self.palette,
+            sidebar_width=self.sidebar_width,
+        )
 
         # setup grid for FramePathInfo
         self.grid_rowconfigure(0, weight=0)
@@ -251,7 +257,6 @@ class FramePathInfo(tk.Frame):
 
         self.build_output_frame()
         self.build_input_frame()
-        self.build_photo_list_frame()
         self.build_selection_list_frame()
 
     def build_output_frame(self):
@@ -336,116 +341,6 @@ class FramePathInfo(tk.Frame):
         """Generate a virtual event to notify the controller of a toggled Checkbutton
         """
         self.input_frame.event_generate("<<toggle_input_folder>>")
-
-    def build_photo_list_frame(self):
-        logg = logging.getLogger(f"c.{__class__.__name__}.build_photo_list_frame")
-        #  logg.setLevel("TRACE")
-        logg.info("Building photo_list_frame")
-        logg.trace(f"self.sidebar_width {self.sidebar_width}")
-
-        # STATIC elements
-
-        self.photo_list_frame_header = tk.Label(
-            self.photo_list_frame,
-            text="Photo list:",
-            background=self.photo_list_frame.cget("background"),
-        )
-
-        # TODO reimplement the whole thing: manually change the TB you show
-        # ask for new PhotoInfo when needed, so that they do not have to be all
-        # loaded; bind configure of photo_list_frame to compute how many TB
-        # have to be available; bind scroll (from the Scrollbar as well?) to a
-        # call in the model to update the list of TB, and show just them
-        # this is mainly needed because this frame can only hold a puny 1000ish
-        # photo list; that's like one week of vacation.
-
-        # ScrollableFrame that holds the ThumbButtons
-        self.photo_list_scrollable = ScrollableFrame(
-            self.photo_list_frame,
-            scroll_width=self.sidebar_width,
-            back_col=self.photo_list_frame.cget("background"),
-            hover_back_col="SkyBlue2",
-            slider_col="DeepSkyBlue4",
-        )
-
-        # setup grid in photo_list_frame
-        self.photo_list_frame.grid_rowconfigure(1, weight=1)
-        self.photo_list_frame.grid_columnconfigure(0, weight=1)
-
-        # grid static elements
-        self.photo_list_frame_header.grid(row=0, column=0, sticky="ew")
-        self.photo_list_scrollable.grid(row=1, column=0, sticky="nsew")
-
-        # dicts for runtime elements
-        self.photo_list_thumbbtn = {}
-        self.current_photo_prim = ""
-
-    def update_photo_list(self, photo_list_info):
-        """Receives a dict of PhotoInfo object and creates ThumbButton
-
-        photo_list_info = { pic : PhotoInfo }
-        """
-        logg = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
-        #  logg.setLevel("TRACE")
-        logg.info("Updating photo_list ThumbButton")
-
-        for pic in self.photo_list_thumbbtn:
-            self.photo_list_thumbbtn[pic].grid_forget()
-
-        for ri, pic in enumerate(photo_list_info):
-            # create the new ThumbButton
-            if not pic in self.photo_list_thumbbtn:
-                self.photo_list_thumbbtn[pic] = ThumbButton(
-                    self.photo_list_scrollable.scroll_frame,
-                    photo_list_info[pic],
-                    back_col=self.photo_list_frame.cget("background"),
-                    hover_back_col="SkyBlue2",
-                    back_col_bis="DeepSkyBlue2",
-                )
-
-                # bind enter/leave event to highlight
-                self.photo_list_thumbbtn[pic].bind("<Enter>", self.on_thumbbtn_enter)
-                self.photo_list_thumbbtn[pic].bind("<Leave>", self.on_thumbbtn_leave)
-
-                # bind scroll function to ThumbButton elements
-                self.photo_list_thumbbtn[pic].register_scroll_func(
-                    self.photo_list_scrollable.on_list_scroll
-                )
-
-                # add event for doubleclick
-                self.photo_list_thumbbtn[pic].bind_doubleclick(
-                    self.on_photo_list_doubleclick
-                )
-
-            # highlight current photo primary
-            if pic == self.current_photo_prim:
-                logg.trace(f"Setting color mode BIS for '{pic}' ThumbButton")
-                self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
-            else:
-                self.photo_list_thumbbtn[pic].set_back_col_mode("FIRST")
-
-            # grid the ThumbButton
-            self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
-
-    def on_photo_list_doubleclick(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
-        #  logg.setLevel("TRACE")
-        logg.debug("Doublecliked something")
-        logg.trace(
-            f"Event {event} fired by {event.widget} master {event.widget.master}"
-        )
-        self.photo_doubleclicked = event.widget.master.photo_info.photo_name_full
-        logg.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
-        self.photo_list_frame.event_generate("<<thumbbtn_photo_doubleclick>>")
-
-    def update_current_photo_prim(self, pic):
-        logg = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
-        #  logg.setLevel("TRACE")
-        logg.trace("Update current_photo_prim")
-        if self.current_photo_prim != "":
-            self.photo_list_thumbbtn[self.current_photo_prim].set_back_col_mode("FIRST")
-        self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
-        self.current_photo_prim = pic
 
     def build_selection_list_frame(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.build_selection_list_frame")
@@ -563,15 +458,22 @@ class FramePathInfo(tk.Frame):
 
 
 class ThumbButtonList(tk.Frame):
-    def __init__(self, parent, back_col, *args, **kwargs):
-        super().__init__(parent, background=back_col, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def on_thumbbtn_enter():
+    def on_thumbbtn_enter(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
         #  logg.setLevel("TRACE")
         logg.trace("Enter ThumbButton")
         logg.trace(f"Event {event} fired by {event.widget}")
         event.widget.on_enter()
+
+    def on_thumbbtn_leave(self, event):
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
+        #  logg.setLevel("TRACE")
+        logg.trace("Leave ThumbButton")
+        logg.trace(f"Event {event} fired by {event.widget}")
+        event.widget.on_leave()
 
 
 class SelectionListFrame(ThumbButtonList):
@@ -589,16 +491,119 @@ class SelectionListFrame(ThumbButtonList):
 
 
 class PhotoListFrame(ThumbButtonList):
-    def __init__(self, parent, back_col, *args, **kwargs):
+    def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         """Do things in build_photo_list_frame
         """
-        super().__init__(parent, background=back_col, *args, **kwargs)
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info(f"Start init")
+
+        self.name = name
+        self.palette = palette
+
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
+
+        self.back_col_header = (
+            self.palette.get_colors(f"background.photo_list_frame_header"),
+        )
+
+        self.back_col_scrollable = self.palette.get_colors(
+            f"background.photo_list_scrollable"
+        )
+        self.hover_col_scrollable = self.palette.get_colors(f"hover.photo_list_scrollable")
+        self.slider_col_scrollable = self.palette.get_colors(f"slider.photo_list_scrollable")
+
+        self.back_col_thumbbtn = self.palette.get_colors(f"background.photo_list_thumbbtn")
+        self.hover_back_col_thumbbtn = self.palette.get_colors(f"hover.photo_list_thumbbtn")
+        self.back_col_bis_thumbbtn = self.palette.get_colors(
+            f"backgroundbis.photo_list_thumbbtn"
+        )
+
+        super().__init__(parent, background=self.back_col, *args, **kwargs)
+
+        # save width of sidebar, needed to explicitly set ScrollableFrame
+        self.sidebar_width = sidebar_width
+
+        self.photo_list_frame_header = tk.Label(
+            self, text="Photo list:", background=self.back_col_header
+        )
+
+        # TODO reimplement the whole thing: manually change the TB you show
+        # ask for new PhotoInfo when needed, so that they do not have to be all
+        # loaded; bind configure of photo_list_frame to compute how many TB
+        # have to be available; bind scroll (from the Scrollbar as well?) to a
+        # call in the model to update the list of TB, and show just them
+        # this is mainly needed because this frame can only hold a puny 1000ish
+        # photo list; that's like one week of vacation.
+
+        # ScrollableFrame that holds the ThumbButtons
+        self.photo_list_scrollable = ScrollableFrame(
+            self,
+            scroll_width=self.sidebar_width,
+            back_col=self.back_col_scrollable,
+            hover_back_col=self.hover_col_scrollable,
+            slider_col=self.slider_col_scrollable,
+        )
+
+        # setup grid in photo_list_frame (this widget)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        # grid static elements
+        self.photo_list_frame_header.grid(row=0, column=0, sticky="ew")
+        self.photo_list_scrollable.grid(row=1, column=0, sticky="nsew")
+
+        # dicts for runtime elements
+        self.photo_list_thumbbtn = {}
+        self.current_photo_prim = ""
 
     def update_photo_list(self, photo_list_info):
         """Receives a dict of PhotoInfo object and creates ThumbButton
 
         photo_list_info = { pic : PhotoInfo }
         """
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
+        logg.setLevel("TRACE")
+        logg.info("Updating photo_list ThumbButton")
+
+        for pic in self.photo_list_thumbbtn:
+            self.photo_list_thumbbtn[pic].grid_forget()
+
+        for ri, pic in enumerate(photo_list_info):
+            # create the new ThumbButton
+            if not pic in self.photo_list_thumbbtn:
+                self.photo_list_thumbbtn[pic] = ThumbButton(
+                    self.photo_list_scrollable.scroll_frame,
+                    photo_list_info[pic],
+                    back_col=self.back_col_thumbbtn,
+                    hover_back_col=self.hover_back_col_thumbbtn,
+                    back_col_bis=self.back_col_bis_thumbbtn,
+                )
+
+                # bind enter/leave event to highlight
+                self.photo_list_thumbbtn[pic].bind("<Enter>", self.on_thumbbtn_enter)
+                self.photo_list_thumbbtn[pic].bind("<Leave>", self.on_thumbbtn_leave)
+
+                # bind scroll function to ThumbButton elements
+                self.photo_list_thumbbtn[pic].register_scroll_func(
+                    self.photo_list_scrollable.on_list_scroll
+                )
+
+                # add event for doubleclick
+                self.photo_list_thumbbtn[pic].bind_doubleclick(
+                    self.on_photo_list_doubleclick
+                )
+
+            # highlight current photo primary
+            if pic == self.current_photo_prim:
+                logg.trace(f"Setting color mode BIS for '{pic}' ThumbButton")
+                self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
+            else:
+                self.photo_list_thumbbtn[pic].set_back_col_mode("FIRST")
+
+            # grid the ThumbButton
+            self.photo_list_thumbbtn[pic].grid(row=ri, column=0, sticky="ew")
+
+        logg.trace(f"Loaded thbtn {self.photo_list_thumbbtn.keys()}")
 
     def on_photo_list_doubleclick(self, event):
         """Handle double clicks on photo list, go to that pic
@@ -608,3 +613,21 @@ class PhotoListFrame(ThumbButtonList):
         ThumbButton top widget, so that the callback can access event.widget
         directly on the ThumbButton, instead of event.widget.master
         """
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_photo_list_doubleclick")
+        #  logg.setLevel("TRACE")
+        logg.debug("Doublecliked something")
+        logg.trace(
+            f"Event {event} fired by {event.widget} master {event.widget.master}"
+        )
+        self.photo_doubleclicked = event.widget.master.photo_info.photo_name_full
+        logg.trace(f"photo_doubleclicked {self.photo_doubleclicked}")
+        self.event_generate("<<thumbbtn_photo_doubleclick>>")
+
+    def update_current_photo_prim(self, pic):
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_current_photo_prim")
+        #  logg.setLevel("TRACE")
+        logg.trace("Update current_photo_prim")
+        if self.current_photo_prim != "":
+            self.photo_list_thumbbtn[self.current_photo_prim].set_back_col_mode("FIRST")
+        self.photo_list_thumbbtn[pic].set_back_col_mode("BIS")
+        self.current_photo_prim = pic

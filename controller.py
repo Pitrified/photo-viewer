@@ -229,12 +229,12 @@ class Controller:
     def updatedPhotoList(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
         logg.info(f"New values received for photo_info_list_active")  # {data}")
-        self.view.frame_path_info.update_photo_list(data)
+        self.view.frame_path_info.photo_list_frame.update_photo_list(data)
 
     def updatedCurrentPhotoPrim(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
         logg.info(f"New value received for current_photo_prim")
-        self.view.frame_path_info.update_current_photo_prim(data)
+        self.view.frame_path_info.photo_list_frame.update_current_photo_prim(data)
 
     def updatedSelectionList(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedSelectionList")
@@ -245,7 +245,7 @@ class Controller:
         logg = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
         #  logg.setLevel("TRACE")
         logg.info(f"doublecliked Thumbbtn photo")
-        pic = self.view.frame_path_info.photo_doubleclicked
+        pic = self.view.frame_path_info.photo_list_frame.photo_doubleclicked
         logg.trace(f"On pic {pic}")
         self.model.seekIndexPrim(pic)
 

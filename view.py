@@ -237,7 +237,7 @@ class FramePathInfo(tk.Frame):
 
         # CREATE children frames
         logg.trace(f"self.sidebar_width {self.sidebar_width}")
-        self.output_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue1")
+        self.output_frame = OutputFrame(self, name="output_frame", palette=self.palette)
         self.input_frame = InputFrame(self, name="input_frame", palette=self.palette)
         self.selection_list_frame = SelectionListFrame(
             self,
@@ -267,27 +267,51 @@ class FramePathInfo(tk.Frame):
         self.selection_list_frame.grid(row=2, column=0, sticky="nsew")
         self.photo_list_frame.grid(row=3, column=0, sticky="nsew")
 
-        self.build_output_frame()
-        #  self.build_input_frame()
 
-    def build_output_frame(self):
+class OutputFrame(tk.Frame):
+    def __init__(self, parent, name, palette, *args, **kwargs):
+        """Do things in build_output_frame
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info(f"Start init")
+
+        self.name = name
+        self.palette = palette
+
+        # frame background color
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
+
+        # set folder button
+        self.back_col_output_setfolder = self.palette.get_colors(
+            f"background.output_setfolder"
+        )
+        self.hover_col_output_setfolder = self.palette.get_colors(
+            f"hover.output_setfolder"
+        )
+
+        # set folder label
+        self.back_col_output_label = self.palette.get_colors(f"background.output_label")
+
+        super().__init__(parent, background=self.back_col, *args, **kwargs)
+
         self.btn_set_output_folder = tk.Button(
-            self.output_frame,
+            self,
             text="Set output folder",
             borderwidth=0,
-            background="SkyBlue2",
-            activebackground="LightSkyBlue2",
+            background=self.back_col_output_setfolder,
+            activebackground=self.hover_col_output_setfolder,
             highlightthickness=0,
         )
         self.output_folder_var = tk.StringVar(value="Not set")
+
         self.text_output_folder = tk.Label(
-            self.output_frame,
+            self,
             textvariable=self.output_folder_var,
-            background=self.output_frame.cget("background"),
+            background=self.back_col_output_label,
         )
 
         # grid the elements, grow only the label
-        self.output_frame.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
         self.btn_set_output_folder.grid(row=0, column=0)
         self.text_output_folder.grid(row=1, column=0, sticky="ew")
 
@@ -311,7 +335,7 @@ class InputFrame(tk.Frame):
         # frame background color
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
-        # add button
+        # add folder button
         self.back_col_input_addfolder = self.palette.get_colors(
             f"background.input_addfolder"
         )

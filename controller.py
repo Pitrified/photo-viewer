@@ -35,7 +35,7 @@ class Controller:
         self.root.bind("<KeyRelease>", self.KeyReleased)
 
         # button to set new output_folder
-        self.view.frame_path_info.btn_set_output_folder.config(
+        self.view.frame_path_info.output_frame.btn_set_output_folder.config(
             command=self.setOutputFolder
         )
         # TODO button to save_selection
@@ -189,7 +189,7 @@ class Controller:
     def updatedOutputFolder(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedOutputFolder")
         logg.info(f"New value '{data}'")
-        self.view.frame_path_info.update_output_frame(data)
+        self.view.frame_path_info.output_frame.update_output_frame(data)
 
     def addInputFolder(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")

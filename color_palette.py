@@ -51,15 +51,29 @@ class Palette:
         self.colors["slider"] = {}
         self.colors["select"] = {}
 
-        # crop frames
+        ###############
+        # crop frames #
+        ###############
         self.colors["background"]["frame_crop_prim"] = "SeaGreen1"
         self.colors["background"]["frame_crop_echo"] = "SeaGreen2"
 
-        # metadata frame
+        ##################
+        # metadata frame #
+        ##################
         self.colors["background"]["frame_metadata"] = "SeaGreen3"
 
-        # path info frame
+        ###################
+        # path info frame #
+        ###################
         self.colors["background"]["frame_path_info"] = "SeaGreen4"
+
+        ## output frame
+        self.colors["background"]["output_frame"] = "SeaGreen4"
+        ### output button set folder
+        self.colors["background"]["output_setfolder"] = "SeaGreen3"
+        self.colors["hover"]["output_setfolder"] = "SeaGreen2"
+        ### output label
+        self.colors["background"]["output_label"] = "SeaGreen4"
 
         ## input frame
         self.colors["background"]["input_frame"] = "SeaGreen4"
@@ -97,10 +111,6 @@ class Palette:
         self.colors["background"]["selection_list_thumbbtn"] = "SeaGreen4"
         self.colors["backgroundbis"]["selection_list_thumbbtn"] = "sienna2"
         self.colors["hover"]["selection_list_thumbbtn"] = "SkyBlue2"
-
-        ## input frame
-
-        ## output frame
 
     def get_colors(self, req_element):
         """Return the color of the requested element, in the current theme

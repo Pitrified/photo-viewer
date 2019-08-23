@@ -35,6 +35,8 @@ class Palette:
         background.frame_path_info.input_frame
         background.frame_path_info.output_frame
 
+        If you don't do the tree structure, element.background is clearer
+
         MAYBE you can do tricks by calling theme with a color inside another,
         and then overwriting only a few items:
         if theme='dark_blue':
@@ -67,11 +69,22 @@ class Palette:
         self.colors["hover"]["photo_list_scrollable"] = "SkyBlue2"
         self.colors["slider"]["photo_list_scrollable"] = "DeepSkyBlue4"
         ### photo list frame ThumbButton
-        self.colors["background"]['photo_list_thumbbtn'] = 'SeaGreen4'
-        self.colors["backgroundbis"]['photo_list_thumbbtn'] = 'DeepSkyBlue2'
-        self.colors["hover"]['photo_list_thumbbtn'] = 'SkyBlue2'
+        self.colors["background"]["photo_list_thumbbtn"] = "SeaGreen4"
+        self.colors["backgroundbis"]["photo_list_thumbbtn"] = "DeepSkyBlue2"
+        self.colors["hover"]["photo_list_thumbbtn"] = "SkyBlue2"
 
         ## selection list frame
+        self.colors["background"]["selection_list_frame"] = "SeaGreen4"
+        ### selection list frame header
+        self.colors["background"]["selection_list_frame_header"] = "SeaGreen4"
+        ### selection list frame ScrollableFrame
+        self.colors["background"]["selection_list_scrollable"] = "SeaGreen4"
+        self.colors["hover"]["selection_list_scrollable"] = "SkyBlue2"
+        self.colors["slider"]["selection_list_scrollable"] = "DeepSkyBlue3"
+        ### selection list frame ThumbButton
+        self.colors["background"]["selection_list_thumbbtn"] = "SeaGreen4"
+        self.colors["backgroundbis"]["selection_list_thumbbtn"] = "sienna2"
+        self.colors["hover"]["selection_list_thumbbtn"] = "SkyBlue2"
 
         ## input frame
 
@@ -83,6 +96,6 @@ class Palette:
         logg = logging.getLogger(f"c.{__class__.__name__}.get_colors")
         #  logg.setLevel("TRACE")
         logg.trace(f"Getting color for {req_element}")
-        group, element = req_element.split('.')
-        logg.trace(f'Color for {group}:{element} is {self.colors[group][element]}')
+        group, element = req_element.split(".")
+        logg.trace(f"Color for {group}:{element} is {self.colors[group][element]}")
         return self.colors[group][element]

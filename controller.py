@@ -51,7 +51,7 @@ class Controller:
         self.view.frame_path_info.photo_list_frame.bind(
             "<<thumbbtn_photo_doubleclick>>", self.doubleclikedThumbbtnPhoto
         )
-        self.view.frame_path_info.photo_list_frame.bind(
+        self.view.frame_path_info.selection_list_frame.bind(
             "<<thumbbtn_selection_doubleclick>>", self.doubleclikedThumbbtnSelection
         )
 
@@ -239,7 +239,7 @@ class Controller:
     def updatedSelectionList(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedSelectionList")
         logg.info(f"New values received for selection_list")  # {data}")
-        self.view.frame_path_info.update_selection_list(data)
+        self.view.frame_path_info.selection_list_frame.update_selection_list(data)
 
     def doubleclikedThumbbtnPhoto(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
@@ -255,7 +255,7 @@ class Controller:
         )
         #  logg.setLevel("TRACE")
         logg.info(f"doublecliked Thumbbtn selection")
-        pic = self.view.frame_path_info.selection_doubleclicked
+        pic = self.view.frame_path_info.selection_list_frame.selection_doubleclicked
         logg.trace(f"On pic {pic}")
         self.model.toggleSelectionPic(pic)
 

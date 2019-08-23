@@ -209,6 +209,9 @@ class FrameMetadata(tk.Frame):
 
 
 class FramePathInfo(tk.Frame):
+    """Container class for input/output folder, photo/selection list
+    """
+
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
         #  logg.setLevel("TRACE")
@@ -231,8 +234,12 @@ class FramePathInfo(tk.Frame):
         logg.trace(f"self.sidebar_width {self.sidebar_width}")
         self.output_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue1")
         self.input_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue2")
-        self.selection_list_frame = tk.Frame(
-            self, width=self.sidebar_width, bg="SkyBlue3"
+        self.selection_list_frame = SelectionListFrame(
+            self,
+            width=self.sidebar_width,
+            name="photo_list_frame",
+            palette=self.palette,
+            sidebar_width=self.sidebar_width,
         )
         self.photo_list_frame = PhotoListFrame(
             self,
@@ -257,7 +264,6 @@ class FramePathInfo(tk.Frame):
 
         self.build_output_frame()
         self.build_input_frame()
-        self.build_selection_list_frame()
 
     def build_output_frame(self):
         self.btn_set_output_folder = tk.Button(
@@ -342,31 +348,85 @@ class FramePathInfo(tk.Frame):
         """
         self.input_frame.event_generate("<<toggle_input_folder>>")
 
-    def build_selection_list_frame(self):
-        logg = logging.getLogger(f"c.{__class__.__name__}.build_selection_list_frame")
-        #  logg.setLevel("TRACE")
-        logg.info("Building selection_list_frame")
-        logg.trace(f"self.sidebar_width {self.sidebar_width}")
 
-        # selection list header, no need for precise pixel dimensions
+class ThumbButtonList(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def on_thumbbtn_enter(self, event):
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
+        #  logg.setLevel("TRACE")
+        logg.trace("Enter ThumbButton")
+        logg.trace(f"Event {event} fired by {event.widget}")
+        event.widget.on_enter()
+
+    def on_thumbbtn_leave(self, event):
+        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
+        #  logg.setLevel("TRACE")
+        logg.trace("Leave ThumbButton")
+        logg.trace(f"Event {event} fired by {event.widget}")
+        event.widget.on_leave()
+
+
+class SelectionListFrame(ThumbButtonList):
+    def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
+        """Do things in build_selection_list_frame
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info(f"Start init")
+
+        self.name = name
+        self.palette = palette
+        self.sidebar_width = sidebar_width
+
+        # frame background color
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
+
+        # header background color
+        self.back_col_header = (
+            self.palette.get_colors(f"background.selection_list_frame_header"),
+        )
+
+        # ScrollableFrame colors
+        self.back_col_scrollable = self.palette.get_colors(
+            f"background.selection_list_scrollable"
+        )
+        self.hover_col_scrollable = self.palette.get_colors(
+            f"hover.selection_list_scrollable"
+        )
+        self.slider_col_scrollable = self.palette.get_colors(
+            f"slider.selection_list_scrollable"
+        )
+
+        # ThumbButton colors
+        self.back_col_thumbbtn = self.palette.get_colors(
+            f"background.selection_list_thumbbtn"
+        )
+        self.hover_back_col_thumbbtn = self.palette.get_colors(
+            f"hover.selection_list_thumbbtn"
+        )
+        self.back_col_bis_thumbbtn = self.palette.get_colors(
+            f"backgroundbis.selection_list_thumbbtn"
+        )
+
+        super().__init__(parent, background=self.back_col, *args, **kwargs)
+
         self.selection_list_frame_header = tk.Label(
-            self.selection_list_frame,
-            text="Selection list:",
-            background=self.selection_list_frame.cget("background"),
+            self, text="Selection list:", background=self.back_col_header
         )
 
         # ScrollableFrame that holds the ThumbButtons
         self.selection_list_scrollable = ScrollableFrame(
-            self.selection_list_frame,
+            self,
             scroll_width=self.sidebar_width,
-            back_col=self.selection_list_frame.cget("background"),
-            hover_back_col="SkyBlue2",
-            slider_col="DeepSkyBlue3",
+            back_col=self.back_col_scrollable,
+            hover_back_col=self.hover_col_scrollable,
+            slider_col=self.slider_col_scrollable,
         )
 
         # setup grid in selection_list_frame
-        self.selection_list_frame.grid_rowconfigure(1, weight=1)
-        self.selection_list_frame.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         # grid static elements
         self.selection_list_frame_header.grid(row=0, column=0, sticky="ew")
@@ -398,9 +458,9 @@ class FramePathInfo(tk.Frame):
                 self.selection_list_thumbbtn[pic] = ThumbButton(
                     self.selection_list_scrollable.scroll_frame,
                     photo_info,
-                    back_col=self.selection_list_frame.cget("background"),
-                    hover_back_col="SkyBlue2",
-                    back_col_bis="sienna2",
+                    back_col=self.back_col_thumbbtn,
+                    hover_back_col=self.hover_back_col_thumbbtn,
+                    back_col_bis=self.back_col_bis_thumbbtn,
                 )
 
                 # bind enter/leave event to highlight
@@ -440,54 +500,7 @@ class FramePathInfo(tk.Frame):
         )
         self.selection_doubleclicked = event.widget.master.photo_info.photo_name_full
         logg.trace(f"selection_doubleclicked {self.selection_doubleclicked}")
-        self.photo_list_frame.event_generate("<<thumbbtn_selection_doubleclick>>")
-
-    def on_thumbbtn_enter(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
-        #  logg.setLevel("TRACE")
-        logg.trace("Enter ThumbButton")
-        logg.trace(f"Event {event} fired by {event.widget}")
-        event.widget.on_enter()
-
-    def on_thumbbtn_leave(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
-        #  logg.setLevel("TRACE")
-        logg.trace("Leave ThumbButton")
-        logg.trace(f"Event {event} fired by {event.widget}")
-        event.widget.on_leave()
-
-
-class ThumbButtonList(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def on_thumbbtn_enter(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_enter")
-        #  logg.setLevel("TRACE")
-        logg.trace("Enter ThumbButton")
-        logg.trace(f"Event {event} fired by {event.widget}")
-        event.widget.on_enter()
-
-    def on_thumbbtn_leave(self, event):
-        logg = logging.getLogger(f"c.{__class__.__name__}.on_thumbbtn_leave")
-        #  logg.setLevel("TRACE")
-        logg.trace("Leave ThumbButton")
-        logg.trace(f"Event {event} fired by {event.widget}")
-        event.widget.on_leave()
-
-
-class SelectionListFrame(ThumbButtonList):
-    def __init__(self, parent, back_col, *args, **kwargs):
-        """Do things in build_selection_list_frame
-        """
-        super().__init__(parent, background=back_col, *args, **kwargs)
-
-    def update_selection_list(self):
-        """Receives a dict of PhotoInfo object and creates ThumbButton
-
-        There is also info on whether the pic is still selected
-        selection_list_info = { pic : (PhotoInfo, is_selected) }
-        """
+        self.event_generate("<<thumbbtn_selection_doubleclick>>")
 
 
 class PhotoListFrame(ThumbButtonList):
@@ -509,11 +522,19 @@ class PhotoListFrame(ThumbButtonList):
         self.back_col_scrollable = self.palette.get_colors(
             f"background.photo_list_scrollable"
         )
-        self.hover_col_scrollable = self.palette.get_colors(f"hover.photo_list_scrollable")
-        self.slider_col_scrollable = self.palette.get_colors(f"slider.photo_list_scrollable")
+        self.hover_col_scrollable = self.palette.get_colors(
+            f"hover.photo_list_scrollable"
+        )
+        self.slider_col_scrollable = self.palette.get_colors(
+            f"slider.photo_list_scrollable"
+        )
 
-        self.back_col_thumbbtn = self.palette.get_colors(f"background.photo_list_thumbbtn")
-        self.hover_back_col_thumbbtn = self.palette.get_colors(f"hover.photo_list_thumbbtn")
+        self.back_col_thumbbtn = self.palette.get_colors(
+            f"background.photo_list_thumbbtn"
+        )
+        self.hover_back_col_thumbbtn = self.palette.get_colors(
+            f"hover.photo_list_thumbbtn"
+        )
         self.back_col_bis_thumbbtn = self.palette.get_colors(
             f"backgroundbis.photo_list_thumbbtn"
         )

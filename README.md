@@ -29,6 +29,14 @@ Each piece of the view is dependent on a single piece of the model. When some ob
 
 Will handle the layout switching.
 
+The structure is:
+
+```
+root
+    layout containers
+        elements
+```
+
 ##### Controller
 Captures User Input (with bindings/callbacks/events from tkinter widgets in the view), and binds it to action *on the model*. The view is updated by the callbacks registered on the observables.
 

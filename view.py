@@ -39,6 +39,11 @@ class View:
             palette=self.palette,
         )
 
+        # MAYBE there could in View reaction callbacks to call from the controller
+        # to insulate the view even more, as the controller would call a generic
+        # self.view.updatedPhotoList, and inside View.updatedPhotoList there would
+        # be the actual implementation
+
     def setup_main_window(self):
         """Setup main window aesthetics
         """
@@ -233,7 +238,7 @@ class FramePathInfo(tk.Frame):
         # CREATE children frames
         logg.trace(f"self.sidebar_width {self.sidebar_width}")
         self.output_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue1")
-        self.input_frame = tk.Frame(self, width=self.sidebar_width, bg="SkyBlue2")
+        self.input_frame = InputFrame(self, name="input_frame", palette=self.palette)
         self.selection_list_frame = SelectionListFrame(
             self,
             width=self.sidebar_width,
@@ -263,7 +268,7 @@ class FramePathInfo(tk.Frame):
         self.photo_list_frame.grid(row=3, column=0, sticky="nsew")
 
         self.build_output_frame()
-        self.build_input_frame()
+        #  self.build_input_frame()
 
     def build_output_frame(self):
         self.btn_set_output_folder = tk.Button(
@@ -292,20 +297,51 @@ class FramePathInfo(tk.Frame):
         # MAYBE showing a right aligned full path might be more informative
         self.output_folder_var.set(basename(output_folder_full))
 
-    def build_input_frame(self):
+
+class InputFrame(tk.Frame):
+    def __init__(self, parent, name, palette, *args, **kwargs):
+        """Do things in build_input_frame
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.info(f"Start init")
+
+        self.name = name
+        self.palette = palette
+
+        # frame background color
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
+
+        # add button
+        self.back_col_input_addfolder = self.palette.get_colors(
+            f"background.input_addfolder"
+        )
+        self.hover_col_input_addfolder = self.palette.get_colors(
+            f"hover.input_addfolder"
+        )
+
+        # checkbuttons
+        self.back_col_input_chkbtn = self.palette.get_colors(f"background.input_chkbtn")
+        self.hover_col_input_chkbtn = self.palette.get_colors(f"hover.input_chkbtn")
+        self.select_col_input_chkbtn = self.palette.get_colors(f"select.input_chkbtn")
+
+        super().__init__(parent, background=self.back_col, *args, **kwargs)
+
         # create static elements
         self.btn_add_folder = tk.Button(
-            self.input_frame,
+            self,
             text="Add directory to list",
             borderwidth=0,
-            background="SkyBlue3",
-            activebackground="LightSkyBlue3",
+            background=self.back_col_input_addfolder,
+            activebackground=self.hover_col_input_addfolder,
             highlightthickness=0,
         )
+
         # setup grid in input_frame
-        self.input_frame.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         # grid static elements
         self.btn_add_folder.grid(row=0, column=0)
+
         # dicts for runtime elements
         self.checkbtn_input_fold = {}
         self.checkbtn_input_state = {}
@@ -327,14 +363,14 @@ class FramePathInfo(tk.Frame):
             if not folder in self.checkbtn_input_fold:
                 self.checkbtn_input_state[folder] = tk.BooleanVar(value=True)
                 self.checkbtn_input_fold[folder] = tk.Checkbutton(
-                    self.input_frame,
+                    self,
                     text=folder_name,
-                    background=self.input_frame.cget("background"),
+                    background=self.back_col_input_chkbtn,
                     variable=self.checkbtn_input_state[folder],
                     command=self.generate_virtual_toggling_input_folder,
                     highlightthickness=0,
-                    activebackground="SkyBlue1",
-                    selectcolor="SkyBlue1",
+                    activebackground=self.hover_col_input_chkbtn,
+                    selectcolor=self.select_col_input_chkbtn,
                     borderwidth=0,
                 )
 
@@ -346,7 +382,7 @@ class FramePathInfo(tk.Frame):
     def generate_virtual_toggling_input_folder(self):
         """Generate a virtual event to notify the controller of a toggled Checkbutton
         """
-        self.input_frame.event_generate("<<toggle_input_folder>>")
+        self.event_generate("<<toggle_input_folder>>")
 
 
 class ThumbButtonList(tk.Frame):

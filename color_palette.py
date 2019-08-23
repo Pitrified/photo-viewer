@@ -49,6 +49,7 @@ class Palette:
         self.colors["hover"] = {}
         self.colors["hoverbis"] = {}
         self.colors["slider"] = {}
+        self.colors["select"] = {}
 
         # crop frames
         self.colors["background"]["frame_crop_prim"] = "SeaGreen1"
@@ -59,6 +60,17 @@ class Palette:
 
         # path info frame
         self.colors["background"]["frame_path_info"] = "SeaGreen4"
+
+        ## input frame
+        self.colors["background"]["input_frame"] = "SeaGreen4"
+        ### input button add folder
+        self.colors["background"]["input_addfolder"] = "SeaGreen3"
+        self.colors["hover"]["input_addfolder"] = "SeaGreen2"
+        ### input checkbuttons folder
+        self.colors["background"]["input_chkbtn"] = "SeaGreen4"
+        self.colors["hover"]["input_chkbtn"] = "SeaGreen2"
+        # ... this controls the background of the check in the Checkbutton
+        self.colors["select"]["input_chkbtn"] = "SeaGreen3"
 
         ## photo list frame
         self.colors["background"]["photo_list_frame"] = "SeaGreen4"

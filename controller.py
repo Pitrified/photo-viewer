@@ -41,7 +41,9 @@ class Controller:
         # TODO button to save_selection
 
         # button to add another input_folder
-        self.view.frame_path_info.btn_add_folder.config(command=self.addInputFolder)
+        self.view.frame_path_info.input_frame.btn_add_folder.config(
+            command=self.addInputFolder
+        )
         # react to input folder toggling
         self.view.frame_path_info.input_frame.bind(
             "<<toggle_input_folder>>", self.toggledInputFolder
@@ -213,12 +215,12 @@ class Controller:
     def updatedInputFolder(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedInputFolder")
         logg.info(f"New values received for input_folders")  # {data}")
-        self.view.frame_path_info.update_input_frame(data)
+        self.view.frame_path_info.input_frame.update_input_frame(data)
 
     def toggledInputFolder(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.toggledinputfolder")
         logg.info(f"toggled input folder")
-        state = self.view.frame_path_info.checkbtn_input_state
+        state = self.view.frame_path_info.input_frame.checkbtn_input_state
         self.model.toggleInputFolder(state)
 
     def updatedCurrentLayout(self, lay_num):

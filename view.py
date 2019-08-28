@@ -15,7 +15,8 @@ class View:
         logg.info("Start init")
 
         self.root = root
-        self.palette = Palette("blue")
+        # TODO get this from Controller
+        self.palette = Palette("blue1")
 
         self.setup_main_window()
 

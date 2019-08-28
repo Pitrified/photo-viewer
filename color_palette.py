@@ -43,6 +43,9 @@ class Palette:
             self.load_theme('blue')
             color['some_element'] = 'dark_blue'
         """
+        logg = logging.getLogger(f"c.{__class__.__name__}.load_theme")
+        logg.setLevel("TRACE")
+
         self.colors = {}
         self.colors["background"] = {}
         self.colors["backgroundbis"] = {}
@@ -55,79 +58,79 @@ class Palette:
             ###############
             # crop frames #
             ###############
-            self.colors["background"]["frame_crop_prim"] = "SeaGreen1"
-            self.colors["background"]["frame_crop_echo"] = "SeaGreen2"
+            self.set_colors("background.frame_crop.prim", "SeaGreen1")
+            self.set_colors("background.frame_crop.echo", "SeaGreen2")
 
             ##################
             # metadata frame #
             ##################
-            self.colors["background"]["frame_metadata"] = "SeaGreen3"
+            self.set_colors("background.frame.metadata", "SeaGreen3")
 
             ###################
             # path info frame #
             ###################
-            self.colors["background"]["frame_path_info"] = "SeaGreen4"
+            self.set_colors("background.frame.path_info", "SeaGreen4")
 
             ## output frame
-            self.colors["background"]["output_frame"] = "SeaGreen4"
+            self.set_colors("background.frame.output", "SeaGreen4")
             ### output header
-            self.colors["background"]["output_frame_header"] = "SeaGreen3"
+            self.set_colors("background.header.output", "SeaGreen3")
             ### output button set folder
-            self.colors["background"]["output_setfolder"] = "SeaGreen3"
-            self.colors["hover"]["output_setfolder"] = "SeaGreen2"
+            self.set_colors("background.button.output_setfolder", "SeaGreen3")
+            self.set_colors("hover.button.output_setfolder", "SeaGreen2")
             ### output label
-            self.colors["background"]["output_label"] = "SeaGreen4"
+            self.set_colors("background.label.output", "SeaGreen4")
 
             ## input frame
-            self.colors["background"]["input_frame"] = "SeaGreen4"
+            self.set_colors("background.frame.input", "SeaGreen4")
             ### input header
-            self.colors["background"]["input_frame_header"] = "SeaGreen3"
+            self.set_colors("background.header.input", "SeaGreen3")
             ### input button add folder
-            self.colors["background"]["input_addfolder"] = "SeaGreen3"
-            self.colors["hover"]["input_addfolder"] = "SeaGreen2"
+            self.set_colors("background.button.input_addfolder", "SeaGreen3")
+            self.set_colors("hover.button.input_addfolder", "SeaGreen2")
             ### input checkbuttons folder
-            self.colors["background"]["input_chkbtn"] = "SeaGreen4"
-            self.colors["hover"]["input_chkbtn"] = "SeaGreen2"
+            self.set_colors("background.chkbtn.input", "SeaGreen4")
+            self.set_colors("hover.chkbtn.input", "SeaGreen2")
             # ... this controls the background of the check in the Checkbutton
-            self.colors["select"]["input_chkbtn"] = "SeaGreen3"
+            self.set_colors("select.chkbtn.input", "SeaGreen3")
 
             ## photo list frame
-            self.colors["background"]["photo_list_frame"] = "SeaGreen4"
+            self.set_colors("background.frame.photo_list", "SeaGreen4")
             ### photo list frame header
-            self.colors["background"]["photo_list_frame_header"] = "SeaGreen4"
+            self.set_colors("background.header.photo_list", "SeaGreen4")
             ### photo list frame ScrollableFrame
-            self.colors["background"]["photo_list_scrollable"] = "SeaGreen4"
-            self.colors["hover"]["photo_list_scrollable"] = "SkyBlue2"
-            self.colors["slider"]["photo_list_scrollable"] = "DeepSkyBlue4"
+            self.set_colors("background.scrollable.photo_list", "SeaGreen4")
+            self.set_colors("hover.scrollable.photo_list", "SkyBlue2")
+            self.set_colors("slider.scrollable.photo_list", "DeepSkyBlue4")
             ### photo list frame ThumbButton
-            self.colors["background"]["photo_list_thumbbtn"] = "SeaGreen4"
-            self.colors["backgroundbis"]["photo_list_thumbbtn"] = "DeepSkyBlue2"
-            self.colors["hover"]["photo_list_thumbbtn"] = "SkyBlue2"
+            self.set_colors("background.thumbbtn.photo_list", "SeaGreen4")
+            self.set_colors("backgroundbis.thumbbtn.photo_list", "DeepSkyBlue2")
+            self.set_colors("hover.thumbbtn.photo_list", "SkyBlue2")
 
             ## selection list frame
-            self.colors["background"]["selection_list_frame"] = "SeaGreen4"
+            self.set_colors("background.frame.selection_list", "SeaGreen4")
             ### selection list frame header
-            self.colors["background"]["selection_list_frame_header"] = "SeaGreen4"
+            self.set_colors("background.header.selection_list", "SeaGreen4")
             ### selection list frame ScrollableFrame
-            self.colors["background"]["selection_list_scrollable"] = "SeaGreen4"
-            self.colors["hover"]["selection_list_scrollable"] = "SkyBlue2"
-            self.colors["slider"]["selection_list_scrollable"] = "DeepSkyBlue3"
+            self.set_colors("background.scrollable.selection_list", "SeaGreen4")
+            self.set_colors("hover.scrollable.selection_list", "SkyBlue2")
+            self.set_colors("slider.scrollable.selection_list", "DeepSkyBlue3")
             ### selection list frame ThumbButton
-            self.colors["background"]["selection_list_thumbbtn"] = "SeaGreen4"
-            self.colors["backgroundbis"]["selection_list_thumbbtn"] = "sienna2"
-            self.colors["hover"]["selection_list_thumbbtn"] = "SkyBlue2"
+            self.set_colors("background.thumbbtn.selection_list", "SeaGreen4")
+            self.set_colors("backgroundbis.thumbbtn.selection_list", "sienna2")
+            self.set_colors("hover.thumbbtn.selection_list", "SkyBlue2")
 
         elif theme == "blue1":
             ###############
             # crop frames #
             ###############
-            self.colors["background"]["frame_crop_prim"] = "SteelBlue1"
-            self.colors["background"]["frame_crop_echo"] = "SteelBlue2"
+            self.set_colors("background.frame_crop.prim", "SteelBlue1")
+            self.set_colors("background.frame_crop.echo", "SteelBlue2")
 
             ##################
             # metadata frame #
             ##################
-            self.colors["background"]["frame_metadata"] = "SteelBlue3"
+            self.set_colors("background.frame.metadata", "SteelBlue3")
 
             ###################
             # path info frame #
@@ -138,63 +141,147 @@ class Palette:
             hover_col = "LightSkyBlue2"
             slider_col = "SteelBlue3"
 
-            self.colors["background"]["frame_path_info"] = back_info_col
+            self.set_colors("background.frame.path_info", back_info_col)
 
             ## output frame
-            self.colors["background"]["output_frame"] = back_info_col
+            self.set_colors("background.frame.output", back_info_col)
             ### output header
-            self.colors["background"]["output_frame_header"] = header_col
+            self.set_colors("background.header.output", header_col)
             ### output button set folder
-            self.colors["background"]["output_setfolder"] = btn_col
-            self.colors["hover"]["output_setfolder"] = hover_col
+            self.set_colors("background.button.output_setfolder", btn_col)
+            self.set_colors("hover.button.output_setfolder", hover_col)
             ### output label
-            self.colors["background"]["output_label"] = back_info_col
+            self.set_colors("background.label.output", back_info_col)
 
             ## input frame
-            self.colors["background"]["input_frame"] = back_info_col
+            self.set_colors("background.frame.input", back_info_col)
             ### input header
-            self.colors["background"]["input_frame_header"] = header_col
+            self.set_colors("background.header.input", header_col)
             ### input button add folder
-            self.colors["background"]["input_addfolder"] = btn_col
-            self.colors["hover"]["input_addfolder"] = hover_col
+            self.set_colors("background.button.input_addfolder", btn_col)
+            self.set_colors("hover.button.input_addfolder", hover_col)
             ### input checkbuttons folder
-            self.colors["background"]["input_chkbtn"] = back_info_col
-            self.colors["hover"]["input_chkbtn"] = hover_col
+            self.set_colors("background.chkbtn.input", back_info_col)
+            self.set_colors("hover.chkbtn.input", hover_col)
             # ... this controls the background of the check in the Checkbutton
-            self.colors["select"]["input_chkbtn"] = btn_col
+            self.set_colors("select.chkbtn.input", btn_col)
 
             ## photo list frame
-            self.colors["background"]["photo_list_frame"] = back_info_col
+            self.set_colors("background.frame.photo_list", back_info_col)
             ### photo list frame header
-            self.colors["background"]["photo_list_frame_header"] = header_col
+            self.set_colors("background.header.photo_list", header_col)
             ### photo list frame ScrollableFrame
-            self.colors["background"]["photo_list_scrollable"] = back_info_col
-            self.colors["hover"]["photo_list_scrollable"] = hover_col
-            self.colors["slider"]["photo_list_scrollable"] = slider_col
+            self.set_colors("background.scrollable.photo_list", back_info_col)
+            self.set_colors("hover.scrollable.photo_list", hover_col)
+            self.set_colors("slider.scrollable.photo_list", slider_col)
             ### photo list frame ThumbButton
-            self.colors["background"]["photo_list_thumbbtn"] = back_info_col
-            self.colors["backgroundbis"]["photo_list_thumbbtn"] = "DeepSkyBlue2"
-            self.colors["hover"]["photo_list_thumbbtn"] = hover_col
+            self.set_colors("background.thumbbtn.photo_list", back_info_col)
+            self.set_colors("backgroundbis.thumbbtn.photo_list", "DeepSkyBlue2")
+            self.set_colors("hover.thumbbtn.photo_list", hover_col)
 
             ## selection list frame
-            self.colors["background"]["selection_list_frame"] = back_info_col
+            self.set_colors("background.frame.selection_list", back_info_col)
             ### selection list frame header
-            self.colors["background"]["selection_list_frame_header"] = header_col
+            self.set_colors("background.header.selection_list", header_col)
             ### selection list frame ScrollableFrame
-            self.colors["background"]["selection_list_scrollable"] = back_info_col
-            self.colors["hover"]["selection_list_scrollable"] = hover_col
-            self.colors["slider"]["selection_list_scrollable"] = slider_col
+            self.set_colors("background.scrollable.selection_list", back_info_col)
+            self.set_colors("hover.scrollable.selection_list", hover_col)
+            self.set_colors("slider.scrollable.selection_list", slider_col)
             ### selection list frame ThumbButton
-            self.colors["background"]["selection_list_thumbbtn"] = back_info_col
-            self.colors["backgroundbis"]["selection_list_thumbbtn"] = "sienna2"
-            self.colors["hover"]["selection_list_thumbbtn"] = hover_col
+            self.set_colors("background.thumbbtn.selection_list", back_info_col)
+            self.set_colors("backgroundbis.thumbbtn.selection_list", "sienna2")
+            self.set_colors("hover.thumbbtn.selection_list", hover_col)
+
+        elif theme == "ocra-minimal":
+            header_col = "LightGoldenrod4"
+            back_info_col = "LightGoldenrod3"
+            btn_col = "LightGoldenrod2"
+            hover_col = "LightGoldenrod1"
+            slider_col = "khaki2"
+            current_col = "goldenrod3"
+            deselected_col = "red3"
+
+            self.set_colors("background.frame_crop", back_info_col)
+            self.set_colors("background.frame", back_info_col)
+            self.set_colors("background.label", back_info_col)
+            self.set_colors("background.header", header_col)
+
+            self.set_colors("background.button", btn_col)
+            self.set_colors("hover.button", hover_col)
+
+            self.set_colors("background.chkbtn", back_info_col)
+            self.set_colors("hover.chkbtn", hover_col)
+            self.set_colors("select.chkbtn", btn_col)
+
+            self.set_colors("background.scrollable", back_info_col)
+            self.set_colors("hover.scrollable", hover_col)
+            self.set_colors("slider.scrollable", slider_col)
+
+            self.set_colors("background.thumbbtn", back_info_col)
+            self.set_colors("backgroundbis.thumbbtn.photo_list", current_col)
+            self.set_colors("backgroundbis.thumbbtn.selection_list", deselected_col)
+            self.set_colors("hover.thumbbtn", hover_col)
+
+        self._state_colors(logg)
+
+    def set_colors(self, req_element, color):
+        """Set the color of the specified element, defined as group.etype.element
+
+        If the dict for that element/level does not exist, create it on the fly
+
+        group.etype is automatically seen as group.etype.standard
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}.set_colors")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"Setting color {color} for {req_element}")
+        elem_tree = req_element.split(".")
+        logg.trace(f"Split in {elem_tree}")
+
+        group = elem_tree[0]
+        if not group in self.colors:
+            self.colors[group] = {}
+
+        etype = elem_tree[1]
+        if not etype in self.colors[group]:
+            self.colors[group][etype] = {}
+
+        if len(elem_tree) > 2:
+            element = elem_tree[2]
+        else:
+            element = "standard"
+
+        self.colors[group][etype][element] = color
 
     def get_colors(self, req_element):
         """Return the color of the requested element, in the current theme
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.get_colors")
-        #  logg.setLevel("TRACE")
+        logg.setLevel("TRACE")
         logg.trace(f"Getting color for {req_element}")
-        group, element = req_element.split(".")
-        logg.trace(f"Color for {group}:{element} is {self.colors[group][element]}")
-        return self.colors[group][element]
+        #  group, element = req_element.split(".")
+        #  logg.trace(f"Color for {group}:{element} is {self.colors[group][element]}")
+
+        elem_tree = req_element.split(".")
+        logg.trace(f"Split in {elem_tree}")
+
+        group = elem_tree[0]
+        etype = elem_tree[1]
+        if len(elem_tree) > 2 and elem_tree[2] in self.colors[group][etype]:
+            element = elem_tree[2]
+        else:
+            element = "standard"
+
+        logg.trace(f"Color for {group}:{etype}:{element}")
+        #  is {self.colors[group][etype][element]}"
+
+        return self.colors[group][etype][element]
+
+    def _state_colors(self, logg):
+        for g in self.colors:
+            logg.trace(f"Group {g}")
+
+            for t in self.colors[g]:
+                logg.trace(f"    Element type {t}")
+
+                for e in self.colors[g][t]:
+                    logg.trace(f"        Element {e:<20} color {self.colors[g][t][e]}")

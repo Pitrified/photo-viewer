@@ -16,27 +16,29 @@ class View:
 
         self.root = root
         # TODO get this from Controller
-        self.palette = Palette("blue1")
+        #  self.palette = Palette("blue1")
+        #  self.palette = Palette("badgreen")
+        self.palette = Palette("ocra-minimal")
 
         self.setup_main_window()
 
         # create frames for photo and info panels
         self.frame_crop_prim = FrameCrop(
-            self.root, name="frame_crop_prim", palette=self.palette
+            self.root, name="frame_crop.prim", palette=self.palette
         )
         self.frame_crop_echo = FrameCrop(
-            self.root, name="frame_crop_echo", palette=self.palette
+            self.root, name="frame_crop.echo", palette=self.palette
         )
         self.frame_metadata = FrameMetadata(
             self.root,
             sidebar_width=self.right_sidebar_width,
-            name="frame_metadata",
+            name="frame.metadata",
             palette=self.palette,
         )
         self.frame_path_info = FramePathInfo(
             parent=self.root,
             sidebar_width=self.right_sidebar_width,
-            name="frame_path_info",
+            name="frame.path_info",
             palette=self.palette,
         )
 
@@ -127,6 +129,7 @@ class View:
         self.frame_crop_echo.grid(row=0, column=1, sticky="nsew")
 
     def exit(self):
+        # TODO ask confirmation, ask if you want to save option/selection
         self.root.destroy()
 
 
@@ -253,19 +256,19 @@ class FramePathInfo(tk.Frame):
 
         # CREATE children frames
         logg.trace(f"self.sidebar_width {self.sidebar_width}")
-        self.output_frame = OutputFrame(self, name="output_frame", palette=self.palette)
-        self.input_frame = InputFrame(self, name="input_frame", palette=self.palette)
+        self.output_frame = OutputFrame(self, name="frame.output", palette=self.palette)
+        self.input_frame = InputFrame(self, name="frame.input", palette=self.palette)
         self.selection_list_frame = SelectionListFrame(
             self,
             width=self.sidebar_width,
-            name="photo_list_frame",
+            name="frame.selection_list",
             palette=self.palette,
             sidebar_width=self.sidebar_width,
         )
         self.photo_list_frame = PhotoListFrame(
             self,
             width=self.sidebar_width,
-            name="photo_list_frame",
+            name="frame.photo_list",
             palette=self.palette,
             sidebar_width=self.sidebar_width,
         )
@@ -299,19 +302,19 @@ class OutputFrame(tk.Frame):
 
         # header background color
         self.back_col_header = (
-            self.palette.get_colors(f"background.output_frame_header"),
+            self.palette.get_colors(f"background.header.output"),
         )
 
         # set folder button
         self.back_col_output_setfolder = self.palette.get_colors(
-            f"background.output_setfolder"
+            f"background.button.output_setfolder"
         )
         self.hover_col_output_setfolder = self.palette.get_colors(
-            f"hover.output_setfolder"
+            f"hover.button.output_setfolder"
         )
 
         # set folder label
-        self.back_col_output_label = self.palette.get_colors(f"background.output_label")
+        self.back_col_output_label = self.palette.get_colors(f"background.label.output")
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
 
@@ -364,21 +367,21 @@ class InputFrame(tk.Frame):
 
         # header background color
         self.back_col_header = (
-            self.palette.get_colors(f"background.input_frame_header"),
+            self.palette.get_colors(f"background.header.input"),
         )
 
         # add folder button
         self.back_col_input_addfolder = self.palette.get_colors(
-            f"background.input_addfolder"
+            f"background.button.input_addfolder"
         )
         self.hover_col_input_addfolder = self.palette.get_colors(
-            f"hover.input_addfolder"
+            f"hover.button.input_addfolder"
         )
 
         # checkbuttons
-        self.back_col_input_chkbtn = self.palette.get_colors(f"background.input_chkbtn")
-        self.hover_col_input_chkbtn = self.palette.get_colors(f"hover.input_chkbtn")
-        self.select_col_input_chkbtn = self.palette.get_colors(f"select.input_chkbtn")
+        self.back_col_input_chkbtn = self.palette.get_colors(f"background.chkbtn.input")
+        self.hover_col_input_chkbtn = self.palette.get_colors(f"hover.chkbtn.input")
+        self.select_col_input_chkbtn = self.palette.get_colors(f"select.chkbtn.input")
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
 
@@ -481,29 +484,29 @@ class SelectionListFrame(ThumbButtonList):
 
         # header background color
         self.back_col_header = (
-            self.palette.get_colors(f"background.selection_list_frame_header"),
+            self.palette.get_colors(f"background.header.selection_list"),
         )
 
         # ScrollableFrame colors
         self.back_col_scrollable = self.palette.get_colors(
-            f"background.selection_list_scrollable"
+            f"background.scrollable.selection_list"
         )
         self.hover_col_scrollable = self.palette.get_colors(
-            f"hover.selection_list_scrollable"
+            f"hover.scrollable.selection_list"
         )
         self.slider_col_scrollable = self.palette.get_colors(
-            f"slider.selection_list_scrollable"
+            f"slider.scrollable.selection_list"
         )
 
         # ThumbButton colors
         self.back_col_thumbbtn = self.palette.get_colors(
-            f"background.selection_list_thumbbtn"
+            f"background.thumbbtn.selection_list"
         )
         self.hover_back_col_thumbbtn = self.palette.get_colors(
-            f"hover.selection_list_thumbbtn"
+            f"hover.thumbbtn.selection_list"
         )
         self.back_col_bis_thumbbtn = self.palette.get_colors(
-            f"backgroundbis.selection_list_thumbbtn"
+            f"backgroundbis.thumbbtn.selection_list"
         )
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
@@ -613,27 +616,27 @@ class PhotoListFrame(ThumbButtonList):
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         self.back_col_header = (
-            self.palette.get_colors(f"background.photo_list_frame_header"),
+            self.palette.get_colors(f"background.header.photo_list"),
         )
 
         self.back_col_scrollable = self.palette.get_colors(
-            f"background.photo_list_scrollable"
+            f"background.scrollable.photo_list"
         )
         self.hover_col_scrollable = self.palette.get_colors(
-            f"hover.photo_list_scrollable"
+            f"hover.scrollable.photo_list"
         )
         self.slider_col_scrollable = self.palette.get_colors(
-            f"slider.photo_list_scrollable"
+            f"slider.scrollable.photo_list"
         )
 
         self.back_col_thumbbtn = self.palette.get_colors(
-            f"background.photo_list_thumbbtn"
+            f"background.thumbbtn.photo_list"
         )
         self.hover_back_col_thumbbtn = self.palette.get_colors(
-            f"hover.photo_list_thumbbtn"
+            f"hover.thumbbtn.photo_list"
         )
         self.back_col_bis_thumbbtn = self.palette.get_colors(
-            f"backgroundbis.photo_list_thumbbtn"
+            f"backgroundbis.thumbbtn.photo_list"
         )
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
@@ -680,7 +683,7 @@ class PhotoListFrame(ThumbButtonList):
         photo_list_info = { pic : PhotoInfo }
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.update_photo_list")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.info("Updating photo_list ThumbButton")
 
         for pic in self.photo_list_thumbbtn:

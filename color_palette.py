@@ -79,6 +79,8 @@ class Palette:
 
         ## input frame
         self.colors["background"]["input_frame"] = "SeaGreen4"
+        ### input header
+        self.colors["background"]["input_frame_header"] = "SeaGreen3"
         ### input button add folder
         self.colors["background"]["input_addfolder"] = "SeaGreen3"
         self.colors["hover"]["input_addfolder"] = "SeaGreen2"

@@ -338,8 +338,8 @@ class OutputFrame(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
         self.output_frame_header.grid(row=0, column=0, sticky="ew")
-        self.btn_set_output_folder.grid(row=1, column=0)
-        self.text_output_folder.grid(row=2, column=0, sticky="ew")
+        self.text_output_folder.grid(row=1, column=0, sticky="ew")
+        self.btn_set_output_folder.grid(row=2, column=0)
 
     def update_output_frame(self, output_folder_full):
         logg = logging.getLogger(f"c.{__class__.__name__}.update_output_frame")
@@ -361,6 +361,11 @@ class InputFrame(tk.Frame):
         # frame background color
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
+        # header background color
+        self.back_col_header = (
+            self.palette.get_colors(f"background.input_frame_header"),
+        )
+
         # add folder button
         self.back_col_input_addfolder = self.palette.get_colors(
             f"background.input_addfolder"
@@ -376,10 +381,14 @@ class InputFrame(tk.Frame):
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
 
+        self.input_frame_header = tk.Label(
+            self, text="Input folder:", background=self.back_col_header
+        )
+
         # create static elements
         self.btn_add_folder = tk.Button(
             self,
-            text="Add directory to list",
+            text="Add input folder",
             borderwidth=0,
             background=self.back_col_input_addfolder,
             activebackground=self.hover_col_input_addfolder,
@@ -390,7 +399,8 @@ class InputFrame(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
         # grid static elements
-        self.btn_add_folder.grid(row=0, column=0)
+        self.input_frame_header.grid(row=0, column=0, sticky="ew")
+        self.btn_add_folder.grid(row=1, column=0)
 
         # dicts for runtime elements
         self.checkbtn_input_fold = {}
@@ -425,7 +435,7 @@ class InputFrame(tk.Frame):
                 )
 
             # grid the Checkbutton
-            self.checkbtn_input_fold[folder].grid(row=ri + 1, column=0, sticky="ew")
+            self.checkbtn_input_fold[folder].grid(row=ri + 2, column=0, sticky="ew")
             # copy the state from what you receive from the model
             self.checkbtn_input_state[folder].set(input_folders[folder])
 

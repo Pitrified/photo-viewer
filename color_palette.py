@@ -69,6 +69,8 @@ class Palette:
 
         ## output frame
         self.colors["background"]["output_frame"] = "SeaGreen4"
+        ### output header
+        self.colors["background"]["output_frame_header"] = "SeaGreen3"
         ### output button set folder
         self.colors["background"]["output_setfolder"] = "SeaGreen3"
         self.colors["hover"]["output_setfolder"] = "SeaGreen2"

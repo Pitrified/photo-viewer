@@ -193,6 +193,9 @@ class FrameCrop(tk.Frame):
 
 
 class FrameMetadata(tk.Frame):
+    """Container class for metadata info
+    """
+
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
         logg.info(f"Start init")
@@ -211,6 +214,18 @@ class FrameMetadata(tk.Frame):
             self, text="Mock up Metadata", background=self.cget("background")
         )
         self.temp.grid(row=0, column=0)
+
+
+class MetadataFrame(tk.Frame):
+    """Element class to show metadata info
+    """
+
+
+class TagFrame(tk.Frame):
+    """Element to add tags to the image
+
+    Possibly in the tag exif field
+    """
 
 
 class FramePathInfo(tk.Frame):
@@ -281,6 +296,11 @@ class OutputFrame(tk.Frame):
         # frame background color
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
+        # header background color
+        self.back_col_header = (
+            self.palette.get_colors(f"background.output_frame_header"),
+        )
+
         # set folder button
         self.back_col_output_setfolder = self.palette.get_colors(
             f"background.output_setfolder"
@@ -293,6 +313,10 @@ class OutputFrame(tk.Frame):
         self.back_col_output_label = self.palette.get_colors(f"background.output_label")
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
+
+        self.output_frame_header = tk.Label(
+            self, text="Output folder:", background=self.back_col_header
+        )
 
         self.btn_set_output_folder = tk.Button(
             self,
@@ -312,8 +336,10 @@ class OutputFrame(tk.Frame):
 
         # grid the elements, grow only the label
         self.grid_columnconfigure(0, weight=1)
-        self.btn_set_output_folder.grid(row=0, column=0)
-        self.text_output_folder.grid(row=1, column=0, sticky="ew")
+
+        self.output_frame_header.grid(row=0, column=0, sticky="ew")
+        self.btn_set_output_folder.grid(row=1, column=0)
+        self.text_output_folder.grid(row=2, column=0, sticky="ew")
 
     def update_output_frame(self, output_folder_full):
         logg = logging.getLogger(f"c.{__class__.__name__}.update_output_frame")

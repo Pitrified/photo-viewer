@@ -134,7 +134,7 @@ class Model:
         logg.info("Cycling layout")
         old_layout = self.layout_current.get()
         new_layout = (old_layout + 1) % self._layout_tot
-        self.layout_current.set(new_layout)
+        self.setLayout(new_layout)
 
         # if the new layout is double and the old is not, sync echo and prim indexes
         if new_layout in self._layout_is_double and (
@@ -173,7 +173,7 @@ class Model:
         # list of filenames of active photos: ideally parallel to
         # photo_info_list_active.keys() but dict order can't be trusted so we
         # keep track here of the index
-        # MAYBE the list passed to view to sort in special way
+        # TODO the list passed to view to sort in special way
         # TODO sort list according to metadata
         # hopefully loading them will be fast, all will be needed to sort
         self._active_photo_list = []
@@ -286,6 +286,7 @@ class Model:
         logg.info(f"Moving index echo {direction}")
 
         if not self.layout_current.get() in self._layout_is_double:
+            # MAYBE move index prim in this case
             logg.warn("Current layout is not double, can't move index echo")
             return
 

@@ -16,6 +16,7 @@ class View:
 
         self.root = root
         # TODO get this from Controller
+        # TODO change theme at runtime...
         #  self.palette = Palette("blue1")
         #  self.palette = Palette("badgreen")
         self.palette = Palette("ocra-minimal")
@@ -78,6 +79,10 @@ class View:
         elif lay_num == 4:
             self.layout_imp()
 
+        # IDEA for layout_imi
+        # MetadataFrame is different if current layout is double
+        # TODO update MetadataFrame if the *new* layout is double?
+
     def layout_reset(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.layout_reset")
         #  logg.setLevel("TRACE")
@@ -130,6 +135,7 @@ class View:
 
     def exit(self):
         # TODO ask confirmation, ask if you want to save option/selection
+        # MAYBE save options in json?
         self.root.destroy()
 
 

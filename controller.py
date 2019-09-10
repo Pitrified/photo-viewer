@@ -27,6 +27,7 @@ class Controller:
         self.model.layout_current.addCallback(self.updatedCurrentLayout)
         self.model.cropped_prim.addCallback(self.updatedCroppedPrim)
         self.model.cropped_echo.addCallback(self.updatedCroppedEcho)
+        self.model.metadata_prim.addCallback(self.updatedMetadataPrim)
 
         self.view = View(self.root)
 
@@ -281,6 +282,12 @@ class Controller:
         #  logg.setLevel("TRACE")
         logg.trace(f"New value received for cropped_echo")
         self.view.frame_crop_echo.update_image(data)
+
+    def updatedMetadataPrim(self, data):
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedMetadataPrim")
+        #  logg.setLevel("TRACE")
+        logg.info(f"New value received for metadata_prim")
+        self.view.frame_metadata.update_meta_prim(data)
 
     def scrolledMouseImageLabel(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")

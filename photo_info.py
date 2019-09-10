@@ -1,5 +1,6 @@
 import logging
 from PIL import Image
+import exifread
 
 
 class PhotoInfo:
@@ -9,6 +10,7 @@ class PhotoInfo:
 
         self._load_thumbnail()
 
+        self._define_useful_tags()
         self.metadata = None
 
     def get_metadata(self):
@@ -25,18 +27,26 @@ class PhotoInfo:
 
     def _load_metadata(self):
         """Load metadata for Photo, according to useful list"""
+        logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
+        logg.setLevel("TRACE")
+        logg.trace(f"Loading metadata")
+
         with open(self.photo_name_full, "rb") as f:
             tags = exifread.process_file(f)
 
-        # TODO decide which to keep and how to save them
-        self.metadata = tags
+        # save only tags listed as useful
+        self.metadata = {}
+        for tag in tags:
+            if tag in self._useful_tags:
+                logg.trace(f"{tag}: {tags[tag]}")
+                self.metadata[tag] = tags[tag]
 
     def _define_useful_tags(self):
         """Populate set of useful tags"""
-        self.useful_tags = set(
+        self._useful_tags = set(
             [
-                "JPEGThumbnail",
-                "TIFFThumbnail",
+                #  "JPEGThumbnail",
+                #  "TIFFThumbnail",
                 "Filename",
                 #  'EXIF MakerNote',
                 # 'Image Tag 0x000B',

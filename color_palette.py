@@ -44,7 +44,7 @@ class Palette:
             color['some_element'] = 'dark_blue'
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.load_theme")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
 
         self.colors = {}
         self.colors["background"] = {}
@@ -256,7 +256,7 @@ class Palette:
         """Return the color of the requested element, in the current theme
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.get_colors")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.trace(f"Getting color for {req_element}")
         #  group, element = req_element.split(".")
         #  logg.trace(f"Color for {group}:{element} is {self.colors[group][element]}")

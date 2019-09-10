@@ -82,6 +82,8 @@ class View:
         # IDEA for layout_imi
         # MetadataFrame is different if current layout is double
         # TODO update MetadataFrame if the *new* layout is double?
+        # this idea is very fancy, but needs weird tricks: the view does not
+        # know if a layout is double, and the update is not clearly triggered
 
     def layout_reset(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.layout_reset")
@@ -225,6 +227,11 @@ class FrameMetadata(tk.Frame):
         )
         self.temp.grid(row=0, column=0)
 
+    def update_meta_prim(self, data):
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_prim")
+        logg.setLevel("TRACE")
+        logg.trace(f"New value received for metadata_prim {data}")
+
 
 class MetadataFrame(tk.Frame):
     """Element class to show metadata info
@@ -307,9 +314,7 @@ class OutputFrame(tk.Frame):
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         # header background color
-        self.back_col_header = (
-            self.palette.get_colors(f"background.header.output"),
-        )
+        self.back_col_header = self.palette.get_colors(f"background.header.output")
 
         # set folder button
         self.back_col_output_setfolder = self.palette.get_colors(
@@ -372,9 +377,7 @@ class InputFrame(tk.Frame):
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         # header background color
-        self.back_col_header = (
-            self.palette.get_colors(f"background.header.input"),
-        )
+        self.back_col_header = self.palette.get_colors(f"background.header.input")
 
         # add folder button
         self.back_col_input_addfolder = self.palette.get_colors(

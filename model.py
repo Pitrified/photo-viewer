@@ -58,6 +58,11 @@ class Model:
         self._widget_wid = -1
         self._widget_hei = -1
 
+        # dict of metadata {name:value}
+        self.metadata_prim = Observable({})
+        self.metadata_echo = Observable({})
+        self._load_named_metadata()
+
         # setup layout info
         self._layout_tot = 5
         self._layout_is_double = (1,)
@@ -254,9 +259,10 @@ class Model:
 
         - current_photo_prim
         - cropped_prim
+        - prim metadata
         """
         logg = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
-        #  logg.setLevel("TRACE")
+        logg.setLevel("TRACE")
         logg.info(f"Updating photo prim, index {self._index_prim}")
         self.current_photo_prim.set(pic_prim)
 
@@ -274,6 +280,19 @@ class Model:
             # if the layout is double, copy the new zoom level to echo pic
             if self.layout_current.get() in self._layout_is_double:
                 self._cloneParams()
+
+        # get the metadata for the image
+        metadata_exif_prim = self._photo_info_list_all[pic_prim].get_metadata()
+        metadata_named_prim = {}
+        # translate the names from EXIF to readable, set default values
+        for name in self.name2exif:
+            exif_name = self.name2exif[name]
+            if exif_name in metadata_exif_prim:
+                metadata_named_prim[name] = metadata_exif_prim[exif_name]
+            else:
+                metadata_named_prim[name] = "-"
+            logg.trace(f"{name}: {metadata_named_prim[name]}")
+        self.metadata_prim.set(metadata_named_prim)
 
     def setIndexEcho(self, index_echo):
         logg = logging.getLogger(f"c.{__class__.__name__}.setIndexEcho")
@@ -313,6 +332,11 @@ class Model:
 
         if self._widget_wid != -1:
             self._cloneParams()
+
+        # TODO bring back fancy metadata frame when echo is on
+        # set the value in the echo observer as None (in the layout switch
+        # function?) and the view will know that it should not show the second
+        # column.
 
     def likePressed(self, which_frame):
         """Update selection_list accordingly
@@ -474,6 +498,18 @@ class Model:
         crop_echo.load_params(params)
         # update echo observable
         self.cropped_echo.set(crop_echo.image_res)
+
+    def _load_named_metadata(self):
+        """Populate two dicts that map a readable name in the metadata field
+        """
+        self.name2exif = {}
+        self.name2exif["Date taken"] = "Image DateTime"
+        #  "EXIF DateTimeOriginal",
+        #  "EXIF DateTimeDigitized",
+        self.name2exif["Exposure time"] = "EXIF ExposureTime"
+        self.name2exif["Aperture"] = "EXIF FNumber"
+        #  self.name2exif["Program"] = "EXIF ExposureProgram"
+        self.name2exif["ISO"] = "EXIF ISOSpeedRatings"
 
 
 class ModelCrop:

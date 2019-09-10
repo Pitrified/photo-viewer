@@ -20,7 +20,14 @@ class PhotoInfo:
 
     def _load_thumbnail(self):
         """resize the pic"""
+        logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
+        logg.setLevel("TRACE")
+
         self.thumb = Image.open(self.photo_name_full)
+
+        # also save the real dimensions
+        self.width, self.height = self.thumb.size
+
         self.thumb.thumbnail((self.thumb_size, self.thumb_size), Image.BOX)
         # MAYBE lanczos is fast enough to be viable
         #  self.thumb.thumbnail((self.thumb_size, self.thumb_size), Image.LANCZOS)
@@ -40,6 +47,20 @@ class PhotoInfo:
             if tag in self._useful_tags:
                 logg.trace(f"{tag}: {tags[tag]}")
                 self.metadata[tag] = tags[tag]
+
+        # add real dimensions as metadata
+        logg.trace(f"Dimensions: {self.width} x {self.height}")
+        self.metadata['PILWidth'] = self.width
+        self.metadata['PILHeight'] = self.height
+
+        #  for tag in tags.keys():
+            #  if tag not in (
+                #  "JPEGThumbnail",
+                #  "TIFFThumbnail",
+                #  "Filename",
+                #  "EXIF MakerNote",
+            #  ):
+                #  print("Key: %s, value %s" % (tag, tags[tag]))
 
     def _define_useful_tags(self):
         """Populate set of useful tags"""
@@ -84,7 +105,7 @@ class PhotoInfo:
                 "EXIF FNumber",
                 "EXIF ExposureProgram",
                 "EXIF ISOSpeedRatings",
-                # 'EXIF ExifVersion',
+                "EXIF ExifVersion",
                 "EXIF DateTimeOriginal",
                 "EXIF DateTimeDigitized",
                 # 'EXIF ComponentsConfiguration',

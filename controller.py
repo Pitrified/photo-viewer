@@ -28,6 +28,7 @@ class Controller:
         self.model.cropped_prim.addCallback(self.updatedCroppedPrim)
         self.model.cropped_echo.addCallback(self.updatedCroppedEcho)
         self.model.metadata_prim.addCallback(self.updatedMetadataPrim)
+        self.model.metadata_echo.addCallback(self.updatedMetadataEcho)
 
         self.view = View(self.root)
 
@@ -93,7 +94,7 @@ class Controller:
         # model.__init__ so the view does not update
         self.model.addInputFolder(input_folder)
         # set starting layout
-        self.model.setLayout(0)
+        self.model.setLayout(2)
         self.model.setIndexPrim(0)
 
     def run(self):
@@ -288,6 +289,12 @@ class Controller:
         #  logg.setLevel("TRACE")
         logg.info(f"New value received for metadata_prim")
         self.view.frame_metadata.update_meta_prim(data)
+
+    def updatedMetadataEcho(self, data):
+        logg = logging.getLogger(f"c.{__class__.__name__}.updatedMetadataEcho")
+        #  logg.setLevel("TRACE")
+        logg.info(f"New value received for metadata_echo")
+        self.view.frame_metadata.update_meta_echo(data)
 
     def scrolledMouseImageLabel(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")

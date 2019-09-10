@@ -6,6 +6,7 @@ from math import ceil
 from math import floor
 from math import log
 from math import sqrt
+from fractions import Fraction
 from os import listdir
 from os import makedirs
 from os.path import isdir
@@ -60,12 +61,12 @@ class Model:
 
         # dict of metadata {name:value}
         self.metadata_prim = Observable({})
-        self.metadata_echo = Observable({})
+        self.metadata_echo = Observable(None)
         self._load_named_metadata()
 
         # setup layout info
-        self._layout_tot = 5
-        self._layout_is_double = (1,)
+        self._layout_tot = 6
+        self._layout_is_double = (1, 5)
         self.layout_current = Observable(0)
         self._old_single_layout = 0
         # double layout to jump to when swapDoubleLayout is called
@@ -132,6 +133,10 @@ class Model:
         logg = logging.getLogger(f"c.{__class__.__name__}.setLayout")
         logg.info(f"Setting layout_current to '{lay_num}'")
         self.layout_current.set(lay_num)
+
+        # if the new layout is not double, reset the values for meta_echo
+        if not self.layout_current.get() in self._layout_is_double:
+            self.metadata_echo.set(None)
 
     def cycleLayout(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.cycleLayout")
@@ -288,7 +293,12 @@ class Model:
         for name in self.name2exif:
             exif_name = self.name2exif[name]
             if exif_name in metadata_exif_prim:
-                metadata_named_prim[name] = metadata_exif_prim[exif_name]
+                if name == "Aperture":
+                    logg.trace(f"{str(metadata_exif_prim[exif_name])}")
+                    fra = Fraction(str(metadata_exif_prim[exif_name]))
+                    metadata_named_prim[name] = fra.numerator / fra.denominator
+                else:
+                    metadata_named_prim[name] = metadata_exif_prim[exif_name]
             else:
                 metadata_named_prim[name] = "-"
             logg.trace(f"{name}: {metadata_named_prim[name]}")
@@ -337,6 +347,22 @@ class Model:
         # set the value in the echo observer as None (in the layout switch
         # function?) and the view will know that it should not show the second
         # column.
+
+        if self.layout_current.get() in self._layout_is_double:
+            # get the metadata for the image
+            metadata_exif_echo = self._photo_info_list_all[pic_echo].get_metadata()
+            metadata_named_echo = {}
+            # translate the names from EXIF to readable, set default values
+            for name in self.name2exif:
+                exif_name = self.name2exif[name]
+                if exif_name in metadata_exif_echo:
+                    metadata_named_echo[name] = metadata_exif_echo[exif_name]
+                else:
+                    metadata_named_echo[name] = "-"
+                logg.trace(f"{name}: {metadata_named_echo[name]}")
+            self.metadata_echo.set(metadata_named_echo)
+        else:
+            self.metadata_echo.set(None)
 
     def likePressed(self, which_frame):
         """Update selection_list accordingly
@@ -510,6 +536,8 @@ class Model:
         self.name2exif["Aperture"] = "EXIF FNumber"
         #  self.name2exif["Program"] = "EXIF ExposureProgram"
         self.name2exif["ISO"] = "EXIF ISOSpeedRatings"
+        self.name2exif["Width"] = "PILWidth"
+        self.name2exif["Height"] = "PILHeight"
 
 
 class ModelCrop:

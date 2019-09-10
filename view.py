@@ -1,5 +1,6 @@
 import logging
 import tkinter as tk
+from tkinter import font as tkfont
 
 from os.path import basename
 
@@ -15,13 +16,36 @@ class View:
         logg.info("Start init")
 
         self.root = root
-        # TODO get this from Controller
+        # TODO get theme from Controller
         # TODO change theme at runtime...
-        #  self.palette = Palette("blue1")
+        self.palette = Palette("blue1")
         #  self.palette = Palette("badgreen")
-        self.palette = Palette("ocra-minimal")
+        #  self.palette = Palette("ocra-minimal")
 
         self.setup_main_window()
+
+        # TODO refactor frame/container names and structure
+        # finalize the definition of the two: (IDEA)
+        # container: collection of frames, use this to change layout
+        # frame: group of widget that *need* to be together
+        # IDEABIS: the container is a group of widget that go together!
+        # frames are just elements to more clearly organize things
+
+        # frames at top level (child of root) (attributes of View) so that the
+        # Controller calls the same function in self.view.frame.update and can
+        # skip the container that is currently showing it
+
+        # OR the container is never split, you either pack it all or don't
+        # this is the source of confusion: if you never split, the controller
+        # can happily call view.container.update and the *container* will take
+        # care of updating the frames inside (THIS GOOD)
+
+        # keypoint: FramePathInfo has too many elements inside, and sometimes I
+        # want to split them, leading to this container madness
+
+        # all this is a bit shady anyway because the FrameCrop are not packed
+        # in a container, and probably wont ever be, as that container will
+        # ever show only them
 
         # create frames for photo and info panels
         self.frame_crop_prim = FrameCrop(
@@ -61,6 +85,7 @@ class View:
 
         # setup elements dimensions
         # TODO sidebar width set using grid_rowconfigure(minwidth)
+        # explicit width is needed for ScrollableFrame
         self.right_sidebar_width = 250
 
     def layout_set(self, lay_num):
@@ -78,6 +103,8 @@ class View:
             self.layout_ip()
         elif lay_num == 4:
             self.layout_imp()
+        elif lay_num == 5:
+            self.layout_imi()
 
         # IDEA for layout_imi
         # MetadataFrame is different if current layout is double
@@ -98,7 +125,7 @@ class View:
 
         # reset weight for row and col
         max_row = 1
-        max_col = 1
+        max_col = 2
         for i in range(max_row + 1):
             self.root.grid_rowconfigure(i, weight=0, uniform="")
         for i in range(max_col + 1):
@@ -111,9 +138,9 @@ class View:
 
     def layout_im(self):
         self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-        self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
-        self.frame_metadata.grid(row=1, column=0, sticky="ew")
+        self.root.grid_columnconfigure(1, weight=1)
+        self.frame_crop_prim.grid(row=0, column=1, sticky="nsew")
+        self.frame_metadata.grid(row=0, column=0, sticky="ns")
 
     def layout_ip(self):
         self.root.grid_rowconfigure(0, weight=1)
@@ -123,10 +150,10 @@ class View:
 
     def layout_imp(self):
         self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-        self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
-        self.frame_metadata.grid(row=1, column=0, sticky="ew")
-        self.frame_path_info.grid(row=0, column=1, rowspan=2, sticky="ns")
+        self.root.grid_columnconfigure(1, weight=1)
+        self.frame_metadata.grid(row=0, column=0, sticky="ns")
+        self.frame_crop_prim.grid(row=0, column=1, sticky="nsew")
+        self.frame_path_info.grid(row=0, column=2, sticky="ns")
 
     def layout_ii(self):
         self.root.grid_rowconfigure(0, weight=1)
@@ -134,6 +161,14 @@ class View:
         self.root.grid_columnconfigure(1, weight=1, uniform="half")
         self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
         self.frame_crop_echo.grid(row=0, column=1, sticky="nsew")
+
+    def layout_imi(self):
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1, uniform="half")
+        self.root.grid_columnconfigure(2, weight=1, uniform="half")
+        self.frame_crop_prim.grid(row=0, column=0, sticky="nsew")
+        self.frame_metadata.grid(row=0, column=1, sticky="ns")
+        self.frame_crop_echo.grid(row=0, column=2, sticky="nsew")
 
     def exit(self):
         # TODO ask confirmation, ask if you want to save option/selection
@@ -213,29 +248,134 @@ class FrameMetadata(tk.Frame):
         logg.info(f"Start init")
 
         self.name = name
+        self.sidebar_width = sidebar_width
+
         self.palette = palette
-        back_col = self.palette.get_colors(f"background.{self.name}")
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         super().__init__(
-            parent, width=sidebar_width, background=back_col, *args, **kwargs
+            parent, width=sidebar_width, background=self.back_col, *args, **kwargs
         )
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.temp = tk.Label(
-            self, text="Mock up Metadata", background=self.cget("background")
+
+        self.metadata_frame = MetadataFrame(
+            self,
+            name="frame.metadata",
+            palette=self.palette,
+            sidebar_width=self.sidebar_width,
         )
-        self.temp.grid(row=0, column=0)
+
+        self.metadata_frame.grid(row=0, column=0)
 
     def update_meta_prim(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_prim")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.trace(f"New value received for metadata_prim {data}")
+        self.metadata_frame.update_meta_prim(data)
+
+    def update_meta_echo(self, data):
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_echo")
+        #  logg.setLevel("TRACE")
+        logg.trace(f"New value received for metadata_echo {data}")
+        self.metadata_frame.update_meta_echo(data)
 
 
 class MetadataFrame(tk.Frame):
     """Element class to show metadata info
     """
+
+    def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
+        logg = logging.getLogger(f"c.{__class__.__name__}.init")
+        logg.setLevel("TRACE")
+        logg.info("Start init")
+
+        self.name = name
+        self.sidebar_width = sidebar_width
+
+        self.palette = palette
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
+
+        super().__init__(parent, background=self.back_col, *args, **kwargs)
+
+        self.meta_prim = {"No metadata": "yet"}
+        self.meta_echo = None
+
+        self.header_labels = {}
+        self.prim_labels = {}
+        self.echo_labels = {}
+
+        # grow the two columns with the same size
+        self.grid_columnconfigure(0, weight=1, uniform="half")
+        #  self.grid_columnconfigure(1, weight=1, uniform="half")
+
+        def_font = tkfont.Font(name="TkDefaultFont", exists=True)
+        logg.trace(f"family {def_font.actual()['family']}")
+        logg.trace(f"size {def_font.actual()['size']}")
+        logg.trace(f"weight {def_font.actual()['weight']}")
+        self.font_header = tkfont.Font(
+            name="meta_header_font",
+            family=def_font.actual()["family"],
+            size=def_font.actual()["size"],
+            weight=tkfont.BOLD,
+        )
+
+    def _update_metadata(self):
+        """Redraw the frame, add a second column if echo has values
+        """
+        # unpack everything
+        for tag in self.header_labels:
+            self.header_labels[tag].grid_forget()
+            self.prim_labels[tag].grid_forget()
+            self.echo_labels[tag].grid_forget()
+
+        for i, tag in enumerate(self.meta_prim):
+            if not tag in self.header_labels:
+                self.header_labels[tag] = tk.Label(
+                    self,
+                    background=self.back_col,
+                    text=f"{tag}:",
+                    font=self.font_header,
+                )
+                self.prim_labels[tag] = tk.Label(
+                    self, background=self.back_col, text="prim"
+                )
+                self.echo_labels[tag] = tk.Label(
+                    self, background=self.back_col, text="echo"
+                )
+
+            self.prim_labels[tag].config(text=self.meta_prim[tag])
+            if not self.meta_echo is None:
+                self.echo_labels[tag].config(text=self.meta_echo[tag])
+
+            #  self.header_labels[tag].grid(row=2 * i, column=0, columnspan=2)
+            #  if self.meta_echo is None:
+                #  self.prim_labels[tag].grid(row=2 * i + 1, column=0, columnspan=2)
+            #  else:
+                #  self.prim_labels[tag].grid(row=2 * i + 1, column=0)
+                #  self.echo_labels[tag].grid(row=2 * i + 1, column=1)
+
+            self.header_labels[tag].grid(row=3 * i, column=0)
+            if self.meta_echo is None:
+                self.prim_labels[tag].grid(row=3 * i + 1, column=0)
+            else:
+                self.prim_labels[tag].grid(row=3 * i + 1, column=0)
+                self.echo_labels[tag].grid(row=3 * i + 2, column=0)
+
+    def update_meta_prim(self, data):
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_prim")
+        logg.setLevel("TRACE")
+        logg.trace(f"New value received for metadata_prim {data}")
+        self.meta_prim = data
+        self._update_metadata()
+
+    def update_meta_echo(self, data):
+        logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_echo")
+        logg.setLevel("TRACE")
+        logg.trace(f"New value received for metadata_echo {data}")
+        self.meta_echo = data
+        self._update_metadata()
 
 
 class TagFrame(tk.Frame):
@@ -258,10 +398,10 @@ class FramePathInfo(tk.Frame):
 
         self.name = name
         self.palette = palette
-        back_col = self.palette.get_colors(f"background.{self.name}")
+        self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         super().__init__(
-            parent, width=sidebar_width, background=back_col, *args, **kwargs
+            parent, width=sidebar_width, background=self.back_col, *args, **kwargs
         )
 
         # save dimensions of elements

@@ -21,7 +21,7 @@ class PhotoInfo:
     def _load_thumbnail(self):
         """resize the pic"""
         logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
 
         self.thumb = Image.open(self.photo_name_full)
 
@@ -35,7 +35,7 @@ class PhotoInfo:
     def _load_metadata(self):
         """Load metadata for Photo, according to useful list"""
         logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.trace(f"Loading metadata")
 
         with open(self.photo_name_full, "rb") as f:
@@ -50,17 +50,17 @@ class PhotoInfo:
 
         # add real dimensions as metadata
         logg.trace(f"Dimensions: {self.width} x {self.height}")
-        self.metadata['PILWidth'] = self.width
-        self.metadata['PILHeight'] = self.height
+        self.metadata["PILWidth"] = self.width
+        self.metadata["PILHeight"] = self.height
 
         #  for tag in tags.keys():
-            #  if tag not in (
-                #  "JPEGThumbnail",
-                #  "TIFFThumbnail",
-                #  "Filename",
-                #  "EXIF MakerNote",
-            #  ):
-                #  print("Key: %s, value %s" % (tag, tags[tag]))
+        #  if tag not in (
+        #  "JPEGThumbnail",
+        #  "TIFFThumbnail",
+        #  "Filename",
+        #  "EXIF MakerNote",
+        #  ):
+        #  print("Key: %s, value %s" % (tag, tags[tag]))
 
     def _define_useful_tags(self):
         """Populate set of useful tags"""

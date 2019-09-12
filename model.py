@@ -2,16 +2,18 @@ import logging
 
 from PIL import Image
 from PIL import ImageTk
+from fractions import Fraction
 from math import ceil
 from math import floor
 from math import log
 from math import sqrt
-from fractions import Fraction
 from os import listdir
 from os import makedirs
+from os.path import basename
 from os.path import isdir
 from os.path import join
 from os.path import splitext
+from shutil import copy2
 from sys import getsizeof
 
 from observable import Observable
@@ -128,6 +130,43 @@ class Model:
             self.input_folders._docallbacks()
 
         self.updatePhotoInfoList()
+
+    def saveSelection(self):
+        logg = logging.getLogger(f"c.{__class__.__name__}.saveSelection")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Saving selected pics")
+        logui = logging.getLogger("UI")
+
+        # check that output_folder is set
+        output_folder = self.output_folder.get()
+        if output_folder == self._out_fold_not_set:
+            logui.warn(f"Set the output folder before saving the selection list")
+            return
+
+        # get current selection_list, {pic: [PhotoInfo, is_selected] }
+        selection_list = self.selection_list.get()
+        logg.trace(selection_list)
+
+        # keep only selected
+        active_selection = tuple(p for p in selection_list if selection_list[p][1])
+        if len(active_selection) == 0:
+            logui.warn(f"No active pic in selection list")
+            return
+        elif len(active_selection) == 1:
+            s = ""
+        else:
+            s = "s"
+        logui.info(f"Saving {len(active_selection)} pic{s} in {output_folder}")
+
+        out_fol_content = set(listdir(output_folder))
+
+        for pic in active_selection:
+            base_pic = basename(pic)
+            if base_pic in out_fol_content:
+                logui.warn(f"{base_pic} already in output folder, skipping it")
+                # MAYBE copy it with changed name
+            else:
+                copy2(pic, output_folder)
 
     def setLayout(self, lay_num):
         logg = logging.getLogger(f"c.{__class__.__name__}.setLayout")
@@ -267,7 +306,7 @@ class Model:
         - prim metadata
         """
         logg = logging.getLogger(f"c.{__class__.__name__}._update_photo_prim")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.info(f"Updating photo prim, index {self._index_prim}")
         self.current_photo_prim.set(pic_prim)
 
@@ -315,7 +354,7 @@ class Model:
         logg.info(f"Moving index echo {direction}")
 
         if not self.layout_current.get() in self._layout_is_double:
-            # MAYBE move index prim in this case
+            # TODO move index prim in this case
             logg.warn("Current layout is not double, can't move index echo")
             return
 

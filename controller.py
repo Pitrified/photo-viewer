@@ -40,7 +40,10 @@ class Controller:
         self.view.frame_path_info.output_frame.btn_set_output_folder.config(
             command=self.setOutputFolder
         )
-        # TODO button to save_selection
+        # button to save selection
+        self.view.frame_path_info.output_frame.btn_save_selection.config(
+            command=self.saveSelection
+        )
 
         # button to add another input_folder
         self.view.frame_path_info.input_frame.btn_add_folder.config(
@@ -192,6 +195,12 @@ class Controller:
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedOutputFolder")
         logg.info(f"New value '{data}'")
         self.view.frame_path_info.output_frame.update_output_frame(data)
+
+    def saveSelection(self):
+        logg = logging.getLogger(f"c.{__class__.__name__}.saveSelection")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Saving selected pics")
+        self.model.saveSelection()
 
     def addInputFolder(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")

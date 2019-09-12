@@ -288,7 +288,7 @@ class MetadataFrame(tk.Frame):
 
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.info("Start init")
 
         self.name = name
@@ -351,10 +351,10 @@ class MetadataFrame(tk.Frame):
 
             #  self.header_labels[tag].grid(row=2 * i, column=0, columnspan=2)
             #  if self.meta_echo is None:
-                #  self.prim_labels[tag].grid(row=2 * i + 1, column=0, columnspan=2)
+            #  self.prim_labels[tag].grid(row=2 * i + 1, column=0, columnspan=2)
             #  else:
-                #  self.prim_labels[tag].grid(row=2 * i + 1, column=0)
-                #  self.echo_labels[tag].grid(row=2 * i + 1, column=1)
+            #  self.prim_labels[tag].grid(row=2 * i + 1, column=0)
+            #  self.echo_labels[tag].grid(row=2 * i + 1, column=1)
 
             self.header_labels[tag].grid(row=3 * i, column=0)
             if self.meta_echo is None:
@@ -363,16 +363,18 @@ class MetadataFrame(tk.Frame):
                 self.prim_labels[tag].grid(row=3 * i + 1, column=0)
                 self.echo_labels[tag].grid(row=3 * i + 2, column=0)
 
+            # MAYBE dimension in a single field wid x hei
+
     def update_meta_prim(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_prim")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.trace(f"New value received for metadata_prim {data}")
         self.meta_prim = data
         self._update_metadata()
 
     def update_meta_echo(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.update_meta_echo")
-        logg.setLevel("TRACE")
+        #  logg.setLevel("TRACE")
         logg.trace(f"New value received for metadata_echo {data}")
         self.meta_echo = data
         self._update_metadata()
@@ -481,12 +483,22 @@ class OutputFrame(tk.Frame):
             activebackground=self.hover_col_output_setfolder,
             highlightthickness=0,
         )
-        self.output_folder_var = tk.StringVar(value="Not set")
 
+        self.output_folder_var = tk.StringVar(value="Not set")
         self.text_output_folder = tk.Label(
             self,
             textvariable=self.output_folder_var,
             background=self.back_col_output_label,
+        )
+
+        # TODO different color for different buttons
+        self.btn_save_selection = tk.Button(
+            self,
+            text="Save selection",
+            borderwidth=0,
+            background=self.back_col_output_setfolder,
+            activebackground=self.hover_col_output_setfolder,
+            highlightthickness=0,
         )
 
         # grid the elements, grow only the label
@@ -495,6 +507,7 @@ class OutputFrame(tk.Frame):
         self.output_frame_header.grid(row=0, column=0, sticky="ew")
         self.text_output_folder.grid(row=1, column=0, sticky="ew")
         self.btn_set_output_folder.grid(row=2, column=0)
+        self.btn_save_selection.grid(row=3, column=0)
 
     def update_output_frame(self, output_folder_full):
         logg = logging.getLogger(f"c.{__class__.__name__}.update_output_frame")
@@ -571,6 +584,7 @@ class InputFrame(tk.Frame):
 
         for ri, folder in enumerate(sorted(input_folders)):
             folder_name = basename(folder)
+            # TODO if the folder string ends in / the basename is empty
 
             # create the Checkbutton for the new folder
             if not folder in self.checkbtn_input_fold:

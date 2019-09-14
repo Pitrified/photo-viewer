@@ -310,8 +310,6 @@ class Model:
         logg.info(f"Updating photo prim, index {self._index_prim}")
         self.current_photo_prim.set(pic_prim)
 
-        #  self._load_pic(pic_prim)
-
         # resets zoom level and pos for the new photo; can only be done AFTER
         # mainloop starts, during initialization Model.doResize has not been
         # called yet, and the widget dimensions are still undefined;
@@ -327,20 +325,7 @@ class Model:
 
         # get the metadata for the image
         metadata_exif_prim = self._photo_info_list_all[pic_prim].get_metadata()
-        metadata_named_prim = {}
-        # translate the names from EXIF to readable, set default values
-        for name in self.name2exif:
-            exif_name = self.name2exif[name]
-            if exif_name in metadata_exif_prim:
-                if name == "Aperture":
-                    logg.trace(f"{str(metadata_exif_prim[exif_name])}")
-                    fra = Fraction(str(metadata_exif_prim[exif_name]))
-                    metadata_named_prim[name] = fra.numerator / fra.denominator
-                else:
-                    metadata_named_prim[name] = metadata_exif_prim[exif_name]
-            else:
-                metadata_named_prim[name] = "-"
-            logg.trace(f"{name}: {metadata_named_prim[name]}")
+        metadata_named_prim = self._parse_metadata(metadata_exif_prim)
         self.metadata_prim.set(metadata_named_prim)
 
     def setIndexEcho(self, index_echo):
@@ -382,23 +367,10 @@ class Model:
         if self._widget_wid != -1:
             self._cloneParams()
 
-        # TODO bring back fancy metadata frame when echo is on
-        # set the value in the echo observer as None (in the layout switch
-        # function?) and the view will know that it should not show the second
-        # column.
-
         if self.layout_current.get() in self._layout_is_double:
             # get the metadata for the image
             metadata_exif_echo = self._photo_info_list_all[pic_echo].get_metadata()
-            metadata_named_echo = {}
-            # translate the names from EXIF to readable, set default values
-            for name in self.name2exif:
-                exif_name = self.name2exif[name]
-                if exif_name in metadata_exif_echo:
-                    metadata_named_echo[name] = metadata_exif_echo[exif_name]
-                else:
-                    metadata_named_echo[name] = "-"
-                logg.trace(f"{name}: {metadata_named_echo[name]}")
+            metadata_named_echo = self._parse_metadata(metadata_exif_echo)
             self.metadata_echo.set(metadata_named_echo)
         else:
             self.metadata_echo.set(None)
@@ -577,6 +549,30 @@ class Model:
         self.name2exif["ISO"] = "EXIF ISOSpeedRatings"
         self.name2exif["Width"] = "PILWidth"
         self.name2exif["Height"] = "PILHeight"
+
+    def _parse_metadata(self, metadata_exif):
+        """Parse raw EXIF metadata into named ones
+        """
+        logg = logging.getLogger(f"c.{__class__.__name__}._parse_metadata")
+        #  logg.setLevel("TRACE")
+        logg.info(f"Parsing metadata")
+
+        metadata_named = {}
+        # translate the names from EXIF to readable, set default values
+        for name in self.name2exif:
+            exif_name = self.name2exif[name]
+            if exif_name in metadata_exif:
+                if name == "Aperture":
+                    logg.trace(f"{str(metadata_exif[exif_name])}")
+                    fra = Fraction(str(metadata_exif[exif_name]))
+                    metadata_named[name] = fra.numerator / fra.denominator
+                else:
+                    metadata_named[name] = metadata_exif[exif_name]
+            else:
+                metadata_named[name] = "-"
+            logg.trace(f"{name}: {metadata_named[name]}")
+
+        return metadata_named
 
 
 class ModelCrop:

@@ -650,44 +650,45 @@ class ModelCrop:
         zoom_hei = ceil(self._image_hei * zoom)
 
         # the zoomed photo fits inside the widget
-        if zoom_wid < self.widget_wid and zoom_hei < self.widget_hei:
+        if zoom_wid <= self.widget_wid and zoom_hei <= self.widget_hei:
             # resize the pic, don't cut it
             resized_dim = (zoom_wid, zoom_hei)
             # take the entire image
-            region = (0, 0, self._image_wid, self._image_hei)
+            region = [0, 0, self._image_wid, self._image_hei]
 
         # the zoomed photo is wider than the widget
-        elif zoom_wid >= self.widget_wid and zoom_hei < self.widget_hei:
+        elif zoom_wid > self.widget_wid and zoom_hei <= self.widget_hei:
             # target dimension as wide as the widget
             resized_dim = (self.widget_wid, zoom_hei)
             # from top to bottom, only keep a vertical stripe
-            region = (
+            region = [
                 self._mov_x / zoom,
                 0,
                 (self._mov_x + self.widget_wid) / zoom,
                 self._image_hei,
-            )
+            ]
 
         # the zoomed photo is taller than the widget
-        elif zoom_wid < self.widget_wid and zoom_hei >= self.widget_hei:
+        elif zoom_wid <= self.widget_wid and zoom_hei > self.widget_hei:
             resized_dim = (zoom_wid, self.widget_hei)
-            region = (
+            region = [
                 0,
                 self._mov_y / zoom,
                 self._image_wid,
                 (self._mov_y + self.widget_hei) / zoom,
-            )
+            ]
 
         # the zoomed photo is bigger than the widget
-        elif zoom_wid >= self.widget_wid and zoom_hei >= self.widget_hei:
+        elif zoom_wid > self.widget_wid and zoom_hei > self.widget_hei:
             resized_dim = (self.widget_wid, self.widget_hei)
-            region = (
+            region = [
                 self._mov_x / zoom,
                 self._mov_y / zoom,
                 (self._mov_x + self.widget_wid) / zoom,
                 (self._mov_y + self.widget_hei) / zoom,
-            )
+            ]
 
+        self._validate_region(region)
         logg.trace(f"resized_dim {resized_dim} region {region}")
 
         # decide what method to use when resizing
@@ -856,6 +857,22 @@ class ModelCrop:
                 self._mov_x = zoom_wid - self.widget_wid
             if self._mov_y + self.widget_hei > zoom_hei:
                 self._mov_y = zoom_hei - self.widget_hei
+
+    def _validate_region(self, region):
+        """region (left, top, right, bottom) must fit inside the image
+        """
+        # left
+        if region[0] < 0:
+            region[0] = 0
+        # top
+        if region[1] < 0:
+            region[1] = 0
+        # right
+        if region[2] > self._image_wid:
+            region[2] = self._image_wid
+        # bottom
+        if region[3] > self._image_hei:
+            region[3] = self._image_hei
 
 
 class Holder:

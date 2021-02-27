@@ -2,8 +2,7 @@ import logging
 
 
 class Observable:
-    """A wrapper around data, to link callbacks to it
-    """
+    """A wrapper around data, to link callbacks to it"""
 
     def __init__(self, initialValue=None):
         log = logging.getLogger(f"c.{__class__.__name__}.init")

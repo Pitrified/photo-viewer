@@ -1,6 +1,7 @@
 import logging
-from PIL import Image
-import exifread
+
+from PIL import Image  # type: ignore
+import exifread  # type: ignore
 
 
 class PhotoInfo:
@@ -20,7 +21,7 @@ class PhotoInfo:
 
     def _load_thumbnail(self):
         """resize the pic"""
-        logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
+        # logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
         #  logg.setLevel("TRACE")
 
         self.thumb = Image.open(self.photo_name_full)
@@ -36,7 +37,7 @@ class PhotoInfo:
         """Load metadata for Photo, according to useful list"""
         logg = logging.getLogger(f"c.{__class__.__name__}._load_metadata")
         #  logg.setLevel("TRACE")
-        logg.trace(f"Loading metadata")
+        logg.trace("Loading metadata")
 
         with open(self.photo_name_full, "rb") as f:
             tags = exifread.process_file(f)

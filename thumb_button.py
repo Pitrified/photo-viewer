@@ -1,10 +1,8 @@
-import logging
-import tkinter as tk
-
 from os.path import basename
-from PIL import ImageTk, Image
+import logging
 
-from label_pixel import LabelPixel
+from PIL import ImageTk  # type: ignore
+import tkinter as tk
 
 
 class ThumbButton(tk.Frame):
@@ -25,7 +23,7 @@ class ThumbButton(tk.Frame):
         self.back_col = back_col
         self.hover_back_col = hover_back_col
         self.back_col_bis = back_col_bis
-        if hover_back_col_bis is "hover_back_col":
+        if hover_back_col_bis == "hover_back_col":
             self.hover_back_col_bis = hover_back_col
         else:
             self.hover_back_col_bis = hover_back_col_bis

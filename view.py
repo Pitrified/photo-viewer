@@ -1,10 +1,9 @@
-import logging
-import tkinter as tk
-from tkinter import font as tkfont
-
 from os.path import basename
+import logging
 
-from label_pixel import LabelPixel
+from tkinter import font as tkfont
+import tkinter as tk
+
 from scrollable_frame import ScrollableFrame
 from thumb_button import ThumbButton
 from color_palette import Palette
@@ -73,8 +72,7 @@ class View:
         # be the actual implementation
 
     def setup_main_window(self):
-        """Setup main window aesthetics
-        """
+        """Setup main window aesthetics"""
         self.width = 900
         self.height = 600
         self.root.geometry(f"{self.width}x{self.height}")
@@ -179,7 +177,7 @@ class View:
 class FrameCrop(tk.Frame):
     def __init__(self, parent, name, palette, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.name = name
         self.palette = palette
@@ -207,45 +205,39 @@ class FrameCrop(tk.Frame):
         # grid_columnconfigure(uniform='half')
 
     def update_image(self, data):
-        """Update the image in the label
-        """
+        """Update the image in the label"""
         logg = logging.getLogger(f"c.{__class__.__name__}.update_image")
-        logg.trace(f"Updating image_label")
+        logg.trace("Updating image_label")
         self.image_label.configure(image=data)
 
     def bind_mouse_scroll_label(self, func):
-        """Bind mouse scroll events *only* to image_label
-        """
+        """Bind mouse scroll events *only* to image_label"""
         self.image_label.bind("<4>", func)
         self.image_label.bind("<5>", func)
         self.image_label.bind("<MouseWheel>", func)
 
     def bind_mouse_scroll_frame(self, func):
-        """Bind mouse scroll events *only* to image_frame
-        """
+        """Bind mouse scroll events *only* to image_frame"""
         self.bind("<4>", func)
         self.bind("<5>", func)
         self.bind("<MouseWheel>", func)
 
     def bind_image(self, kind, func):
-        """Bind event 'kind' to func *only* on image_label
-        """
+        """Bind event 'kind' to func *only* on image_label"""
         self.image_label.bind(kind, func)
 
     def bind_to_all(self, kind, func):
-        """Bind event 'kind' to func on *both* image_label and frame
-        """
+        """Bind event 'kind' to func on *both* image_label and frame"""
         self.bind(kind, func)
         self.image_label.bind(kind, func)
 
 
 class FrameMetadata(tk.Frame):
-    """Container class for metadata info
-    """
+    """Container class for metadata info"""
 
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.name = name
         self.sidebar_width = sidebar_width
@@ -283,8 +275,7 @@ class FrameMetadata(tk.Frame):
 
 
 class MetadataFrame(tk.Frame):
-    """Element class to show metadata info
-    """
+    """Element class to show metadata info"""
 
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
@@ -322,8 +313,7 @@ class MetadataFrame(tk.Frame):
         )
 
     def _update_metadata(self):
-        """Redraw the frame, add a second column if echo has values
-        """
+        """Redraw the frame, add a second column if echo has values"""
         # unpack everything
         for tag in self.header_labels:
             self.header_labels[tag].grid_forget()
@@ -331,7 +321,7 @@ class MetadataFrame(tk.Frame):
             self.echo_labels[tag].grid_forget()
 
         for i, tag in enumerate(self.meta_prim):
-            if not tag in self.header_labels:
+            if tag not in self.header_labels:
                 self.header_labels[tag] = tk.Label(
                     self,
                     background=self.back_col,
@@ -346,7 +336,7 @@ class MetadataFrame(tk.Frame):
                 )
 
             self.prim_labels[tag].config(text=self.meta_prim[tag])
-            if not self.meta_echo is None:
+            if self.meta_echo is not None:
                 self.echo_labels[tag].config(text=self.meta_echo[tag])
 
             #  self.header_labels[tag].grid(row=2 * i, column=0, columnspan=2)
@@ -388,8 +378,7 @@ class TagFrame(tk.Frame):
 
 
 class FramePathInfo(tk.Frame):
-    """Container class for input/output folder, photo/selection list
-    """
+    """Container class for input/output folder, photo/selection list"""
 
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
@@ -444,10 +433,9 @@ class FramePathInfo(tk.Frame):
 
 class OutputFrame(tk.Frame):
     def __init__(self, parent, name, palette, *args, **kwargs):
-        """Do things in build_output_frame
-        """
+        """Do things in build_output_frame"""
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.name = name
         self.palette = palette
@@ -456,18 +444,18 @@ class OutputFrame(tk.Frame):
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         # header background color
-        self.back_col_header = self.palette.get_colors(f"background.header.output")
+        self.back_col_header = self.palette.get_colors("background.header.output")
 
         # set folder button
         self.back_col_output_setfolder = self.palette.get_colors(
-            f"background.button.output_setfolder"
+            "background.button.output_setfolder"
         )
         self.hover_col_output_setfolder = self.palette.get_colors(
-            f"hover.button.output_setfolder"
+            "hover.button.output_setfolder"
         )
 
         # set folder label
-        self.back_col_output_label = self.palette.get_colors(f"background.label.output")
+        self.back_col_output_label = self.palette.get_colors("background.label.output")
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
 
@@ -518,10 +506,9 @@ class OutputFrame(tk.Frame):
 
 class InputFrame(tk.Frame):
     def __init__(self, parent, name, palette, *args, **kwargs):
-        """Do things in build_input_frame
-        """
+        """Do things in build_input_frame"""
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.name = name
         self.palette = palette
@@ -530,20 +517,20 @@ class InputFrame(tk.Frame):
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         # header background color
-        self.back_col_header = self.palette.get_colors(f"background.header.input")
+        self.back_col_header = self.palette.get_colors("background.header.input")
 
         # add folder button
         self.back_col_input_addfolder = self.palette.get_colors(
-            f"background.button.input_addfolder"
+            "background.button.input_addfolder"
         )
         self.hover_col_input_addfolder = self.palette.get_colors(
-            f"hover.button.input_addfolder"
+            "hover.button.input_addfolder"
         )
 
         # checkbuttons
-        self.back_col_input_chkbtn = self.palette.get_colors(f"background.chkbtn.input")
-        self.hover_col_input_chkbtn = self.palette.get_colors(f"hover.chkbtn.input")
-        self.select_col_input_chkbtn = self.palette.get_colors(f"select.chkbtn.input")
+        self.back_col_input_chkbtn = self.palette.get_colors("background.chkbtn.input")
+        self.hover_col_input_chkbtn = self.palette.get_colors("hover.chkbtn.input")
+        self.select_col_input_chkbtn = self.palette.get_colors("select.chkbtn.input")
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
 
@@ -587,7 +574,7 @@ class InputFrame(tk.Frame):
             # TODO if the folder string ends in / the basename is empty
 
             # create the Checkbutton for the new folder
-            if not folder in self.checkbtn_input_fold:
+            if folder not in self.checkbtn_input_fold:
                 self.checkbtn_input_state[folder] = tk.BooleanVar(value=True)
                 self.checkbtn_input_fold[folder] = tk.Checkbutton(
                     self,
@@ -607,8 +594,7 @@ class InputFrame(tk.Frame):
             self.checkbtn_input_state[folder].set(input_folders[folder])
 
     def generate_virtual_toggling_input_folder(self):
-        """Generate a virtual event to notify the controller of a toggled Checkbutton
-        """
+        """Generate a virtual event to notify the controller of a toggled Checkbutton"""
         self.event_generate("<<toggle_input_folder>>")
 
 
@@ -633,10 +619,9 @@ class ThumbButtonList(tk.Frame):
 
 class SelectionListFrame(ThumbButtonList):
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
-        """Do things in build_selection_list_frame
-        """
+        """Do things in build_selection_list_frame"""
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.name = name
         self.palette = palette
@@ -647,29 +632,29 @@ class SelectionListFrame(ThumbButtonList):
 
         # header background color
         self.back_col_header = (
-            self.palette.get_colors(f"background.header.selection_list"),
+            self.palette.get_colors("background.header.selection_list"),
         )
 
         # ScrollableFrame colors
         self.back_col_scrollable = self.palette.get_colors(
-            f"background.scrollable.selection_list"
+            "background.scrollable.selection_list"
         )
         self.hover_col_scrollable = self.palette.get_colors(
-            f"hover.scrollable.selection_list"
+            "hover.scrollable.selection_list"
         )
         self.slider_col_scrollable = self.palette.get_colors(
-            f"slider.scrollable.selection_list"
+            "slider.scrollable.selection_list"
         )
 
         # ThumbButton colors
         self.back_col_thumbbtn = self.palette.get_colors(
-            f"background.thumbbtn.selection_list"
+            "background.thumbbtn.selection_list"
         )
         self.hover_back_col_thumbbtn = self.palette.get_colors(
-            f"hover.thumbbtn.selection_list"
+            "hover.thumbbtn.selection_list"
         )
         self.back_col_bis_thumbbtn = self.palette.get_colors(
-            f"backgroundbis.thumbbtn.selection_list"
+            "backgroundbis.thumbbtn.selection_list"
         )
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
@@ -706,7 +691,7 @@ class SelectionListFrame(ThumbButtonList):
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.update_selection_list")
         #  logg.setLevel("TRACE")
-        logg.info(f"Updating selection_list ThumbButtons")
+        logg.info("Updating selection_list ThumbButtons")
 
         for pic in self.selection_list_thumbbtn:
             self.selection_list_thumbbtn[pic].grid_forget()
@@ -717,7 +702,7 @@ class SelectionListFrame(ThumbButtonList):
             is_selected = selection_list_info[pic][1]
 
             # create the new ThumbButton
-            if not pic in self.selection_list_thumbbtn:
+            if pic not in self.selection_list_thumbbtn:
                 self.selection_list_thumbbtn[pic] = ThumbButton(
                     self.selection_list_scrollable.scroll_frame,
                     photo_info,
@@ -768,10 +753,9 @@ class SelectionListFrame(ThumbButtonList):
 
 class PhotoListFrame(ThumbButtonList):
     def __init__(self, parent, name, palette, sidebar_width, *args, **kwargs):
-        """Do things in build_photo_list_frame
-        """
+        """Do things in build_photo_list_frame"""
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.name = name
         self.palette = palette
@@ -779,27 +763,27 @@ class PhotoListFrame(ThumbButtonList):
         self.back_col = self.palette.get_colors(f"background.{self.name}")
 
         self.back_col_header = (
-            self.palette.get_colors(f"background.header.photo_list"),
+            self.palette.get_colors("background.header.photo_list"),
         )
 
         self.back_col_scrollable = self.palette.get_colors(
-            f"background.scrollable.photo_list"
+            "background.scrollable.photo_list"
         )
         self.hover_col_scrollable = self.palette.get_colors(
-            f"hover.scrollable.photo_list"
+            "hover.scrollable.photo_list"
         )
         self.slider_col_scrollable = self.palette.get_colors(
-            f"slider.scrollable.photo_list"
+            "slider.scrollable.photo_list"
         )
 
         self.back_col_thumbbtn = self.palette.get_colors(
-            f"background.thumbbtn.photo_list"
+            "background.thumbbtn.photo_list"
         )
         self.hover_back_col_thumbbtn = self.palette.get_colors(
-            f"hover.thumbbtn.photo_list"
+            "hover.thumbbtn.photo_list"
         )
         self.back_col_bis_thumbbtn = self.palette.get_colors(
-            f"backgroundbis.thumbbtn.photo_list"
+            "backgroundbis.thumbbtn.photo_list"
         )
 
         super().__init__(parent, background=self.back_col, *args, **kwargs)
@@ -854,7 +838,7 @@ class PhotoListFrame(ThumbButtonList):
 
         for ri, pic in enumerate(photo_list_info):
             # create the new ThumbButton
-            if not pic in self.photo_list_thumbbtn:
+            if pic not in self.photo_list_thumbbtn:
                 self.photo_list_thumbbtn[pic] = ThumbButton(
                     self.photo_list_scrollable.scroll_frame,
                     photo_list_info[pic],

@@ -1,10 +1,11 @@
-from tkinter import filedialog
-import tkinter as tk
 import logging
 
-from view import View
+from tkinter import filedialog  # noqa: F401
+import tkinter as tk
+
 from model import Model
 from utils import format_color
+from view import View
 
 
 class Controller:
@@ -101,8 +102,7 @@ class Controller:
         self.model.setIndexPrim(0)
 
     def run(self):
-        """Start the app and run the mainloop
-        """
+        """Start the app and run the mainloop"""
         logg = logging.getLogger(f"c.{__class__.__name__}.run")
         logg.info("Running controller\n")
 
@@ -111,7 +111,7 @@ class Controller:
     def KeyReleased(self, event):
         """Bind Key to functions
 
-        Using the numpad is hard: https://stackoverflow.com/q/45869902/2237151 
+        Using the numpad is hard: https://stackoverflow.com/q/45869902/2237151
         """
         keysym = event.keysym
 
@@ -172,7 +172,7 @@ class Controller:
     def setOutputFolder(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
         #  logg.setLevel("TRACE")
-        logg.info(f"Obtain new value")
+        logg.info("Obtain new value")
 
         output_folder_full = tk.filedialog.askdirectory()
         logg.trace(
@@ -182,7 +182,7 @@ class Controller:
         # filedialog sometimes returns an empty tuple, sometimes an empty string
         # if isinstance(output_folder_full, tuple) or output_folder_full == '':
         if len(output_folder_full) == 0:
-            logg.info(f"Selection of output_folder cancelled")
+            logg.info("Selection of output_folder cancelled")
             return
 
         logg.info(
@@ -199,13 +199,13 @@ class Controller:
     def saveSelection(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.saveSelection")
         #  logg.setLevel("TRACE")
-        logg.info(f"Saving selected pics")
+        logg.info("Saving selected pics")
         self.model.saveSelection()
 
     def addInputFolder(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
         #  logg.setLevel("TRACE")
-        logg.info(f"Add an input folder")
+        logg.info("Add an input folder")
 
         input_folder_full = tk.filedialog.askdirectory()
         logg.trace(
@@ -214,7 +214,7 @@ class Controller:
 
         # filedialog sometimes returns an empty tuple, sometimes an empty string
         if len(input_folder_full) == 0:
-            logg.info(f"Selection of input_folder cancelled")
+            logg.info("Selection of input_folder cancelled")
             return
 
         logg.info(
@@ -225,39 +225,39 @@ class Controller:
 
     def updatedInputFolder(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedInputFolder")
-        logg.info(f"New values received for input_folders")  # {data}")
+        logg.info("New values received for input_folders")  # {data}")
         self.view.frame_path_info.input_frame.update_input_frame(data)
 
     def toggledInputFolder(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.toggledinputfolder")
-        logg.info(f"toggled input folder")
+        logg.info("Toggled input folder")
         state = self.view.frame_path_info.input_frame.checkbtn_input_state
         self.model.toggleInputFolder(state)
 
     def updatedCurrentLayout(self, lay_num):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentLayout")
-        logg.info(f"Updated current layout")
+        logg.info("Updated current layout")
         self.view.layout_set(lay_num)
 
     def updatedPhotoList(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedPhotoList")
-        logg.info(f"New values received for photo_info_list_active")  # {data}")
+        logg.info("New values received for photo_info_list_active")  # {data}")
         self.view.frame_path_info.photo_list_frame.update_photo_list(data)
 
     def updatedCurrentPhotoPrim(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedCurrentPhotoPrim")
-        logg.info(f"New value received for current_photo_prim")
+        logg.info("New value received for current_photo_prim")
         self.view.frame_path_info.photo_list_frame.update_current_photo_prim(data)
 
     def updatedSelectionList(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedSelectionList")
-        logg.info(f"New values received for selection_list")  # {data}")
+        logg.info("New values received for selection_list")  # {data}")
         self.view.frame_path_info.selection_list_frame.update_selection_list(data)
 
     def doubleclikedThumbbtnPhoto(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.doubleclikedThumbbtnPhoto")
         #  logg.setLevel("TRACE")
-        logg.info(f"doublecliked Thumbbtn photo")
+        logg.info("Doublecliked Thumbbtn photo")
         pic = self.view.frame_path_info.photo_list_frame.photo_doubleclicked
         logg.trace(f"On pic {pic}")
         self.model.seekIndexPrim(pic)
@@ -267,7 +267,7 @@ class Controller:
             f"c.{__class__.__name__}.doubleclikedThumbbtnSelection"
         )
         #  logg.setLevel("TRACE")
-        logg.info(f"doublecliked Thumbbtn selection")
+        logg.info("Doublecliked Thumbbtn selection")
         pic = self.view.frame_path_info.selection_list_frame.selection_doubleclicked
         logg.trace(f"On pic {pic}")
         self.model.toggleSelectionPic(pic)
@@ -275,7 +275,7 @@ class Controller:
     def frameResized(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.frameResized")
         #  logg.setLevel("TRACE")
-        logg.info(f"Resized frame_crop_prim")
+        logg.info("Resized frame_crop_prim")
         widget_wid = event.widget.winfo_width()
         widget_hei = event.widget.winfo_height()
         logg.trace(f"width {widget_wid} height {widget_hei}")
@@ -284,31 +284,31 @@ class Controller:
     def updatedCroppedPrim(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedPrim")
         #  logg.setLevel("TRACE")
-        logg.trace(f"New value received for cropped_prim")
+        logg.trace("New value received for cropped_prim")
         self.view.frame_crop_prim.update_image(data)
 
     def updatedCroppedEcho(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedCroppedEcho")
         #  logg.setLevel("TRACE")
-        logg.trace(f"New value received for cropped_echo")
+        logg.trace("New value received for cropped_echo")
         self.view.frame_crop_echo.update_image(data)
 
     def updatedMetadataPrim(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedMetadataPrim")
         #  logg.setLevel("TRACE")
-        logg.info(f"New value received for metadata_prim")
+        logg.info("New value received for metadata_prim")
         self.view.frame_metadata.update_meta_prim(data)
 
     def updatedMetadataEcho(self, data):
         logg = logging.getLogger(f"c.{__class__.__name__}.updatedMetadataEcho")
         #  logg.setLevel("TRACE")
-        logg.info(f"New value received for metadata_echo")
+        logg.info("New value received for metadata_echo")
         self.view.frame_metadata.update_meta_echo(data)
 
     def scrolledMouseImageLabel(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageLabel")
         #  logg.setLevel("TRACE")
-        logg.info(f"Scrolled mouse on image")
+        logg.info("Scrolled mouse on image")
         logg.trace(f"widget {event.widget} x {event.x} y {event.y}")
         logg.trace(f"num {event.num} delta {event.delta}")
         if event.num == 4 or event.delta == 120 or event.delta == 1:
@@ -322,7 +322,7 @@ class Controller:
     def scrolledMouseImageFrame(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.scrolledMouseImageFrame")
         #  logg.setLevel("TRACE")
-        logg.info(f"Scrolled mouse on image frame")
+        logg.info("Scrolled mouse on image frame")
         if event.num == 4 or event.delta == 120 or event.delta == 1:
             direction = "in"
         elif event.num == 5 or event.delta == -120 or event.delta == -1:
@@ -334,43 +334,40 @@ class Controller:
     def clickedImage(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.clickedImage")
         #  logg.setLevel("TRACE")
-        logg.info(f"Clicked mouse on image")
+        logg.info("Clicked mouse on image")
         self.model.saveMousePos(event.x, event.y)
 
     def movedImageMouse(self, event):
         logg = logging.getLogger(f"c.{__class__.__name__}.movedImageMouse")
         #  logg.setLevel("TRACE")
-        logg.trace(f"Moved mouse on image")
+        logg.trace("Moved mouse on image")
         self.model.moveImageMouse(event.x, event.y)
 
     def rightClickedFrameCropPrim(self, event):
-        """Setup delayed callback for eventual doubleclick
-        """
+        """Setup delayed callback for eventual doubleclick"""
         logg = logging.getLogger(f"c.{__class__.__name__}.rightClickedFrameCropPrim")
         #  logg.setLevel("TRACE")
-        logg.trace(f"Callback for right click")
+        logg.trace("Callback for right click")
         # this works but I hate it, it is too slow to react
         #  event.widget.after(200, self.rightClickActionFrameCropPrim, event)
         self.rightClickActionFrameCropPrim(event)
 
     def rightDoubleClickedFrameCropPrim(self, event):
-        """Set flag that a doubleclick happened
-        """
+        """Set flag that a doubleclick happened"""
         logg = logging.getLogger(
             f"c.{__class__.__name__}.rightDoubleClickedFrameCropPrim"
         )
         #  logg.setLevel("TRACE")
-        logg.trace(f"Callback for right doubleclick")
+        logg.trace("Callback for right doubleclick")
         self._right_double_click_frame_crop_prim = True
 
     def rightClickActionFrameCropPrim(self, event):
-        """Actual action for Click or DoubleClick
-        """
+        """Actual action for Click or DoubleClick"""
         logg = logging.getLogger(
             f"c.{__class__.__name__}.rightClickActionFrameCropPrim"
         )
         #  logg.setLevel("TRACE")
-        logg.trace(f"Action for right doubleclick or click")
+        logg.trace("Action for right doubleclick or click")
 
         if self._right_double_click_frame_crop_prim:
             self._right_double_click_frame_crop_prim = False
@@ -389,7 +386,7 @@ class Controller:
 
     def debug(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.debug")
-        logg.info(f"Useful info\n\n")  # {data}")
+        logg.info("Useful info\n\n")  # {data}")
 
     def createEventMouse(self, direction):
         logg = logging.getLogger(f"c.{__class__.__name__}.createEventMouse")

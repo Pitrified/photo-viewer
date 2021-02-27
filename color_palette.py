@@ -4,7 +4,7 @@ import logging
 class Palette:
     def __init__(self, theme):
         logg = logging.getLogger(f"c.{__class__.__name__}.init")
-        logg.info(f"Start init")
+        logg.info("Start init")
 
         self.load_theme(theme)
 
@@ -238,11 +238,11 @@ class Palette:
         logg.trace(f"Split in {elem_tree}")
 
         group = elem_tree[0]
-        if not group in self.colors:
+        if group not in self.colors:
             self.colors[group] = {}
 
         etype = elem_tree[1]
-        if not etype in self.colors[group]:
+        if etype not in self.colors[group]:
             self.colors[group][etype] = {}
 
         if len(elem_tree) > 2:
@@ -253,8 +253,7 @@ class Palette:
         self.colors[group][etype][element] = color
 
     def get_colors(self, req_element):
-        """Return the color of the requested element, in the current theme
-        """
+        """Return the color of the requested element, in the current theme"""
         logg = logging.getLogger(f"c.{__class__.__name__}.get_colors")
         #  logg.setLevel("TRACE")
         logg.trace(f"Getting color for {req_element}")

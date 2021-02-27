@@ -1,17 +1,14 @@
-import argparse
-import logging
-
 from os.path import abspath
 from os.path import dirname
 from os.path import join
-from timeit import default_timer as timer
+import argparse
+import logging
 
 from controller import Controller
 
 
 def parse_arguments():
-    """Setup CLI interface
-    """
+    """Setup CLI interface"""
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument(
@@ -37,8 +34,7 @@ def parse_arguments():
 
 
 def setup_logger(logLevel="DEBUG"):
-    """Setup logger that outputs to console for the module
-    """
+    """Setup logger that outputs to console for the module"""
     # setup a logger for debugging purposes
     logdebug = logging.getLogger("c")
     logdebug.propagate = False
@@ -85,7 +81,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
 
     To avoid accidental clobberings of existing attributes, this method will
     raise an `AttributeError` if the level name is already an attribute of the
-    `logging` module or if the method name is already present 
+    `logging` module or if the method name is already present
 
     Example
     -------
@@ -137,11 +133,11 @@ def main():
 
     setup_logger(log_level_debug)
 
-    recap = f"Startup settings: python3 photo_main.py"
+    recap = "Startup settings: python3 photo_main.py"
     recap += f" --path_input {path_input}"
     recap += f" --log_level_debug {log_level_debug}"
 
-    logmain = logging.getLogger(f"UI")
+    logmain = logging.getLogger("UI")
     logmain.info(recap)
 
     dir_file = abspath(dirname(__file__))

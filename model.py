@@ -1,10 +1,5 @@
-import logging
-
-from PIL import Image
-from PIL import ImageTk
 from fractions import Fraction
 from math import ceil
-from math import floor
 from math import log
 from math import sqrt
 from os import listdir
@@ -15,6 +10,10 @@ from os.path import join
 from os.path import splitext
 from shutil import copy2
 from sys import getsizeof
+import logging
+
+from PIL import Image  # type: ignore
+from PIL import ImageTk
 
 from observable import Observable
 from photo_info import PhotoInfo
@@ -78,7 +77,7 @@ class Model:
         logg = logging.getLogger(f"c.{__class__.__name__}.setOutputFolder")
         logg.info(f"Setting output_folder to '{output_folder_full}'")
 
-        logui = logging.getLogger(f"UI")
+        logui = logging.getLogger("UI")
         logui.info(f"Setting output folder to '{output_folder_full}'")
 
         # create the folder if it doesn't exist
@@ -92,7 +91,7 @@ class Model:
         logg = logging.getLogger(f"c.{__class__.__name__}.addInputFolder")
         logg.info(f"Adding new input_folder '{input_folder_full}'")
 
-        logui = logging.getLogger(f"UI")
+        logui = logging.getLogger("UI")
 
         # check for folder existence
         if not isdir(input_folder_full):
@@ -115,7 +114,7 @@ class Model:
     def toggleInputFolder(self, state):
         logg = logging.getLogger(f"c.{__class__.__name__}.toggleInputFolder")
         #  logg.setLevel("TRACE")
-        logg.info(f"Setting new input_folder state")
+        logg.info("Setting new input_folder state")
 
         state = {x: state[x].get() for x in state}
         logg.trace(f"state {state}")
@@ -134,13 +133,13 @@ class Model:
     def saveSelection(self):
         logg = logging.getLogger(f"c.{__class__.__name__}.saveSelection")
         #  logg.setLevel("TRACE")
-        logg.info(f"Saving selected pics")
+        logg.info("Saving selected pics")
         logui = logging.getLogger("UI")
 
         # check that output_folder is set
         output_folder = self.output_folder.get()
         if output_folder == self._out_fold_not_set:
-            logui.warn(f"Set the output folder before saving the selection list")
+            logui.warn("Set the output folder before saving the selection list")
             return
 
         # get current selection_list, {pic: [PhotoInfo, is_selected] }
@@ -150,7 +149,7 @@ class Model:
         # keep only selected
         active_selection = tuple(p for p in selection_list if selection_list[p][1])
         if len(active_selection) == 0:
-            logui.warn(f"No active pic in selection list")
+            logui.warn("No active pic in selection list")
             return
         elif len(active_selection) == 1:
             s = ""
@@ -187,7 +186,7 @@ class Model:
 
         # if the new layout is double and the old is not, sync echo and prim indexes
         if new_layout in self._layout_is_double and (
-            not old_layout in self._layout_is_double
+            old_layout not in self._layout_is_double
         ):
             self.moveIndexEcho("sync")
 
@@ -217,7 +216,7 @@ class Model:
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.updatePhotoInfoList")
         #  logg.setLevel("TRACE")
-        logg.info(f"Update photo_info_list_active")
+        logg.info("Update photo_info_list_active")
 
         # list of filenames of active photos: ideally parallel to
         # photo_info_list_active.keys() but dict order can't be trusted so we
@@ -230,7 +229,7 @@ class Model:
         input_folders = self.input_folders.get()
         for folder in input_folders:
             # the folder is not toggled, skip it
-            if input_folders[folder] == False:
+            if input_folders[folder] is False:
                 continue
             for photo in listdir(folder):
                 photo_full = join(folder, photo)
@@ -240,7 +239,7 @@ class Model:
         new_photo_info_active = {}
         for photo_full in self._active_photo_list:
             # load new photos in _photo_info_list_all
-            if not photo_full in self._photo_info_list_all:
+            if photo_full not in self._photo_info_list_all:
                 self._photo_info_list_all[photo_full] = PhotoInfo(
                     photo_full, self._thumb_size
                 )
@@ -293,7 +292,7 @@ class Model:
 
     def seekIndexPrim(self, pic):
         logg = logging.getLogger(f"c.{__class__.__name__}.seekIndexPrim")
-        logg.info(f"Seeking index prim")
+        logg.info("Seeking index prim")
         # MAYBE the pic is not in _active_photo_list... very weird, add guards?
         self._index_prim = self._active_photo_list.index(pic)
         self._update_photo_prim(pic)
@@ -376,8 +375,7 @@ class Model:
             self.metadata_echo.set(None)
 
     def likePressed(self, which_frame):
-        """Update selection_list accordingly
-        """
+        """Update selection_list accordingly"""
         logg = logging.getLogger(f"c.{__class__.__name__}.likePressed")
         #  logg.setLevel("TRACE")
         logg.info(f"Like pressed on {which_frame}")
@@ -459,8 +457,7 @@ class Model:
             self._cloneParams()
 
     def moveImageDirection(self, direction):
-        """Move image in the specified direction of self._mov_delta
-        """
+        """Move image in the specified direction of self._mov_delta"""
         logg = logging.getLogger(f"c.{__class__.__name__}.moveImageDirection")
         #  logg.setLevel("TRACE")
         logg.trace(f"Moving in direction {direction}")
@@ -474,11 +471,10 @@ class Model:
             self._moveImage(0, self._mov_delta)
 
     def moveImageMouse(self, mouse_x, mouse_y):
-        """Move the image to follow the mouse
-        """
+        """Move the image to follow the mouse"""
         logg = logging.getLogger(f"c.{__class__.__name__}.moveImageMouse")
         #  logg.setLevel("TRACE")
-        logg.trace(f"Moving mouse")
+        logg.trace("Moving mouse")
         delta_x = self._old_mouse_x - mouse_x
         delta_y = self._old_mouse_y - mouse_y
         self._old_mouse_x = mouse_x
@@ -486,14 +482,12 @@ class Model:
         self._moveImage(delta_x, delta_y)
 
     def saveMousePos(self, mouse_x, mouse_y):
-        """Save the current mouse position
-        """
+        """Save the current mouse position"""
         self._old_mouse_x = mouse_x
         self._old_mouse_y = mouse_y
 
     def _moveImage(self, delta_x, delta_y):
-        """Actually move image of specified delta
-        """
+        """Actually move image of specified delta"""
         logg = logging.getLogger(f"c.{__class__.__name__}._moveImage")
         #  logg.setLevel("TRACE")
         logg.trace(f"Moving delta {delta_x} {delta_y}")
@@ -511,13 +505,12 @@ class Model:
             self._cloneParams()
 
     def _cloneParams(self):
-        """Clone current prim params to echo image
-        """
+        """Clone current prim params to echo image"""
         # MAYBE the check for doubleness of the layout can be done here
         # cloning only makes sense if it's double after all
         logg = logging.getLogger(f"c.{__class__.__name__}._cloneParams")
         #  logg.setLevel("TRACE")
-        logg.trace(f"Cloning params")
+        logg.trace("Cloning params")
 
         # get current prim pic
         pic_prim = self.current_photo_prim.get()
@@ -537,8 +530,7 @@ class Model:
         self.cropped_echo.set(crop_echo.image_res)
 
     def _load_named_metadata(self):
-        """Populate two dicts that map a readable name in the metadata field
-        """
+        """Populate two dicts that map a readable name in the metadata field"""
         self.name2exif = {}
         self.name2exif["Date taken"] = "Image DateTime"
         #  "EXIF DateTimeOriginal",
@@ -551,11 +543,10 @@ class Model:
         self.name2exif["Height"] = "PILHeight"
 
     def _parse_metadata(self, metadata_exif):
-        """Parse raw EXIF metadata into named ones
-        """
+        """Parse raw EXIF metadata into named ones"""
         logg = logging.getLogger(f"c.{__class__.__name__}._parse_metadata")
         #  logg.setLevel("TRACE")
-        logg.info(f"Parsing metadata")
+        logg.info("Parsing metadata")
 
         metadata_named = {}
         # translate the names from EXIF to readable, set default values
@@ -610,7 +601,7 @@ class ModelCrop:
         """
         logg = logging.getLogger(f"c.{__class__.__name__}.reset_image")
         #  logg.setLevel("TRACE")
-        logg.trace(f"Resetting image")
+        logg.trace("Resetting image")
         if widget_wid != -1:
             self.widget_wid = widget_wid
             self.widget_hei = widget_hei
@@ -705,8 +696,7 @@ class ModelCrop:
         self.image_res = image_res
 
     def zoom_image(self, direction, rel_x=-1, rel_y=-1):
-        """Change zoom level, keep (rel_x, rel_y) still
-        """
+        """Change zoom level, keep (rel_x, rel_y) still"""
         logg = logging.getLogger(f"c.{__class__.__name__}.zoom_image")
         #  logg.setLevel("TRACE")
         logg.info(f"Zooming image {direction}")
@@ -806,8 +796,7 @@ class ModelCrop:
         return params
 
     def load_params(self, params):
-        """Crop the photo according to params
-        """
+        """Crop the photo according to params"""
         self._mov_x = params["mov_x"]
         self._mov_y = params["mov_y"]
         self._zoom_level = params["zoom_level"]
@@ -817,16 +806,14 @@ class ModelCrop:
         self.update_crop()
 
     def move_image(self, delta_x, delta_y):
-        """Move image of specified delta
-        """
+        """Move image of specified delta"""
         self._mov_x += delta_x
         self._mov_y += delta_y
         self._validate_mov()
         self.update_crop()
 
     def _validate_mov(self):
-        """Check that mov is reasonable for the current widget/image/zoom
-        """
+        """Check that mov is reasonable for the current widget/image/zoom"""
         zoom = self._zoom_base ** self._zoom_level
         zoom_wid = self._image_wid * zoom
         zoom_hei = self._image_hei * zoom
@@ -859,8 +846,7 @@ class ModelCrop:
                 self._mov_y = zoom_hei - self.widget_hei
 
     def _validate_region(self, region):
-        """region (left, top, right, bottom) must fit inside the image
-        """
+        """region (left, top, right, bottom) must fit inside the image"""
         # left
         if region[0] < 0:
             region[0] = 0
@@ -888,19 +874,17 @@ class Holder:
         self._loaded_croppers = {}
 
     def get_cropper(self, image_name):
-        """Return the requested cropper, if not loaded, create it on the fly
-        """
+        """Return the requested cropper, if not loaded, create it on the fly"""
         logg = logging.getLogger(f"c.{__class__.__name__}.get_cropper")
         logg.trace("Getting cropper")
 
-        if not image_name in self._loaded_croppers:
+        if image_name not in self._loaded_croppers:
             self._load_cropper(image_name)
 
         return self._loaded_croppers[image_name]
 
     def _load_cropper(self, image_name):
-        """Load the cropper
-        """
+        """Load the cropper"""
         logg = logging.getLogger(f"c.{__class__.__name__}._load_cropper")
         logg.info("Loading cropper")
 

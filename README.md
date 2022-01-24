@@ -1,6 +1,14 @@
 # Photo Viewer Project
 
-Yet another iteration of this project, this time following the MVC paradigm. Old version buried in my [snippets](https://github.com/Pitrified/snippet/tree/master/photo-viewer), now it deserves a full repo.
+A simple tool to compare pictures.
+
+Show photos side by side:
+
+![sample world](samples/pic1.png)
+
+Zoom in to compare details:
+
+![sample world](samples/pic2.png)
 
 ### On the MVC paradigm
 
@@ -44,22 +52,6 @@ root
 
 Captures user input (with bindings/callbacks/events from tkinter widgets in the view), and binds it to action *on the model*. The view is updated by the callbacks registered on the observables.
 
-### TODO
+### Misc
 
-##### Model
-
-##### View
-
-* button to save selection in selection\_frame, with askdialog that tells you a recap (number of photos and output folder)
-
-##### Controller
-
-##### General
-
-* outfolder starts near the other one
-* colors saved as attributes of the class, easier customization at the end
-
-### FIXME
-
-* when untoggling a folder, if the list is scrolled down, you have to manually scroll up
-* when changing pic with 'qe', the list does not scroll
+Yet another iteration of this project, this time following the MVC paradigm. Old version buried in my [snippets](https://github.com/Pitrified/snippet/tree/master/photo-viewer), now it deserves a full repo.

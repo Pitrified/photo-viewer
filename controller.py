@@ -15,6 +15,7 @@ class Controller:
         logg.info("Start init")
 
         self.root = tk.Tk()
+        self.root.winfo_toplevel().title("Photo Viewer")
         self._fullscreen_state = False
 
         self.model = Model()

@@ -18,8 +18,8 @@ class View:
         # TODO get theme from Controller
         # TODO change theme at runtime...
         self.palette = Palette("blue1")
-        #  self.palette = Palette("badgreen")
-        #  self.palette = Palette("ocra-minimal")
+        # self.palette = Palette("badgreen")
+        # self.palette = Palette("ocra-minimal")
 
         self.setup_main_window()
 

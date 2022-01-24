@@ -130,7 +130,8 @@ class Palette:
             ##################
             # metadata frame #
             ##################
-            self.set_colors("background.frame.metadata", "SteelBlue3")
+            # self.set_colors("background.frame.metadata", "SteelBlue3")
+            self.set_colors("background.frame.metadata", "PaleTurquoise2")
 
             ###################
             # path info frame #
